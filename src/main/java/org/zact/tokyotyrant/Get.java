@@ -1,14 +1,16 @@
 package org.zact.tokyotyrant;
 
+import java.util.concurrent.CountDownLatch;
+
 import org.apache.mina.core.buffer.IoBuffer;
 
 public class Get extends Command {
 	private byte[] kbuf;
 	private byte[] vbuf;
 
-	public Get(String key) {
-		super((byte)0x30);
-		this.kbuf = key.getBytes();
+	public Get(CountDownLatch latch, byte[] key) {
+		super(latch, (byte)0x30);
+		this.kbuf = key;
 	}
 	
 	public boolean isSuccess() {
