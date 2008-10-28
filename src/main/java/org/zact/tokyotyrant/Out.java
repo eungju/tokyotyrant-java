@@ -1,14 +1,17 @@
 package org.zact.tokyotyrant;
 
-import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 import org.apache.mina.core.buffer.IoBuffer;
 
 public class Out extends Command {
 	private byte[] kbuf;
 
-	public Out(CountDownLatch latch, byte[] key) {
-		super(latch, (byte)0x20);
+	public Out(byte[] key) {
+		super((byte)0x20);
 		this.kbuf = key;
 	}
 	
@@ -32,4 +35,27 @@ public class Out extends Command {
 		}
 		return false;
 	}
+
+	public Future<Boolean> getFuture() {
+		return new OutFuture(this);
+	}
+	
+	public static class OutFuture extends CommandFuture<Out, Boolean> {
+		public OutFuture(Out command) {
+			super(command);
+		}
+
+		public Boolean get() throws InterruptedException, ExecutionException {
+			latch.await();
+			return command.isSuccess();
+		}
+
+		public Boolean get(long timeout, TimeUnit unit)
+				throws InterruptedException, ExecutionException,
+				TimeoutException {
+			latch.await(timeout, unit);
+			return command.isSuccess();
+		}
+	}
+	
 }

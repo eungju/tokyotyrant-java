@@ -1,6 +1,9 @@
 package org.zact.tokyotyrant;
 
-import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 import org.apache.mina.core.buffer.IoBuffer;
 
@@ -8,8 +11,8 @@ public class Put extends Command {
 	private byte[] kbuf;
 	private byte[] vbuf;
 
-	public Put(CountDownLatch latch, byte[] key, byte[] value) {
-		super(latch, (byte)0x10);
+	public Put(byte[] key, byte[] value) {
+		super((byte)0x10);
 		this.kbuf = key;
 		this.vbuf = value;
 	}
@@ -35,5 +38,27 @@ public class Put extends Command {
 			return true;
 		}
 		return false;
+	}
+	
+	public Future<Boolean> getFuture() {
+		return new PutFuture(this);
+	}
+	
+	public static class PutFuture extends CommandFuture<Put, Boolean> {
+		public PutFuture(Put command) {
+			super(command);
+		}
+
+		public Boolean get() throws InterruptedException, ExecutionException {
+			latch.await();
+			return command.isSuccess();
+		}
+
+		public Boolean get(long timeout, TimeUnit unit)
+				throws InterruptedException, ExecutionException,
+				TimeoutException {
+			latch.await(timeout, unit);
+			return command.isSuccess();
+		}
 	}
 }

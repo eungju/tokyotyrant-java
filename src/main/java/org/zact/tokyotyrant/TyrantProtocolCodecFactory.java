@@ -1,7 +1,5 @@
 package org.zact.tokyotyrant;
 
-import java.util.concurrent.LinkedBlockingQueue;
-
 import org.apache.mina.core.session.IoSession;
 import org.apache.mina.filter.codec.ProtocolCodecFactory;
 import org.apache.mina.filter.codec.ProtocolDecoder;
@@ -11,9 +9,9 @@ public class TyrantProtocolCodecFactory implements ProtocolCodecFactory {
 	private TyrantEncoder encoder;
 	private TyrantDecoder decoder;
 
-	public TyrantProtocolCodecFactory(LinkedBlockingQueue<Command> queue) {
+	public TyrantProtocolCodecFactory() {
 		this.encoder = new TyrantEncoder();
-		this.decoder = new TyrantDecoder(queue);
+		this.decoder = new TyrantDecoder();
 	}
 
 	public ProtocolDecoder getDecoder(IoSession session) throws Exception {
