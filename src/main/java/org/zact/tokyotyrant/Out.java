@@ -10,6 +10,10 @@ public class Out extends Command {
 		this.key = key;
 	}
 	
+	public boolean getReturnValue() {
+		return isSuccess();
+	}
+	
 	public ByteBuffer encode() {
 		byte[] kbuf = transcoder.encode(key);
 		ByteBuffer buffer = ByteBuffer.allocate(magic.length + 4 + kbuf.length);

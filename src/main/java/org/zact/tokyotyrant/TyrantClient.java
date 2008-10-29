@@ -73,7 +73,7 @@ public class TyrantClient {
 		command.setTranscoder(getTranscoder());
 		cumulativeWrite(command, channel);
 		cumulativeRead(command, channel);
-		return command.isSuccess();
+		return command.getReturnValue();
 	}
 
 	public boolean out(Object key) throws IOException {
@@ -81,7 +81,7 @@ public class TyrantClient {
 		command.setTranscoder(getTranscoder());
 		cumulativeWrite(command, channel);
 		cumulativeRead(command, channel);
-		return command.isSuccess();
+		return command.getReturnValue();
 	}
 	
 	public Object get(Object key) throws IOException {
@@ -89,7 +89,7 @@ public class TyrantClient {
 		command.setTranscoder(getTranscoder());
 		cumulativeWrite(command, channel);
 		cumulativeRead(command, channel);
-		return command.getValue();
+		return command.getReturnValue();
 	}
 	
 	public Map<Object, Object> mget(Object[] keys) throws IOException {
@@ -97,7 +97,7 @@ public class TyrantClient {
 		command.setTranscoder(getTranscoder());
 		cumulativeWrite(command, channel);
 		cumulativeRead(command, channel);
-		return command.getValue();
+		return command.getReturnValue();
 	}
 
 	public int vsiz(Object key) throws IOException {
@@ -105,6 +105,14 @@ public class TyrantClient {
 		command.setTranscoder(getTranscoder());
 		cumulativeWrite(command, channel);
 		cumulativeRead(command, channel);
-		return command.getValue();
+		return command.getReturnValue();
+	}
+
+	public long rnum() throws IOException {
+		Rnum command = new Rnum();
+		command.setTranscoder(getTranscoder());
+		cumulativeWrite(command, channel);
+		cumulativeRead(command, channel);
+		return command.getReturnValue();
 	}
 }

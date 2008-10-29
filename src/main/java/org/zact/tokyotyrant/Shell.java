@@ -29,7 +29,9 @@ public class Shell {
 					System.out.println(key + "\t" + values.get(key));
 				}
 			} else if ("vsiz".equals(command)) {
-				System.out.println(tokens[1] + "\t" + client.vsiz(tokens[1]));
+				System.out.println(client.vsiz(tokens[1]));
+			} else if ("rnum".equals(command)) {
+				System.out.println(client.rnum());
 			} else if ("quit".equals(command)) {
 				client.close();
 				break;

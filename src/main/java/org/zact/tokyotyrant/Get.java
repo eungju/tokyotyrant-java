@@ -11,7 +11,7 @@ public class Get extends Command {
 		this.key = key;
 	}
 	
-	public Object getValue() {
+	public Object getReturnValue() {
 		return isSuccess() ? value : null;
 	}
 

@@ -13,7 +13,7 @@ public class Mget extends Command {
 		this.keys = keys;
 	}
 	
-	public Map<Object, Object> getValue() {
+	public Map<Object, Object> getReturnValue() {
 		return isSuccess() ? values : null;
 	}
 

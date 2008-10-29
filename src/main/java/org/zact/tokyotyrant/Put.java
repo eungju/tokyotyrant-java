@@ -12,6 +12,10 @@ public class Put extends Command {
 		this.value = value;
 	}
 	
+	public boolean getReturnValue() {
+		return isSuccess();
+	}
+	
 	public ByteBuffer encode() {
 		byte[] kbuf = transcoder.encode(key);
 		byte[] vbuf = transcoder.encode(value);
