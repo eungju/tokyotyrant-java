@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
 import java.nio.channels.SocketChannel;
+import java.util.Map;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -83,11 +84,27 @@ public class TyrantClient {
 		return command.isSuccess();
 	}
 	
-	public Object get(String key) throws IOException {
+	public Object get(Object key) throws IOException {
 		Get command = new Get(key);
 		command.setTranscoder(getTranscoder());
 		cumulativeWrite(command, channel);
 		cumulativeRead(command, channel);
-		return command.isSuccess() ? command.getValue() : null;
+		return command.getValue();
+	}
+	
+	public Map<Object, Object> mget(Object[] keys) throws IOException {
+		Mget command = new Mget(keys);
+		command.setTranscoder(getTranscoder());
+		cumulativeWrite(command, channel);
+		cumulativeRead(command, channel);
+		return command.getValue();
+	}
+
+	public int vsiz(Object key) throws IOException {
+		Vsiz command = new Vsiz(key);
+		command.setTranscoder(getTranscoder());
+		cumulativeWrite(command, channel);
+		cumulativeRead(command, channel);
+		return command.getValue();
 	}
 }

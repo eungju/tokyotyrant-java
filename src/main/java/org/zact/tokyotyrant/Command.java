@@ -46,7 +46,11 @@ public abstract class Command {
         return in.remaining() - prefixLength >= dataLength;
 	}
 	
+	public boolean isSuccess() {
+		return code == 0;
+	}
+
 	public abstract ByteBuffer encode();
+
 	public abstract boolean decode(ByteBuffer in);
-	public abstract boolean isSuccess();
 }

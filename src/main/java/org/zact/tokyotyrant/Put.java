@@ -12,10 +12,6 @@ public class Put extends Command {
 		this.value = value;
 	}
 	
-	public boolean isSuccess() {
-		return code == 0;
-	}
-
 	public ByteBuffer encode() {
 		byte[] kbuf = transcoder.encode(key);
 		byte[] vbuf = transcoder.encode(value);
@@ -30,10 +26,10 @@ public class Put extends Command {
 	}
 
 	public boolean decode(ByteBuffer in) {
-		if (in.remaining() >= 1) {
-			code = in.get();
-			return true;
+		if (in.remaining() < 1) {
+			return false;
 		}
-		return false;
+		code = in.get();
+		return true;
 	}
 }

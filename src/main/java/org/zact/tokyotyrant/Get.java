@@ -11,10 +11,6 @@ public class Get extends Command {
 		this.key = key;
 	}
 	
-	public boolean isSuccess() {
-		return code == 0;
-	}
-	
 	public Object getValue() {
 		return isSuccess() ? value : null;
 	}
@@ -30,16 +26,20 @@ public class Get extends Command {
 	}
 
 	public boolean decode(ByteBuffer in) {
-		if (in.remaining() >= 1) {
-			code = in.get();
-			if (isSuccess() && prefixedDataAvailable(in, 4)) {
-				int vsiz = in.getInt();
-				byte[] vbuf = new byte[vsiz];
-				in.get(vbuf);
-				value = transcoder.decode(vbuf);
-			}
+		if (in.remaining() < 1) {
+			return false;
+		}
+		code = in.get();
+		if (!isSuccess()) {
 			return true;
 		}
-		return false;
+		if (!prefixedDataAvailable(in, 4)) {
+			return false;
+		}
+		int vsiz = in.getInt();
+		byte[] vbuf = new byte[vsiz];
+		in.get(vbuf);
+		value = transcoder.decode(vbuf);
+		return true;
 	}
 }
