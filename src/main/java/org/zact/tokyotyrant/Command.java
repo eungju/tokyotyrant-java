@@ -1,28 +1,52 @@
 package org.zact.tokyotyrant;
 
-import java.util.concurrent.CountDownLatch;
-
-import org.apache.mina.core.buffer.IoBuffer;
+import java.nio.ByteBuffer;
 
 public abstract class Command {
+	protected Transcoder transcoder;
 	protected byte[] magic;
 	protected byte code;
-	private CountDownLatch latch;
 	
 	public Command(byte commandId) {
 		magic = new byte[] {(byte) 0xC8, commandId};
-		latch = new CountDownLatch(1);
 	}
 	
-	public CountDownLatch getLatch() {
-		return latch;
+	public void setTranscoder(Transcoder transcoder) {
+		this.transcoder = transcoder;
 	}
 	
-	public void completed() {
-		latch.countDown();
+    protected boolean prefixedDataAvailable(ByteBuffer in, int prefixLength) {
+    	return prefixedDataAvailable(in, prefixLength, Integer.MAX_VALUE);
+    }
+
+    protected boolean prefixedDataAvailable(ByteBuffer in, int prefixLength, int maxDataLength) {
+        if (in.remaining() < prefixLength) {
+            return false;
+        }
+
+        int dataLength;
+        switch (prefixLength) {
+        case 1:
+            dataLength = in.get(in.position()) & 0xff;
+            break;
+        case 2:
+            dataLength = in.getShort(in.position()) & 0xffff;
+            break;
+        case 4:
+            dataLength = in.getInt(in.position()) & 0xffffffff;
+            break;
+        default:
+            throw new IllegalArgumentException("prefixLength: " + prefixLength);
+        }
+
+        if (dataLength < 0 || dataLength > maxDataLength) {
+            throw new IllegalStateException("dataLength: " + dataLength);
+        }
+
+        return in.remaining() - prefixLength >= dataLength;
 	}
 	
-	public abstract IoBuffer encode();
-	public abstract boolean decode(IoBuffer in);
+	public abstract ByteBuffer encode();
+	public abstract boolean decode(ByteBuffer in);
 	public abstract boolean isSuccess();
 }

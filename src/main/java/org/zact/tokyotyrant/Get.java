@@ -1,31 +1,27 @@
 package org.zact.tokyotyrant;
 
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Future;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
-
-import org.apache.mina.core.buffer.IoBuffer;
+import java.nio.ByteBuffer;
 
 public class Get extends Command {
-	private byte[] kbuf;
-	private byte[] vbuf;
+	private Object key;
+	private Object value;
 
-	public Get(byte[] key) {
+	public Get(Object key) {
 		super((byte)0x30);
-		this.kbuf = key;
+		this.key = key;
 	}
 	
 	public boolean isSuccess() {
 		return code == 0;
 	}
 	
-	public String getValue() {
-		return isSuccess() ? new String(vbuf) : null;
+	public Object getValue() {
+		return isSuccess() ? value : null;
 	}
 
-	public IoBuffer encode() {
-		IoBuffer buffer = IoBuffer.allocate(magic.length + 4 + kbuf.length, false);
+	public ByteBuffer encode() {
+		byte[] kbuf = transcoder.encode(key);
+		ByteBuffer buffer = ByteBuffer.allocate(magic.length + 4 + kbuf.length);
 		buffer.put(magic);
 		buffer.putInt(kbuf.length);
 		buffer.put(kbuf);
@@ -33,38 +29,17 @@ public class Get extends Command {
 		return buffer;
 	}
 
-	public boolean decode(IoBuffer in) {
+	public boolean decode(ByteBuffer in) {
 		if (in.remaining() >= 1) {
 			code = in.get();
-			if (isSuccess() && in.prefixedDataAvailable(4)) {
+			if (isSuccess() && prefixedDataAvailable(in, 4)) {
 				int vsiz = in.getInt();
-				vbuf = new byte[vsiz];
+				byte[] vbuf = new byte[vsiz];
 				in.get(vbuf);
+				value = transcoder.decode(vbuf);
 			}
 			return true;
 		}
 		return false;
 	}
-	
-	public Future<Object> getFuture() {
-		return new GetFuture(this);
-	}
-	
-	public static class GetFuture extends CommandFuture<Get, Object> {
-		public GetFuture(Get command) {
-			super(command);
-		}
-
-		public Object get() throws InterruptedException, ExecutionException {
-			latch.await();
-			return command.getValue();
-		}
-
-		public Object get(long timeout, TimeUnit unit)
-				throws InterruptedException, ExecutionException,
-				TimeoutException {
-			latch.await(timeout, unit);
-			return command.getValue();
-		}
-	}	
 }

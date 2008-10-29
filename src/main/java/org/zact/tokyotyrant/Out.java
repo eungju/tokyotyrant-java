@@ -1,26 +1,22 @@
 package org.zact.tokyotyrant;
 
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Future;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
-
-import org.apache.mina.core.buffer.IoBuffer;
+import java.nio.ByteBuffer;
 
 public class Out extends Command {
-	private byte[] kbuf;
+	private Object key;
 
-	public Out(byte[] key) {
+	public Out(Object key) {
 		super((byte)0x20);
-		this.kbuf = key;
+		this.key = key;
 	}
 	
 	public boolean isSuccess() {
 		return code == 0;
 	}
 
-	public IoBuffer encode() {
-		IoBuffer buffer = IoBuffer.allocate(magic.length + 4 + kbuf.length, false);
+	public ByteBuffer encode() {
+		byte[] kbuf = transcoder.encode(key);
+		ByteBuffer buffer = ByteBuffer.allocate(magic.length + 4 + kbuf.length);
 		buffer.put(magic);
 		buffer.putInt(kbuf.length);
 		buffer.put(kbuf);
@@ -28,34 +24,11 @@ public class Out extends Command {
 		return buffer;
 	}
 
-	public boolean decode(IoBuffer in) {
+	public boolean decode(ByteBuffer in) {
 		if (in.remaining() >= 1) {
 			code = in.get();
 			return true;
 		}
 		return false;
 	}
-
-	public Future<Boolean> getFuture() {
-		return new OutFuture(this);
-	}
-	
-	public static class OutFuture extends CommandFuture<Out, Boolean> {
-		public OutFuture(Out command) {
-			super(command);
-		}
-
-		public Boolean get() throws InterruptedException, ExecutionException {
-			latch.await();
-			return command.isSuccess();
-		}
-
-		public Boolean get(long timeout, TimeUnit unit)
-				throws InterruptedException, ExecutionException,
-				TimeoutException {
-			latch.await(timeout, unit);
-			return command.isSuccess();
-		}
-	}
-	
 }
