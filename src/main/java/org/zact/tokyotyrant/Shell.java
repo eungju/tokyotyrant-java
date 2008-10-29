@@ -3,9 +3,10 @@ package org.zact.tokyotyrant;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.util.Arrays;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
+
+import org.apache.commons.lang.ArrayUtils;
 
 public class Shell {
 	public static void main(String[] args) throws IOException, InterruptedException, ExecutionException {
@@ -23,7 +24,7 @@ public class Shell {
 			} else if ("get".equals(command)) {
 				System.out.println(tokens[1] + "\t" + client.get(tokens[1]));
 			} else if ("mget".equals(command)) {
-				Object[] keys = Arrays.copyOfRange(tokens, 1, tokens.length);
+				Object[] keys = ArrayUtils.subarray(tokens, 1, tokens.length);
 				Map<Object, Object> values = client.mget(keys);
 				for (Object key : values.keySet()) {
 					System.out.println(key + "\t" + values.get(key));
