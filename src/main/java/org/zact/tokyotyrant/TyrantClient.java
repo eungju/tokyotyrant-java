@@ -58,6 +58,7 @@ public class TyrantClient {
 			received.flip();
 			buffer.put(received);
 			channel.read(buffer);
+			log.info("Received fragment " + buffer);
 			received = buffer;
 			buffer.flip();
 		} while (!command.decode(buffer));
@@ -108,8 +109,32 @@ public class TyrantClient {
 		return command.getReturnValue();
 	}
 
+	public boolean setmst(String host, int port) throws IOException {
+		Setmst command = new Setmst(host, port);
+		command.setTranscoder(getTranscoder());
+		cumulativeWrite(command, channel);
+		cumulativeRead(command, channel);
+		return command.getReturnValue();
+	}
+
 	public long rnum() throws IOException {
 		Rnum command = new Rnum();
+		command.setTranscoder(getTranscoder());
+		cumulativeWrite(command, channel);
+		cumulativeRead(command, channel);
+		return command.getReturnValue();
+	}
+
+	public String stat() throws IOException {
+		Stat command = new Stat();
+		command.setTranscoder(getTranscoder());
+		cumulativeWrite(command, channel);
+		cumulativeRead(command, channel);
+		return command.getReturnValue();
+	}
+
+	public long size() throws IOException {
+		Size command = new Size();
 		command.setTranscoder(getTranscoder());
 		cumulativeWrite(command, channel);
 		cumulativeRead(command, channel);
