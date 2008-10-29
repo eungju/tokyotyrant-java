@@ -40,13 +40,12 @@ public class Mget extends Command {
 			return false;
 		}
 		code = in.get();
-		if (!isSuccess()) {
-			return true;
-		}
+
 		if (in.remaining() < 4) {
 			return false;
 		}
 		int rnum = in.getInt();
+
 		for (int i = 0; i < rnum; i++) {
 			if (in.remaining() < 4 + 4) {
 				return false;

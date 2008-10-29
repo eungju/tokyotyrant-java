@@ -25,9 +25,7 @@ public class Rnum extends Command {
 			return false;
 		}
 		code = in.get();
-		if (!isSuccess()) {
-			return true;
-		}
+		
 		if (in.remaining() < 8) {
 			return false;
 		}
