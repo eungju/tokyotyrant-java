@@ -11,7 +11,7 @@ public class Vsiz extends Command {
 		this.key = key;
 	}
 	
-	public int getValue() {
+	public int getReturnValue() {
 		return isSuccess() ? vsiz : -1;
 	}
 
