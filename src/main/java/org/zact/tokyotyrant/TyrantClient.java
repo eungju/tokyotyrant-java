@@ -159,21 +159,30 @@ public class TyrantClient {
 		return command.getReturnValue();
 	}
 
-	public List<Object> list() throws IOException {
+	public boolean iterinit() throws IOException {
 		Iterinit command = new Iterinit();
 		command.setTranscoder(getTranscoder());
 		sendAndReceive(command, channel);
+		return command.getReturnValue();
+	}
+	
+	public Object iternext() throws IOException {
+		Iternext command = new Iternext();
+		command.setTranscoder(getTranscoder());
+		sendAndReceive(command, channel);
+		return command.getReturnValue();
+	}
+
+	public List<Object> list() throws IOException {
 		List<Object> result = null;
-		if (command.getReturnValue()) {
+		if (iterinit()) {
 			result = new ArrayList<Object>();
 			while (true) {
-				Iternext nextCommand = new Iternext();
-				nextCommand.setTranscoder(getTranscoder());
-				sendAndReceive(nextCommand, channel);
-				if (!nextCommand.isSuccess()) {
+				Object key = iternext();
+				if (key == null) {
 					break;
 				}
-				result.add(nextCommand.getReturnValue());
+				result.add(key);
 			}
 		}
 		return result;
