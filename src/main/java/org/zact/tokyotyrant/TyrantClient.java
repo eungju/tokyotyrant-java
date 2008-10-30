@@ -5,6 +5,8 @@ import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
 import java.nio.channels.ByteChannel;
 import java.nio.channels.SocketChannel;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
 import org.slf4j.Logger;
@@ -155,6 +157,26 @@ public class TyrantClient {
 		command.setTranscoder(getTranscoder());
 		sendAndReceive(command, channel);
 		return command.getReturnValue();
+	}
+
+	public List<Object> list() throws IOException {
+		Iterinit command = new Iterinit();
+		command.setTranscoder(getTranscoder());
+		sendAndReceive(command, channel);
+		List<Object> result = null;
+		if (command.getReturnValue()) {
+			result = new ArrayList<Object>();
+			while (true) {
+				Iternext nextCommand = new Iternext();
+				nextCommand.setTranscoder(getTranscoder());
+				sendAndReceive(nextCommand, channel);
+				if (!nextCommand.isSuccess()) {
+					break;
+				}
+				result.add(nextCommand.getReturnValue());
+			}
+		}
+		return result;
 	}
 
 	public boolean setmst(String host, int port) throws IOException {
