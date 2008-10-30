@@ -66,21 +66,22 @@ public class TyrantClient {
 	void cumulativeRead(Command command, ByteChannel channel) throws IOException {
 		final int chunkCapacity = 2048;
 		ByteBuffer buffer = ByteBuffer.allocate(chunkCapacity);
+		buffer.flip();
 		int oldPos = 0;
-		do {
-			buffer.position(oldPos);
-			buffer.limit(buffer.capacity());
-
+		while (!command.decode(buffer)) {
+			log.debug("Trying to read fragment");
 			ByteBuffer fragment = ByteBuffer.allocate(chunkCapacity);
 			channel.read(fragment);
 			log.debug("Received fragment " + fragment);
 			
 			fragment.flip();
+			buffer.position(oldPos);
+			buffer.limit(buffer.capacity());
 			buffer = fillBuffer(buffer, fragment);
 			oldPos = buffer.position();
 			buffer.flip();
-		} while (!command.decode(buffer));
-		log.debug("Received message " + buffer);
+		}
+		log.debug("Received message " + buffer + ", " + command.code);
 	}
 	
 	void sendAndReceive(Command command, ByteChannel channel) throws IOException {
@@ -97,6 +98,12 @@ public class TyrantClient {
 		command.setTranscoder(getTranscoder());
 		sendAndReceive(command, channel);
 		return command.getReturnValue();
+	}
+
+	public void putnr(Object key, Object value) throws IOException {
+		Putnr command = new Putnr(key, value);
+		command.setTranscoder(getTranscoder());
+		sendAndReceive(command, channel);
 	}
 
 	public boolean out(Object key) throws IOException {

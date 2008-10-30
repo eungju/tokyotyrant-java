@@ -10,7 +10,7 @@ import org.apache.commons.lang.ArrayUtils;
 
 public class Shell {
 	public static void main(String[] args) throws IOException, InterruptedException, ExecutionException {
-		TyrantClient client = new TyrantClient("localhost", 1978);
+		TyrantClient client = new TyrantClient(args[0], Integer.parseInt(args[1]));
 		BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
 		while (true) {
 			System.out.print("> ");
@@ -19,6 +19,8 @@ public class Shell {
 			long s = System.currentTimeMillis();
 			if ("put".equals(command)) {
 				System.out.println(client.put(tokens[1], tokens[2]));
+			} else if ("putnr".equals(command)) {
+				client.putnr(tokens[1], tokens[2]);
 			} else if ("out".equals(command)) {
 				System.out.println(client.out(tokens[1]));
 			} else if ("get".equals(command)) {
