@@ -1,16 +1,15 @@
 package org.zact.tokyotyrant;
 
 import java.nio.ByteBuffer;
-import java.util.Map;
 
 public class PacketSpec {
 	private FieldSpec[] fields;
 	
-	public PacketSpec(FieldSpec...fields) {
+	public PacketSpec(FieldSpec... fields) {
 		this.fields = fields;
 	}
 	
-	public ByteBuffer encode(Map<String, Object> context) {
+	public ByteBuffer encode(PacketContext context) {
 		int capacity = 0;
 		for (FieldSpec each : fields) {
 			capacity += each.size(context);
@@ -34,7 +33,7 @@ public class PacketSpec {
 		return out;
 	}
 
-	public boolean decode(Map<String, Object> context, ByteBuffer in) {
+	public boolean decode(PacketContext context, ByteBuffer in) {
 		for (FieldSpec each : fields) {
 			int size = each.size(context);
 			if (in.remaining() < size) {
@@ -60,6 +59,16 @@ public class PacketSpec {
 			}
 		}
 		return true;
+	}
+	
+	public static PacketContext decodingContext() {
+		return new PacketContext();
+	}
+	
+	public static PacketContext encodingContext(byte[] magic) {
+		PacketContext context = new PacketContext();
+		context.put("magic", magic);
+		return context;
 	}
 
 	public static PacketSpec packet(FieldSpec...fields) {
@@ -112,11 +121,11 @@ public class PacketSpec {
 			this.sizeVariable = sizeVariable;
 		}
 		
-		public int size(Map<String, Object> context) {
+		public int size(PacketContext context) {
 			return sizeVariable == null ? size : (Integer)context.get(sizeVariable);
 		}
 		
-		public boolean needMore(Map<String, Object> context) {
+		public boolean needMore(PacketContext context) {
 			return true;
 		}
 	}
@@ -129,8 +138,8 @@ public class PacketSpec {
 			this.stopWhenError = stopWhenError;
 		}
 		
-		public boolean needMore(Map<String, Object> context) {
-			return !stopWhenError || 0 == (Byte)context.get(name);
+		public boolean needMore(PacketContext context) {
+			return 0 == (Byte)context.get(name) || !stopWhenError;
 		}
 	}
 }

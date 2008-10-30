@@ -3,10 +3,8 @@ package org.zact.tokyotyrant;
 import static org.zact.tokyotyrant.PacketSpec.*;
 
 import java.nio.ByteBuffer;
-import java.util.HashMap;
-import java.util.Map;
 
-public class Iternext extends EasyCommand {
+public class Iternext extends Command {
 	private static final PacketSpec REQUEST = packet(magic());
 	private static final PacketSpec RESPONSE = packet(code(true), int32("ksiz"), bytes("kbuf", "ksiz"));
 	private Object key;
@@ -20,11 +18,11 @@ public class Iternext extends EasyCommand {
 	}
 	
 	public ByteBuffer encode() {
-		return REQUEST.encode(context());
+		return REQUEST.encode(encodingContext(magic));
 	}
 	
 	public boolean decode(ByteBuffer in) {
-		Map<String, Object> context = new HashMap<String, Object>();
+		PacketContext context = PacketSpec.decodingContext();
 		if (!RESPONSE.decode(context, in)) return false;
 		code = (Byte)context.get("code");
 		if (code == 0) {

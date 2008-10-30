@@ -3,10 +3,8 @@ package org.zact.tokyotyrant;
 import static org.zact.tokyotyrant.PacketSpec.*;
 
 import java.nio.ByteBuffer;
-import java.util.HashMap;
-import java.util.Map;
 
-public class Putrtt extends EasyCommand {
+public class Putrtt extends Command {
 	private static final PacketSpec REQUEST = packet(magic(), int32("ksiz"), int32("vsiz"), int32("width"), bytes("kbuf", "ksiz"), bytes("vbuf", "vsiz"));
 	private static final PacketSpec RESPONSE = packet(code(false));
 	private Object key;
@@ -25,7 +23,7 @@ public class Putrtt extends EasyCommand {
 	}
 	
 	public ByteBuffer encode() {
-		Map<String, Object> context = context();
+		PacketContext context = encodingContext(magic);
 		byte[] kbuf = transcoder.encode(key);
 		byte[] vbuf = transcoder.encode(value);
 		context.put("ksiz", kbuf.length);
@@ -37,7 +35,7 @@ public class Putrtt extends EasyCommand {
 	}
 	
 	public boolean decode(ByteBuffer in) {
-		Map<String, Object> context = new HashMap<String, Object>();
+		PacketContext context = decodingContext();
 		boolean done = RESPONSE.decode(context, in);
 		if (done) {
 			code = (Byte)context.get("code");

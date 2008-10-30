@@ -3,9 +3,8 @@ package org.zact.tokyotyrant;
 import static org.zact.tokyotyrant.PacketSpec.*;
 
 import java.nio.ByteBuffer;
-import java.util.Map;
 
-public class Putnr extends EasyCommand {
+public class Putnr extends Command {
 	private static final PacketSpec REQUEST = packet(magic(), int32("ksiz"), int32("vsiz"), bytes("kbuf", "ksiz"), bytes("vbuf", "vsiz"));
 	private static final PacketSpec RESPONSE = packet();
 	private Object key;
@@ -22,7 +21,7 @@ public class Putnr extends EasyCommand {
 	}
 	
 	public ByteBuffer encode() {
-		Map<String, Object> context = context();
+		PacketContext context = encodingContext(magic);
 		byte[] kbuf = transcoder.encode(key);
 		byte[] vbuf = transcoder.encode(value);
 		context.put("ksiz", kbuf.length);

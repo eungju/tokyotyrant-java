@@ -3,10 +3,8 @@ package org.zact.tokyotyrant;
 import static org.zact.tokyotyrant.PacketSpec.*;
 
 import java.nio.ByteBuffer;
-import java.util.HashMap;
-import java.util.Map;
 
-public class Setmst extends EasyCommand {
+public class Setmst extends Command {
 	private static final PacketSpec REQUEST = packet(magic(), int32("hsiz"), int32("port"), bytes("host", "hsiz"));
 	private static final PacketSpec RESPONSE = packet(code(false));
 	private String host;
@@ -23,7 +21,7 @@ public class Setmst extends EasyCommand {
 	}
 	
 	public ByteBuffer encode() {
-		Map<String, Object> context = context();
+		PacketContext context = encodingContext(magic);
 		byte[] hbuf = host.getBytes();
 		context.put("hsiz", hbuf.length);
 		context.put("host", hbuf);
@@ -32,7 +30,7 @@ public class Setmst extends EasyCommand {
 	}
 	
 	public boolean decode(ByteBuffer in) {
-		Map<String, Object> context = new HashMap<String, Object>();
+		PacketContext context = decodingContext();
 		boolean done = RESPONSE.decode(context, in);
 		if (done) {
 			code = (Byte)context.get("code");
