@@ -41,6 +41,10 @@ public class Shell {
 				System.out.println(client.vsiz(tokens[1]));
 			} else if ("list".equals(command)) {
 				System.out.println(client.list());
+			} else if ("sync".equals(command)) {
+				System.out.println(client.sync());
+			} else if ("vanish".equals(command)) {
+				System.out.println(client.vanish());
 			} else if ("setmst".equals(command)) {
 				System.out.println(client.setmst(tokens[1], Integer.parseInt(tokens[2])));
 			} else if ("rnum".equals(command)) {

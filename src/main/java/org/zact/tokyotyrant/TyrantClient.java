@@ -188,6 +188,20 @@ public class TyrantClient {
 		return result;
 	}
 
+	public boolean sync() throws IOException {
+		Sync command = new Sync();
+		command.setTranscoder(getTranscoder());
+		sendAndReceive(command, channel);
+		return command.getReturnValue();
+	}
+
+	public boolean vanish() throws IOException {
+		Vanish command = new Vanish();
+		command.setTranscoder(getTranscoder());
+		sendAndReceive(command, channel);
+		return command.getReturnValue();
+	}
+
 	public boolean setmst(String host, int port) throws IOException {
 		Setmst command = new Setmst(host, port);
 		command.setTranscoder(getTranscoder());
