@@ -3,6 +3,7 @@ package org.zact.tokyotyrant;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
+import java.nio.channels.ByteChannel;
 import java.nio.channels.SocketChannel;
 import java.util.Map;
 
@@ -41,28 +42,50 @@ public class TyrantClient {
 	public void dispose() {
 	}
 	
-	void cumulativeWrite(Command command, SocketChannel channel) throws IOException {
+	void cumulativeWrite(Command command, ByteChannel channel) throws IOException {
+		//In blocking-mode, a write operation will return only after writing all of the requested bytes.
 		ByteBuffer buffer = command.encode();
-		int n = 0;
-		do {
-			n += channel.write(buffer);
-		} while (n < buffer.limit());
-		log.info("Sent message " + buffer);
+		channel.write(buffer);
+		log.debug("Sent message " + buffer);
 	}
 	
-	void cumulativeRead(Command command, SocketChannel channel) throws IOException {
-		ByteBuffer buffer = null;
-		ByteBuffer received = ByteBuffer.allocate(1024);
+	ByteBuffer fillBuffer(ByteBuffer buffer, ByteBuffer more) {
+		log.debug("buffer " + buffer);
+		if (buffer.remaining() < more.remaining()) {
+			ByteBuffer newBuffer = ByteBuffer.allocate(buffer.capacity() * 2);
+			buffer.flip();
+			newBuffer.put(buffer);
+			buffer = newBuffer;
+		}
+		log.debug("new buffer " + buffer);
+		buffer.put(more);
+		log.debug("filled buffer " + buffer);
+		return buffer;
+	}
+	
+	void cumulativeRead(Command command, ByteChannel channel) throws IOException {
+		final int chunkCapacity = 2048;
+		ByteBuffer buffer = ByteBuffer.allocate(chunkCapacity);
+		int oldPos = 0;
 		do {
-			buffer = ByteBuffer.allocate(received.limit() * 2);
-			received.flip();
-			buffer.put(received);
-			channel.read(buffer);
-			log.info("Received fragment " + buffer);
-			received = buffer;
+			buffer.position(oldPos);
+			buffer.limit(buffer.capacity());
+
+			ByteBuffer fragment = ByteBuffer.allocate(chunkCapacity);
+			channel.read(fragment);
+			log.debug("Received fragment " + fragment);
+			
+			fragment.flip();
+			buffer = fillBuffer(buffer, fragment);
+			oldPos = buffer.position();
 			buffer.flip();
 		} while (!command.decode(buffer));
-		log.info("Received message " + buffer);
+		log.debug("Received message " + buffer);
+	}
+	
+	void sendAndReceive(Command command, ByteChannel channel) throws IOException {
+		cumulativeWrite(command, channel);
+		cumulativeRead(command, channel);
 	}
 	
 	protected Transcoder getTranscoder() {
@@ -72,72 +95,63 @@ public class TyrantClient {
 	public boolean put(Object key, Object value) throws IOException {
 		Put command = new Put(key, value);
 		command.setTranscoder(getTranscoder());
-		cumulativeWrite(command, channel);
-		cumulativeRead(command, channel);
+		sendAndReceive(command, channel);
 		return command.getReturnValue();
 	}
 
 	public boolean out(Object key) throws IOException {
 		Out command = new Out(key);
 		command.setTranscoder(getTranscoder());
-		cumulativeWrite(command, channel);
-		cumulativeRead(command, channel);
+		sendAndReceive(command, channel);
 		return command.getReturnValue();
 	}
 	
 	public Object get(Object key) throws IOException {
 		Get command = new Get(key);
 		command.setTranscoder(getTranscoder());
-		cumulativeWrite(command, channel);
-		cumulativeRead(command, channel);
+		sendAndReceive(command, channel);
 		return command.getReturnValue();
 	}
 	
 	public Map<Object, Object> mget(Object[] keys) throws IOException {
 		Mget command = new Mget(keys);
 		command.setTranscoder(getTranscoder());
-		cumulativeWrite(command, channel);
-		cumulativeRead(command, channel);
+		sendAndReceive(command, channel);
 		return command.getReturnValue();
 	}
 
 	public int vsiz(Object key) throws IOException {
 		Vsiz command = new Vsiz(key);
 		command.setTranscoder(getTranscoder());
-		cumulativeWrite(command, channel);
-		cumulativeRead(command, channel);
+		sendAndReceive(command, channel);
 		return command.getReturnValue();
 	}
 
 	public boolean setmst(String host, int port) throws IOException {
 		Setmst command = new Setmst(host, port);
 		command.setTranscoder(getTranscoder());
-		cumulativeWrite(command, channel);
-		cumulativeRead(command, channel);
+		sendAndReceive(command, channel);
 		return command.getReturnValue();
 	}
 
 	public long rnum() throws IOException {
 		Rnum command = new Rnum();
 		command.setTranscoder(getTranscoder());
-		cumulativeWrite(command, channel);
-		cumulativeRead(command, channel);
+		sendAndReceive(command, channel);
 		return command.getReturnValue();
 	}
 
 	public String stat() throws IOException {
 		Stat command = new Stat();
 		command.setTranscoder(getTranscoder());
-		cumulativeWrite(command, channel);
-		cumulativeRead(command, channel);
+		sendAndReceive(command, channel);
 		return command.getReturnValue();
 	}
 
 	public long size() throws IOException {
 		Size command = new Size();
 		command.setTranscoder(getTranscoder());
-		cumulativeWrite(command, channel);
-		cumulativeRead(command, channel);
+		sendAndReceive(command, channel);
 		return command.getReturnValue();
 	}
 }
