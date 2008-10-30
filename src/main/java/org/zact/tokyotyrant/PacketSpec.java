@@ -54,7 +54,7 @@ public class PacketSpec {
 				throw new UnsupportedOperationException("Doesn't support type " + each.type);
 			}
 			
-			if (!each.needMore(context)) {
+			if (!each.isExpectingMoreData(context)) {
 				return true;
 			}
 		}
@@ -125,7 +125,7 @@ public class PacketSpec {
 			return sizeVariable == null ? size : (Integer)context.get(sizeVariable);
 		}
 		
-		public boolean needMore(PacketContext context) {
+		public boolean isExpectingMoreData(PacketContext context) {
 			return true;
 		}
 	}
@@ -138,7 +138,7 @@ public class PacketSpec {
 			this.stopWhenError = stopWhenError;
 		}
 		
-		public boolean needMore(PacketContext context) {
+		public boolean isExpectingMoreData(PacketContext context) {
 			return 0 == (Byte)context.get(name) || !stopWhenError;
 		}
 	}
