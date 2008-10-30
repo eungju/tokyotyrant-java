@@ -19,6 +19,12 @@ public class Shell {
 			long s = System.currentTimeMillis();
 			if ("put".equals(command)) {
 				System.out.println(client.put(tokens[1], tokens[2]));
+			} else if ("putkeep".equals(command)) {
+				System.out.println(client.putkeep(tokens[1], tokens[2]));
+			} else if ("putcat".equals(command)) {
+				System.out.println(client.putcat(tokens[1], tokens[2]));
+			} else if ("putrtt".equals(command)) {
+				System.out.println(client.putrtt(tokens[1], tokens[2], Integer.parseInt(tokens[3])));
 			} else if ("putnr".equals(command)) {
 				client.putnr(tokens[1], tokens[2]);
 			} else if ("out".equals(command)) {

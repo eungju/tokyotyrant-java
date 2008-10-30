@@ -33,6 +33,10 @@ public class Setmst extends EasyCommand {
 	
 	public boolean decode(ByteBuffer in) {
 		Map<String, Object> context = new HashMap<String, Object>();
-		return RESPONSE.decode(context, in);
+		boolean done = RESPONSE.decode(context, in);
+		if (done) {
+			code = (Byte)context.get("code");
+		}
+		return done;
 	}
 }

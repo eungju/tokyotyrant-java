@@ -64,17 +64,19 @@ public class TyrantClient {
 	}
 	
 	void cumulativeRead(Command command, ByteChannel channel) throws IOException {
-		final int chunkCapacity = 2048;
-		ByteBuffer buffer = ByteBuffer.allocate(chunkCapacity);
+		final int fragmentCapacity = 2048;
+		ByteBuffer buffer = ByteBuffer.allocate(fragmentCapacity);
+		ByteBuffer fragment = ByteBuffer.allocate(fragmentCapacity);
+		
 		buffer.flip();
 		int oldPos = 0;
 		while (!command.decode(buffer)) {
 			log.debug("Trying to read fragment");
-			ByteBuffer fragment = ByteBuffer.allocate(chunkCapacity);
+			fragment.clear();
 			channel.read(fragment);
+			fragment.flip();
 			log.debug("Received fragment " + fragment);
 			
-			fragment.flip();
 			buffer.position(oldPos);
 			buffer.limit(buffer.capacity());
 			buffer = fillBuffer(buffer, fragment);
@@ -95,6 +97,27 @@ public class TyrantClient {
 	
 	public boolean put(Object key, Object value) throws IOException {
 		Put command = new Put(key, value);
+		command.setTranscoder(getTranscoder());
+		sendAndReceive(command, channel);
+		return command.getReturnValue();
+	}
+
+	public boolean putkeep(Object key, Object value) throws IOException {
+		Putkeep command = new Putkeep(key, value);
+		command.setTranscoder(getTranscoder());
+		sendAndReceive(command, channel);
+		return command.getReturnValue();
+	}
+
+	public boolean putcat(Object key, Object value) throws IOException {
+		Putcat command = new Putcat(key, value);
+		command.setTranscoder(getTranscoder());
+		sendAndReceive(command, channel);
+		return command.getReturnValue();
+	}
+
+	public boolean putrtt(Object key, Object value, int width) throws IOException {
+		Putrtt command = new Putrtt(key, value, width);
 		command.setTranscoder(getTranscoder());
 		sendAndReceive(command, channel);
 		return command.getReturnValue();

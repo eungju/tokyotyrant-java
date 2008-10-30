@@ -27,6 +27,7 @@ public class Size extends EasyCommand {
 		Map<String, Object> context = new HashMap<String, Object>();
 		boolean done = RESPONSE.decode(context, in);
 		if (done) {
+			code = (Byte)context.get("code");
 			size = (Long)context.get("size");
 		}
 		return done;

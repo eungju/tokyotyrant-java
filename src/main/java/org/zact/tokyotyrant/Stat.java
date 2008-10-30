@@ -24,10 +24,11 @@ public class Stat extends EasyCommand {
 	}
 	
 	public boolean decode(ByteBuffer in) {
-		Map<String, Object> decoded = new HashMap<String, Object>();
-		boolean done = RESPONSE.decode(decoded, in);
+		Map<String, Object> context = new HashMap<String, Object>();
+		boolean done = RESPONSE.decode(context, in);
 		if (done) {
-			sbuf = new String((byte[])decoded.get("sbuf"));
+			code = (Byte)context.get("code");
+			sbuf = new String((byte[])context.get("sbuf"));
 		}
 		return done;
 	}
