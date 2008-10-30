@@ -1,14 +1,14 @@
 package org.zact.tokyotyrant;
 
-import static org.zact.tokyotyrant.CommandSpec.*;
+import static org.zact.tokyotyrant.PacketSpec.*;
 
 import java.nio.ByteBuffer;
 import java.util.HashMap;
 import java.util.Map;
 
 public class Setmst extends EasyCommand {
-	private static final CommandSpec REQUEST = packet(magic(), field("hsize", Integer.class, 4), field("port", Integer.class, 4), field("host", String.class, "hsize"));
-	private static final CommandSpec RESPONSE = packet(code(true));
+	private static final PacketSpec REQUEST = packet(magic(), int32("hsiz"), int32("port"), bytes("host", "hsiz"));
+	private static final PacketSpec RESPONSE = packet(code(false));
 	private String host;
 	private int port;
 	
@@ -24,8 +24,9 @@ public class Setmst extends EasyCommand {
 	
 	public ByteBuffer encode() {
 		Map<String, Object> context = context();
-		context.put("hsize", host.getBytes().length);
-		context.put("host", host);
+		byte[] hbuf = host.getBytes();
+		context.put("hsiz", hbuf.length);
+		context.put("host", hbuf);
 		context.put("port", port);
 		return REQUEST.encode(context);
 	}

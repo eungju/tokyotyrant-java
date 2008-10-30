@@ -4,11 +4,11 @@ import java.nio.ByteBuffer;
 import java.util.HashMap;
 import java.util.Map;
 
-import static org.zact.tokyotyrant.CommandSpec.*;
+import static org.zact.tokyotyrant.PacketSpec.*;
 
 public class Stat extends EasyCommand {
-	private static final CommandSpec REQUEST = packet(magic());
-	private static final CommandSpec RESPONSE = packet(code(true), field("ssize", Integer.class, 4), field("sbuf", String.class, "ssize"));
+	private static final PacketSpec REQUEST = packet(magic());
+	private static final PacketSpec RESPONSE = packet(code(false), int32("ssiz"), bytes("sbuf", "ssiz"));
 	private String sbuf;
 	             
 	public Stat() {
@@ -27,7 +27,7 @@ public class Stat extends EasyCommand {
 		Map<String, Object> decoded = new HashMap<String, Object>();
 		boolean done = RESPONSE.decode(decoded, in);
 		if (done) {
-			sbuf = (String)decoded.get("sbuf");
+			sbuf = new String((byte[])decoded.get("sbuf"));
 		}
 		return done;
 	}

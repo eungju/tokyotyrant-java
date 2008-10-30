@@ -1,14 +1,14 @@
 package org.zact.tokyotyrant;
 
-import static org.zact.tokyotyrant.CommandSpec.*;
+import static org.zact.tokyotyrant.PacketSpec.*;
 
 import java.nio.ByteBuffer;
 import java.util.HashMap;
 import java.util.Map;
 
 public class Size extends EasyCommand {
-	private static final CommandSpec REQUEST = packet(magic());
-	private static final CommandSpec RESPONSE = packet(code(true), field("size", Long.class, 8));
+	private static final PacketSpec REQUEST = packet(magic());
+	private static final PacketSpec RESPONSE = packet(code(false), int64("size"));
 	private long size;
 	             
 	public Size() {

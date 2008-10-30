@@ -1,17 +1,13 @@
 package org.zact.tokyotyrant;
 
-import static org.zact.tokyotyrant.CommandSpec.*;
+import static org.zact.tokyotyrant.PacketSpec.*;
 
 import java.nio.ByteBuffer;
 import java.util.Map;
 
 public class Putnr extends EasyCommand {
-	private static final CommandSpec REQUEST = packet(
-			magic(),
-			field("ksiz", Integer.class, 4), field("vsiz", Integer.class, 4),
-			field("kbuf", byte[].class, "ksiz"), field("vbuf", byte[].class, "vsiz")
-			);
-	private static final CommandSpec RESPONSE = packet();
+	private static final PacketSpec REQUEST = packet(magic(), int32("ksiz"), int32("vsiz"), bytes("kbuf", "ksiz"), bytes("vbuf", "vsiz"));
+	private static final PacketSpec RESPONSE = packet();
 	private Object key;
 	private Object value;
 	

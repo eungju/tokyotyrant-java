@@ -3,20 +3,20 @@ package org.zact.tokyotyrant;
 import java.nio.ByteBuffer;
 import java.util.Map;
 
-public class CommandSpec {
-	private FieldSpec[] fieldSpecs;
+public class PacketSpec {
+	private FieldSpec[] fields;
 	
-	public CommandSpec(FieldSpec...fields) {
-		this.fieldSpecs = fields;
+	public PacketSpec(FieldSpec...fields) {
+		this.fields = fields;
 	}
 	
 	public ByteBuffer encode(Map<String, Object> context) {
 		int capacity = 0;
-		for (FieldSpec each : fieldSpecs) {
+		for (FieldSpec each : fields) {
 			capacity += each.size(context);
 		}
 		ByteBuffer out = ByteBuffer.allocate(capacity);
-		for (FieldSpec each : fieldSpecs) {
+		for (FieldSpec each : fields) {
 			Object value = context.get(each.name);
 			if (each.type.equals(byte[].class)) {
 				out.put((byte[])value);
@@ -26,10 +26,8 @@ public class CommandSpec {
 				out.put((Byte)value);
 			} else if (each.type.equals(Long.class)) {
 				out.putLong((Long)value);
-			} else if (each.type.equals(String.class)) {
-				out.put(((String)value).getBytes());
 			} else {
-				new UnsupportedOperationException("Doesn't support type " + each.type);
+				throw new UnsupportedOperationException("Doesn't support type " + each.type);
 			}
 		}
 		out.flip();
@@ -37,7 +35,7 @@ public class CommandSpec {
 	}
 
 	public boolean decode(Map<String, Object> context, ByteBuffer in) {
-		for (FieldSpec each : fieldSpecs) {
+		for (FieldSpec each : fields) {
 			int size = each.size(context);
 			if (in.remaining() < size) {
 				return false;
@@ -53,12 +51,8 @@ public class CommandSpec {
 				context.put(each.name, in.get());
 			} else if (each.type.equals(Long.class)) {
 				context.put(each.name, in.getLong());
-			} else if (each.type.equals(String.class)) {
-				byte[] buf = new byte[each.size(context)];
-				in.get(buf);
-				context.put(each.name, new String(buf));
 			} else {
-				new UnsupportedOperationException("Doesn't support type " + each.type);
+				throw new UnsupportedOperationException("Doesn't support type " + each.type);
 			}
 			
 			if (!each.needMore(context)) {
@@ -68,24 +62,36 @@ public class CommandSpec {
 		return true;
 	}
 
-	public static CommandSpec packet(FieldSpec...fields) {
-		return new CommandSpec(fields);
-	}
-	
-	public static FieldSpec field(String name, Class<?> type, int size) {
-		return new FieldSpec(name, type, size);
-	}
-
-	public static FieldSpec field(String name, Class<?> type, String sizeVariable) {
-		return new FieldSpec(name, type, sizeVariable);
+	public static PacketSpec packet(FieldSpec...fields) {
+		return new PacketSpec(fields);
 	}
 	
 	public static FieldSpec magic() {
-		return field("magic", byte[].class, 2);
+		return bytes("magic", 2);
 	}
 	
-	public static FieldSpec code(boolean proceedAlways) {
-		return new CodeFieldSpec(proceedAlways);
+	public static FieldSpec code(boolean stopWhenError) {
+		return new CodeFieldSpec(stopWhenError);
+	}
+	
+	public static FieldSpec int8(String name) {
+		return new FieldSpec(name, Byte.class, 1);
+	}
+
+	public static FieldSpec int32(String name) {
+		return new FieldSpec(name, Integer.class, 4);
+	}
+
+	public static FieldSpec int64(String name) {
+		return new FieldSpec(name, Long.class, 8);
+	}
+	
+	public static FieldSpec bytes(String name, int size) {
+		return new FieldSpec(name, byte[].class, size);
+	}
+
+	public static FieldSpec bytes(String name, String sizeVariable) {
+		return new FieldSpec(name, byte[].class, sizeVariable);
 	}
 	
 	private static class FieldSpec extends ObjectSupport {
@@ -116,15 +122,15 @@ public class CommandSpec {
 	}
 	
 	private static class CodeFieldSpec extends FieldSpec {
-		private boolean proceedAlways;
+		private boolean stopWhenError;
 
-		public CodeFieldSpec(boolean proceedAlways) {
+		public CodeFieldSpec(boolean stopWhenError) {
 			super("code", Byte.class, 1);
-			this.proceedAlways = proceedAlways;
+			this.stopWhenError = stopWhenError;
 		}
 		
 		public boolean needMore(Map<String, Object> context) {
-			return proceedAlways || 0 == (Byte)context.get(name);
+			return !stopWhenError || 0 == (Byte)context.get(name);
 		}
 	}
 }
