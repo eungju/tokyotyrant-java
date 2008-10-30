@@ -202,6 +202,20 @@ public class TyrantClient {
 		return command.getReturnValue();
 	}
 
+	public boolean copy(String path) throws IOException {
+		Copy command = new Copy(path);
+		command.setTranscoder(getTranscoder());
+		sendAndReceive(command, channel);
+		return command.getReturnValue();
+	}
+
+	public boolean restore(String path, long ts) throws IOException {
+		Restore command = new Restore(path, ts);
+		command.setTranscoder(getTranscoder());
+		sendAndReceive(command, channel);
+		return command.getReturnValue();
+	}
+	
 	public boolean setmst(String host, int port) throws IOException {
 		Setmst command = new Setmst(host, port);
 		command.setTranscoder(getTranscoder());

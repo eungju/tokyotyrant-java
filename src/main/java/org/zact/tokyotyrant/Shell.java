@@ -45,6 +45,10 @@ public class Shell {
 				System.out.println(client.sync());
 			} else if ("vanish".equals(command)) {
 				System.out.println(client.vanish());
+			} else if ("copy".equals(command)) {
+				System.out.println(client.copy(tokens[1]));
+			} else if ("restore".equals(command)) {
+				System.out.println(client.restore(tokens[1], Long.parseLong(tokens[2])));
 			} else if ("setmst".equals(command)) {
 				System.out.println(client.setmst(tokens[1], Integer.parseInt(tokens[2])));
 			} else if ("rnum".equals(command)) {
