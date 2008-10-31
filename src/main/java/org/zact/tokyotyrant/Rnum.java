@@ -1,35 +1,33 @@
 package org.zact.tokyotyrant;
 
+import static org.zact.tokyotyrant.PacketSpec.*;
+
 import java.nio.ByteBuffer;
 
 public class Rnum extends Command {
+	private static final PacketSpec REQUEST = packet(magic());
+	private static final PacketSpec RESPONSE = packet(code(false), int64("rnum"));
 	private long rnum;
 
 	public Rnum() {
-		super((byte)0x80);
+		super((byte) 0x80);
 	}
 	
 	public long getReturnValue() {
-		return isSuccess() ? rnum : 0;
+		return rnum;
 	}
 
 	public ByteBuffer encode() {
-		ByteBuffer buffer = ByteBuffer.allocate(magic.length);
-		buffer.put(magic);
-		buffer.flip();
-		return buffer;
+		return REQUEST.encode(encodingContext(magic));
 	}
 
 	public boolean decode(ByteBuffer in) {
-		if (in.remaining() < 1) {
-			return false;
+		PacketContext context = decodingContext();
+		boolean done = RESPONSE.decode(context, in);
+		if (done) {
+			code = (Byte)context.get("code");
+			rnum = (Long)context.get("rnum");
 		}
-		code = in.get();
-		
-		if (in.remaining() < 8) {
-			return false;
-		}
-		rnum = in.getLong();
-		return true;
+		return done;
 	}
 }

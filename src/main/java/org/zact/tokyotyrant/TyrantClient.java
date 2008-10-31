@@ -258,7 +258,7 @@ public class TyrantClient {
 		return command.getReturnValue();
 	}
 
-	public String stat() throws IOException {
+	public Map<String, String> stat() throws IOException {
 		Stat command = new Stat();
 		command.setTranscoder(getTranscoder());
 		sendAndReceive(command, channel);
