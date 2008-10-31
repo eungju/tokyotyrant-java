@@ -21,7 +21,7 @@ public class Setmst extends Command {
 	}
 	
 	public ByteBuffer encode() {
-		PacketContext context = encodingContext(magic);
+		PacketContext context = REQUEST.context(magic);
 		byte[] hbuf = host.getBytes();
 		context.put("hsiz", hbuf.length);
 		context.put("host", hbuf);
@@ -30,7 +30,7 @@ public class Setmst extends Command {
 	}
 	
 	public boolean decode(ByteBuffer in) {
-		PacketContext context = decodingContext();
+		PacketContext context = RESPONSE.context();
 		boolean done = RESPONSE.decode(context, in);
 		if (done) {
 			code = (Byte)context.get("code");

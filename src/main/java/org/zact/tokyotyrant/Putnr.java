@@ -21,7 +21,7 @@ public class Putnr extends Command {
 	}
 	
 	public ByteBuffer encode() {
-		PacketContext context = encodingContext(magic);
+		PacketContext context = REQUEST.context(magic);
 		byte[] kbuf = transcoder.encode(key);
 		byte[] vbuf = transcoder.encode(value);
 		context.put("ksiz", kbuf.length);

@@ -8,6 +8,15 @@ public class PacketSpec {
 	public PacketSpec(FieldSpec... fields) {
 		this.fields = fields;
 	}
+
+	/**
+	 * Create new context for encoding.
+	 */
+	public PacketContext context(byte[] magic) {
+		PacketContext context = new PacketContext(fields.length);
+		context.put("magic", magic);
+		return context;
+	}
 	
 	public ByteBuffer encode(PacketContext context) {
 		int capacity = 0;
@@ -31,6 +40,13 @@ public class PacketSpec {
 		}
 		out.flip();
 		return out;
+	}
+
+	/**
+	 * Create new context for decoding.
+	 */
+	public PacketContext context() {
+		return new PacketContext(fields.length);
 	}
 
 	public boolean decode(PacketContext context, ByteBuffer in) {
@@ -61,16 +77,6 @@ public class PacketSpec {
 		return true;
 	}
 	
-	public static PacketContext decodingContext() {
-		return new PacketContext();
-	}
-	
-	public static PacketContext encodingContext(byte[] magic) {
-		PacketContext context = new PacketContext();
-		context.put("magic", magic);
-		return context;
-	}
-
 	public static PacketSpec packet(FieldSpec...fields) {
 		return new PacketSpec(fields);
 	}

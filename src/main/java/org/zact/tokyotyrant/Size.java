@@ -18,11 +18,11 @@ public class Size extends Command {
 	}
 	
 	public ByteBuffer encode() {
-		return REQUEST.encode(encodingContext(magic));
+		return REQUEST.encode(REQUEST.context(magic));
 	}
 	
 	public boolean decode(ByteBuffer in) {
-		PacketContext context = decodingContext();
+		PacketContext context = RESPONSE.context();
 		boolean done = RESPONSE.decode(context, in);
 		if (done) {
 			code = (Byte)context.get("code");

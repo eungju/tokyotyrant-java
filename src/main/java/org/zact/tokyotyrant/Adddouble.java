@@ -24,7 +24,7 @@ public class Adddouble extends Command {
 	private static final long TRILLION = (1000000L * 1000000L);
 	
 	public ByteBuffer encode() {
-		PacketContext context = encodingContext(magic);
+		PacketContext context = REQUEST.context(magic);
 		byte[] kbuf = transcoder.encode(key);
 		context.put("ksiz", kbuf.length);
 		context.put("kbuf", kbuf);
@@ -37,7 +37,7 @@ public class Adddouble extends Command {
 	}
 	
 	public boolean decode(ByteBuffer in) {
-		PacketContext context = PacketSpec.decodingContext();
+		PacketContext context = RESPONSE.context();
 		if (!RESPONSE.decode(context, in)) return false;
 		code = (Byte)context.get("code");
 		if (code == 0) {

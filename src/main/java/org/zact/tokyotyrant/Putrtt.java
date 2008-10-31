@@ -23,7 +23,7 @@ public class Putrtt extends Command {
 	}
 	
 	public ByteBuffer encode() {
-		PacketContext context = encodingContext(magic);
+		PacketContext context = REQUEST.context(magic);
 		byte[] kbuf = transcoder.encode(key);
 		byte[] vbuf = transcoder.encode(value);
 		context.put("ksiz", kbuf.length);
@@ -35,7 +35,7 @@ public class Putrtt extends Command {
 	}
 	
 	public boolean decode(ByteBuffer in) {
-		PacketContext context = decodingContext();
+		PacketContext context = RESPONSE.context();
 		boolean done = RESPONSE.decode(context, in);
 		if (done) {
 			code = (Byte)context.get("code");

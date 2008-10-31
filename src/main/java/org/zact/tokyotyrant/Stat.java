@@ -20,11 +20,11 @@ public class Stat extends Command {
 	}
 	
 	public ByteBuffer encode() {
-		return REQUEST.encode(encodingContext(magic));
+		return REQUEST.encode(REQUEST.context(magic));
 	}
 	
 	public boolean decode(ByteBuffer in) {
-		PacketContext context = decodingContext();
+		PacketContext context = RESPONSE.context();
 		if (!RESPONSE.decode(context, in)) return false;
 		code = (Byte)context.get("code");
 		stat = parseTsv(new String((byte[])context.get("sbuf")));

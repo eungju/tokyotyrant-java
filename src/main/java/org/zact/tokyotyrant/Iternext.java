@@ -18,11 +18,11 @@ public class Iternext extends Command {
 	}
 	
 	public ByteBuffer encode() {
-		return REQUEST.encode(encodingContext(magic));
+		return REQUEST.encode(REQUEST.context(magic));
 	}
 	
 	public boolean decode(ByteBuffer in) {
-		PacketContext context = PacketSpec.decodingContext();
+		PacketContext context = RESPONSE.context();
 		if (!RESPONSE.decode(context, in)) return false;
 		code = (Byte)context.get("code");
 		if (code == 0) {

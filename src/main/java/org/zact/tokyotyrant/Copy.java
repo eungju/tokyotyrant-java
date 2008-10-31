@@ -19,7 +19,7 @@ public class Copy extends Command {
 	}
 	
 	public ByteBuffer encode() {
-		PacketContext context = encodingContext(magic);
+		PacketContext context = REQUEST.context(magic);
 		byte[] pbuf = path.getBytes();
 		context.put("psiz", pbuf.length);
 		context.put("path", pbuf);
@@ -27,7 +27,7 @@ public class Copy extends Command {
 	}
 	
 	public boolean decode(ByteBuffer in) {
-		PacketContext context = decodingContext();
+		PacketContext context = RESPONSE.context();
 		if (!RESPONSE.decode(context, in)) return false;
 		code = (Byte)context.get("code");
 		return true;

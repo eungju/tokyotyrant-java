@@ -26,7 +26,7 @@ public class Ext extends Command {
 	}
 	
 	public ByteBuffer encode() {
-		PacketContext context = encodingContext(magic);
+		PacketContext context = REQUEST.context(magic);
 		byte[] nbuf = name.getBytes();
 		byte[] kbuf = transcoder.encode(key);
 		byte[] vbuf = transcoder.encode(value);
@@ -41,7 +41,7 @@ public class Ext extends Command {
 	}
 	
 	public boolean decode(ByteBuffer in) {
-		PacketContext context = PacketSpec.decodingContext();
+		PacketContext context = RESPONSE.context();
 		if (!RESPONSE.decode(context, in)) return false;
 		code = (Byte)context.get("code");
 		if (code == 0) {
