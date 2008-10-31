@@ -88,7 +88,8 @@ public class TyrantClient {
 		log.debug("Received message " + buffer + ", " + command.code);
 	}
 	
-	void sendAndReceive(Command command, ByteChannel channel) throws IOException {
+	void execute(Command command) throws IOException {
+		command.setTranscoder(getTranscoder());
 		cumulativeWrite(command, channel);
 		cumulativeRead(command, channel);
 	}
@@ -99,77 +100,66 @@ public class TyrantClient {
 	
 	public boolean put(Object key, Object value) throws IOException {
 		Put command = new Put(key, value);
-		command.setTranscoder(getTranscoder());
-		sendAndReceive(command, channel);
+		execute(command);
 		return command.getReturnValue();
 	}
 
 	public boolean putkeep(Object key, Object value) throws IOException {
 		Putkeep command = new Putkeep(key, value);
-		command.setTranscoder(getTranscoder());
-		sendAndReceive(command, channel);
+		execute(command);
 		return command.getReturnValue();
 	}
 
 	public boolean putcat(Object key, Object value) throws IOException {
 		Putcat command = new Putcat(key, value);
-		command.setTranscoder(getTranscoder());
-		sendAndReceive(command, channel);
+		execute(command);
 		return command.getReturnValue();
 	}
 
 	public boolean putrtt(Object key, Object value, int width) throws IOException {
 		Putrtt command = new Putrtt(key, value, width);
-		command.setTranscoder(getTranscoder());
-		sendAndReceive(command, channel);
+		execute(command);
 		return command.getReturnValue();
 	}
 
 	public void putnr(Object key, Object value) throws IOException {
 		Putnr command = new Putnr(key, value);
-		command.setTranscoder(getTranscoder());
-		sendAndReceive(command, channel);
+		execute(command);
 	}
 
 	public boolean out(Object key) throws IOException {
 		Out command = new Out(key);
-		command.setTranscoder(getTranscoder());
-		sendAndReceive(command, channel);
+		execute(command);
 		return command.getReturnValue();
 	}
 	
 	public Object get(Object key) throws IOException {
 		Get command = new Get(key);
-		command.setTranscoder(getTranscoder());
-		sendAndReceive(command, channel);
+		execute(command);
 		return command.getReturnValue();
 	}
 	
 	public Map<Object, Object> mget(Object[] keys) throws IOException {
 		Mget command = new Mget(keys);
-		command.setTranscoder(getTranscoder());
-		sendAndReceive(command, channel);
+		execute(command);
 		return command.getReturnValue();
 	}
 
 	public int vsiz(Object key) throws IOException {
 		Vsiz command = new Vsiz(key);
-		command.setTranscoder(getTranscoder());
-		sendAndReceive(command, channel);
+		execute(command);
 		return command.getReturnValue();
 	}
 
 	public boolean iterinit() throws IOException {
 		Iterinit command = new Iterinit();
-		command.setTranscoder(getTranscoder());
-		sendAndReceive(command, channel);
+		execute(command);
 		return command.getReturnValue();
 	}
 	
 	public Object iternext() throws IOException {
 		Iternext command = new Iternext();
-		command.setTranscoder(getTranscoder());
-		sendAndReceive(command, channel);
+		execute(command);
 		return command.getReturnValue();
 	}
 
@@ -190,85 +180,73 @@ public class TyrantClient {
 
 	public List<Object> fwmkeys(Object prefix, int max) throws IOException {
 		Fwmkeys command = new Fwmkeys(prefix, max);
-		command.setTranscoder(getTranscoder());
-		sendAndReceive(command, channel);
+		execute(command);
 		return command.getReturnValue();
 	}
 
 	public int addint(Object key, int num) throws IOException {
 		Addint command = new Addint(key, num);
-		command.setTranscoder(getTranscoder());
-		sendAndReceive(command, channel);
+		execute(command);
 		return command.getReturnValue();
 	}
 
 	public double adddouble(Object key, double num) throws IOException {
 		Adddouble command = new Adddouble(key, num);
-		command.setTranscoder(getTranscoder());
-		sendAndReceive(command, channel);
+		execute(command);
 		return command.getReturnValue();
 	}
 
 	public Object ext(String name, int opts, Object key, Object value) throws IOException {
 		Ext command = new Ext(name, opts, key, value);
-		command.setTranscoder(getTranscoder());
-		sendAndReceive(command, channel);
+		execute(command);
 		return command.getReturnValue();
 	}
 
 	public boolean sync() throws IOException {
 		Sync command = new Sync();
-		command.setTranscoder(getTranscoder());
-		sendAndReceive(command, channel);
+		execute(command);
 		return command.getReturnValue();
 	}
 
 	public boolean vanish() throws IOException {
 		Vanish command = new Vanish();
-		command.setTranscoder(getTranscoder());
-		sendAndReceive(command, channel);
+		execute(command);
 		return command.getReturnValue();
 	}
 
 	public boolean copy(String path) throws IOException {
 		Copy command = new Copy(path);
-		command.setTranscoder(getTranscoder());
-		sendAndReceive(command, channel);
+		execute(command);
 		return command.getReturnValue();
 	}
 
 	public boolean restore(String path, long ts) throws IOException {
 		Restore command = new Restore(path, ts);
-		command.setTranscoder(getTranscoder());
-		sendAndReceive(command, channel);
+		execute(command);
 		return command.getReturnValue();
 	}
 	
 	public boolean setmst(String host, int port) throws IOException {
 		Setmst command = new Setmst(host, port);
-		command.setTranscoder(getTranscoder());
-		sendAndReceive(command, channel);
+		execute(command);
 		return command.getReturnValue();
 	}
 
 	public long rnum() throws IOException {
 		Rnum command = new Rnum();
-		command.setTranscoder(getTranscoder());
-		sendAndReceive(command, channel);
+		execute(command);
 		return command.getReturnValue();
 	}
 
 	public Map<String, String> stat() throws IOException {
 		Stat command = new Stat();
-		command.setTranscoder(getTranscoder());
-		sendAndReceive(command, channel);
+		execute(command);
 		return command.getReturnValue();
 	}
 
 	public long size() throws IOException {
 		Size command = new Size();
-		command.setTranscoder(getTranscoder());
-		sendAndReceive(command, channel);
+		execute(command);
 		return command.getReturnValue();
 	}
 }
