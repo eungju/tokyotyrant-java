@@ -188,6 +188,13 @@ public class TyrantClient {
 		return result;
 	}
 
+	public List<Object> fwmkeys(Object prefix, int max) throws IOException {
+		Fwmkeys command = new Fwmkeys(prefix, max);
+		command.setTranscoder(getTranscoder());
+		sendAndReceive(command, channel);
+		return command.getReturnValue();
+	}
+
 	public int addint(Object key, int num) throws IOException {
 		Addint command = new Addint(key, num);
 		command.setTranscoder(getTranscoder());

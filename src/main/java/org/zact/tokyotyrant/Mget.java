@@ -6,7 +6,7 @@ import java.util.Map;
 
 public class Mget extends Command {
 	private Object[] keys;
-	private Map<Object, Object> values = new HashMap<Object, Object>();
+	private Map<Object, Object> values;
 
 	public Mget(Object[] keys) {
 		super((byte)0x31);
@@ -46,6 +46,7 @@ public class Mget extends Command {
 		}
 		int rnum = in.getInt();
 
+		values = new HashMap<Object, Object>(rnum);
 		for (int i = 0; i < rnum; i++) {
 			if (in.remaining() < 4 + 4) {
 				return false;

@@ -41,6 +41,8 @@ public class Shell {
 				System.out.println(client.vsiz(tokens[1]));
 			} else if ("list".equals(command)) {
 				System.out.println(client.list());
+			} else if ("fwmkeys".equals(command)) {
+				System.out.println(client.fwmkeys(tokens[1], Integer.parseInt(tokens[2])));
 			} else if ("addint".equals(command)) {
 				System.out.println(client.addint(tokens[1], Integer.parseInt(tokens[2])));
 			} else if ("adddouble".equals(command)) {
