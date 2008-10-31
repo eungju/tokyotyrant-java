@@ -188,6 +188,27 @@ public class TyrantClient {
 		return result;
 	}
 
+	public int addint(Object key, int num) throws IOException {
+		Addint command = new Addint(key, num);
+		command.setTranscoder(getTranscoder());
+		sendAndReceive(command, channel);
+		return command.getReturnValue();
+	}
+
+	public double adddouble(Object key, double num) throws IOException {
+		Adddouble command = new Adddouble(key, num);
+		command.setTranscoder(getTranscoder());
+		sendAndReceive(command, channel);
+		return command.getReturnValue();
+	}
+
+	public Object ext(String name, int opts, Object key, Object value) throws IOException {
+		Ext command = new Ext(name, opts, key, value);
+		command.setTranscoder(getTranscoder());
+		sendAndReceive(command, channel);
+		return command.getReturnValue();
+	}
+
 	public boolean sync() throws IOException {
 		Sync command = new Sync();
 		command.setTranscoder(getTranscoder());
