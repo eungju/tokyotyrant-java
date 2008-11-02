@@ -66,7 +66,7 @@ public class Shell {
 			} else if ("size".equals(command)) {
 				System.out.println(client.size());
 			} else if ("quit".equals(command)) {
-				client.close();
+				client.dispose();
 				break;
 			}
 			System.out.println("It takes " + (System.currentTimeMillis() - s) + "ms");

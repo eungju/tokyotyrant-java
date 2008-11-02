@@ -2,9 +2,6 @@ package org.zact.tokyotyrant;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
-import java.nio.ByteBuffer;
-import java.nio.channels.ByteChannel;
-import java.nio.channels.SocketChannel;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -14,90 +11,31 @@ import org.slf4j.LoggerFactory;
 
 public class TyrantClient {
 	private final Logger log = LoggerFactory.getLogger(getClass());  
-	private int timeout = 1000;
-	private SocketChannel channel;
     private Transcoder defaultTranscoder = new StringTranscoder();
+	private Networking networking;
     
     public TyrantClient(String host, int port) throws IOException {
-        connect(new InetSocketAddress(host, port));
-	}
-
-    public void connect(InetSocketAddress remoteAddress) throws IOException {
-    	try {
-			channel = SocketChannel.open(remoteAddress);
-			channel.socket().setSoTimeout(timeout);
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-    }
-    
-	public void close() {
-		try {
-			channel.close();
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+		log.info("Initializing...");
+    	networking = new SynchronousNetworking(new InetSocketAddress(host, port));
+    	networking.start();
+		log.info("Initialized");
 	}
 	
 	public void dispose() {
+		log.info("Disposing...");
+		networking.stop();
+		log.info("Disposed");
 	}
 	
-	void cumulativeWrite(Command command, ByteChannel channel) throws IOException {
-		//In blocking-mode, a write operation will return only after writing all of the requested bytes.
-		ByteBuffer buffer = command.encode();
-		channel.write(buffer);
-		log.debug("Sent message " + buffer);
-	}
-	
-	ByteBuffer fillBuffer(ByteBuffer buffer, ByteBuffer more) {
-		log.debug("buffer " + buffer);
-		if (buffer.remaining() < more.remaining()) {
-			ByteBuffer newBuffer = ByteBuffer.allocate(buffer.capacity() * 2);
-			buffer.flip();
-			newBuffer.put(buffer);
-			buffer = newBuffer;
-		}
-		log.debug("new buffer " + buffer);
-		buffer.put(more);
-		log.debug("filled buffer " + buffer);
-		return buffer;
-	}
-	
-	void cumulativeRead(Command command, ByteChannel channel) throws IOException {
-		final int fragmentCapacity = 2048;
-		ByteBuffer buffer = ByteBuffer.allocate(fragmentCapacity);
-		ByteBuffer fragment = ByteBuffer.allocate(fragmentCapacity);
-		
-		buffer.flip();
-		int oldPos = 0;
-		while (!command.decode(buffer)) {
-			log.debug("Trying to read fragment");
-			fragment.clear();
-			channel.read(fragment);
-			fragment.flip();
-			log.debug("Received fragment " + fragment);
-			
-			buffer.position(oldPos);
-			buffer.limit(buffer.capacity());
-			buffer = fillBuffer(buffer, fragment);
-			oldPos = buffer.position();
-			buffer.flip();
-		}
-		log.debug("Received message " + buffer + ", " + command.code);
-	}
-	
-	void execute(Command command) throws IOException {
-		command.setTranscoder(getTranscoder());
-		cumulativeWrite(command, channel);
-		cumulativeRead(command, channel);
-	}
-	
-	protected Transcoder getTranscoder() {
+	Transcoder getTranscoder() {
 		return defaultTranscoder;
 	}
-	
+
+	void execute(Command command) throws IOException {
+		command.setTranscoder(getTranscoder());
+		networking.execute(command);
+	}
+
 	public boolean put(Object key, Object value) throws IOException {
 		Put command = new Put(key, value);
 		execute(command);
