@@ -83,6 +83,15 @@
 	<reporting>
 		<plugins>
 			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-javadoc-plugin</artifactId>
+				<configuration>
+					<charset>${maven.compiler.encoding}</charset>
+					<docencoding>${maven.compiler.encoding}</docencoding>
+					<encoding>${maven.compiler.encoding}</encoding>
+				</configuration>
+			</plugin>
+			<plugin>
 				<groupId>org.codehaus.mojo</groupId>
 				<artifactId>cobertura-maven-plugin</artifactId>
 			</plugin>
@@ -102,6 +111,13 @@
 			<plugin>
 				<groupId>org.codehaus.mojo</groupId>
 				<artifactId>findbugs-maven-plugin</artifactId>
+			</plugin>
+			<plugin>
+				<groupId>org.codehaus.mojo</groupId>
+				<artifactId>javancss-maven-plugin</artifactId>
+				<configuration>
+					<forceEncoding>${maven.compiler.encoding}</forceEncoding>
+				</configuration>
 			</plugin>
 		</plugins>
 	</reporting>	
