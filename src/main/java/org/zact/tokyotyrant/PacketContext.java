@@ -10,10 +10,6 @@ public final class PacketContext {
 		fields = new HashMap<String, Object>();		
 	}
 	
-	public PacketContext(int numberOfFields) {
-		fields = new HashMap<String, Object>(numberOfFields);		
-	}
-	
 	public void put(String key, Object value) {
 		fields.put(key, value);
 	}

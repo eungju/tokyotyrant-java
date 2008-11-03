@@ -93,7 +93,7 @@ public class PacketSpec {
 		return new FieldSpec(name, byte[].class, sizeVariable);
 	}
 	
-	private static class FieldSpec extends ObjectSupport {
+	static class FieldSpec extends ObjectSupport {
 		public String name;
 		public Class<?> type;
 		public int size;

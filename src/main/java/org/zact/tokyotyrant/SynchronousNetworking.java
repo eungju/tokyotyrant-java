@@ -11,9 +11,9 @@ import org.slf4j.LoggerFactory;
 
 public class SynchronousNetworking implements Networking {
 	private final Logger log = LoggerFactory.getLogger(getClass());
+	private NetworkingHelper helper;
 	private SocketAddress serverAddress;
 	private SocketChannel channel;
-	
 
 	public SynchronousNetworking(SocketAddress serverAddress) {
 		this.serverAddress = serverAddress;
@@ -36,32 +36,18 @@ public class SynchronousNetworking implements Networking {
 	}
 
 	public void execute(Command command) throws IOException {
-		cumulativeWrite(command, channel);
-		cumulativeRead(command, channel);
+		sendRequest(command, channel);
+		receiveResponse(command, channel);
 	}
 	
-	void cumulativeWrite(Command command, ByteChannel channel) throws IOException {
+	void sendRequest(Command command, ByteChannel channel) throws IOException {
 		//In blocking-mode, a write operation will return only after writing all of the requested bytes.
 		ByteBuffer buffer = command.encode();
 		channel.write(buffer);
 		log.debug("Sent message " + buffer);
 	}
 	
-	ByteBuffer fillBuffer(ByteBuffer buffer, ByteBuffer more) {
-		log.debug("buffer " + buffer);
-		if (buffer.remaining() < more.remaining()) {
-			ByteBuffer newBuffer = ByteBuffer.allocate(buffer.capacity() * 2);
-			buffer.flip();
-			newBuffer.put(buffer);
-			buffer = newBuffer;
-		}
-		log.debug("new buffer " + buffer);
-		buffer.put(more);
-		log.debug("filled buffer " + buffer);
-		return buffer;
-	}
-	
-	void cumulativeRead(Command command, ByteChannel channel) throws IOException {
+	void receiveResponse(Command command, ByteChannel channel) throws IOException {
 		final int fragmentCapacity = 2048;
 		ByteBuffer buffer = ByteBuffer.allocate(fragmentCapacity);
 		ByteBuffer fragment = ByteBuffer.allocate(fragmentCapacity);
@@ -77,7 +63,7 @@ public class SynchronousNetworking implements Networking {
 			
 			buffer.position(oldPos);
 			buffer.limit(buffer.capacity());
-			buffer = fillBuffer(buffer, fragment);
+			buffer = helper.accumulateBuffer(buffer, fragment);
 			oldPos = buffer.position();
 			buffer.flip();
 		}

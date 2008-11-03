@@ -16,6 +16,7 @@ import org.slf4j.LoggerFactory;
 
 public class AsynchronousNetworking implements Networking, Runnable {
 	private final Logger log = LoggerFactory.getLogger(getClass());  
+	private NetworkingHelper helper;
 	private SocketAddress serverAddress;
 	private Selector selector;
 	private SocketChannel channel;
@@ -95,7 +96,7 @@ public class AsynchronousNetworking implements Networking, Runnable {
 						fragment.flip();
 						log.debug("Received fragment " + fragment);
 							
-						readBuffer = fillBuffer(readBuffer, fragment);
+						readBuffer = helper.accumulateBuffer(readBuffer, fragment);
 						int pos = readBuffer.position();
 						readBuffer.flip();
 						if (currentCommand.decode(readBuffer)) {
@@ -125,7 +126,7 @@ public class AsynchronousNetworking implements Networking, Runnable {
 		latch = new CountDownLatch(1);
 		channel.register(selector, SelectionKey.OP_WRITE);
 		channel.register(selector, SelectionKey.OP_READ);
-		cumulativeWrite(command, channel);
+		sendRequest(command, channel);
 		try {
 			latch.await();
 		} catch (InterruptedException e) {
@@ -133,7 +134,7 @@ public class AsynchronousNetworking implements Networking, Runnable {
 		}
 	}
 
-	void cumulativeWrite(Command command, ByteChannel channel) throws IOException {
+	void sendRequest(Command command, ByteChannel channel) throws IOException {
 		ByteBuffer buffer = command.encode();
 		int written = 0;
 		do {
@@ -141,19 +142,5 @@ public class AsynchronousNetworking implements Networking, Runnable {
 			written += n;
 		} while (written != buffer.limit());
 		log.debug("Sent message " + buffer);
-	}
-	
-	ByteBuffer fillBuffer(ByteBuffer buffer, ByteBuffer more) {
-		log.debug("buffer " + buffer);
-		if (buffer.remaining() < more.remaining()) {
-			ByteBuffer newBuffer = ByteBuffer.allocate(buffer.capacity() * 2);
-			buffer.flip();
-			newBuffer.put(buffer);
-			buffer = newBuffer;
-		}
-		log.debug("new buffer " + buffer);
-		buffer.put(more);
-		log.debug("filled buffer " + buffer);
-		return buffer;
 	}
 }

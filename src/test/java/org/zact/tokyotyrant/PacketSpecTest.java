@@ -60,4 +60,73 @@ public class PacketSpecTest {
 		PacketContext context = new PacketContext();
 		assertFalse(packet(code(false), int32("vsiz")).decode(context, in));
 	}
+	
+	@Test public void encodeAndDecodeByteArrays() {
+		String fieldName = "field";
+		PacketContext encodingContext = new PacketContext();
+		PacketContext decodingContext = new PacketContext();
+		PacketSpec spec = packet(bytes(fieldName, 1));
+		encodingContext.put(fieldName, new byte[] {42});
+		ByteBuffer buffer = spec.encode(encodingContext);
+		assertArrayEquals(new byte[] {42}, (byte[])encodingContext.get(fieldName));
+		spec.decode(decodingContext, buffer);
+		assertArrayEquals((byte[])decodingContext.get(fieldName), (byte[])encodingContext.get(fieldName));
+	}
+
+	@Test public void encodeAndDecodeInt32s() {
+		String fieldName = "field";
+		PacketContext encodingContext = new PacketContext();
+		PacketContext decodingContext = new PacketContext();
+		PacketSpec spec = packet(int32(fieldName));
+		encodingContext.put(fieldName, 42);
+		ByteBuffer buffer = spec.encode(encodingContext);
+		assertEquals(42, encodingContext.get(fieldName));
+		spec.decode(decodingContext, buffer);
+		assertEquals(decodingContext.get(fieldName), encodingContext.get(fieldName));
+	}
+
+	@Test public void encodeAndDecodeInt8s() {
+		String fieldName = "field";
+		PacketContext encodingContext = new PacketContext();
+		PacketContext decodingContext = new PacketContext();
+		PacketSpec spec = packet(int8(fieldName));
+		encodingContext.put(fieldName, (byte) 42);
+		ByteBuffer buffer = spec.encode(encodingContext);
+		assertTrue(encodingContext.get(fieldName) instanceof Byte);
+		assertEquals((byte)42, encodingContext.get(fieldName));
+		spec.decode(decodingContext, buffer);
+		assertEquals((Byte)decodingContext.get(fieldName), encodingContext.get(fieldName));
+	}
+
+	@Test public void encodeAndDecodeInt64s() {
+		String fieldName = "field";
+		PacketContext encodingContext = new PacketContext();
+		PacketContext decodingContext = new PacketContext();
+		PacketSpec spec = packet(int64(fieldName));
+		encodingContext.put(fieldName, 42L);
+		ByteBuffer buffer = spec.encode(encodingContext);
+		assertTrue(encodingContext.get(fieldName) instanceof Long);
+		assertEquals(42L, encodingContext.get(fieldName));
+		spec.decode(decodingContext, buffer);
+		assertEquals((Long)decodingContext.get(fieldName), encodingContext.get(fieldName));
+	}
+	
+	@Test(expected=UnsupportedOperationException.class)
+	public void encodeUnsupportedTypeDouble() {
+		String fieldName = "field";
+		PacketSpec spec = packet(new FieldSpec(fieldName, Double.class, 8));
+		PacketContext encodingContext = new PacketContext();
+		encodingContext.put(fieldName, 42L);
+		spec.encode(encodingContext);
+	}
+
+	@Test(expected=UnsupportedOperationException.class)
+	public void decodeUnsupportedTypeDouble() {
+		String fieldName = "field";
+		PacketSpec spec = packet(new FieldSpec(fieldName, Double.class, 8));
+		PacketContext decodingContext = new PacketContext();
+		ByteBuffer buffer = ByteBuffer.allocate(8);
+		buffer.putDouble(42).flip();
+		spec.decode(decodingContext, buffer);
+	}
 }
