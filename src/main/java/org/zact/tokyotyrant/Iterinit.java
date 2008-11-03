@@ -2,28 +2,22 @@ package org.zact.tokyotyrant;
 
 import static org.zact.tokyotyrant.PacketSpec.*;
 
-import java.nio.ByteBuffer;
-
-public class Iterinit extends Command {
+public class Iterinit extends CommandSupport {
 	private static final PacketSpec REQUEST = packet(magic());
 	private static final PacketSpec RESPONSE = packet(code(false));
 	             
 	public Iterinit() {
-		super((byte) 0x50);
+		super((byte) 0x50, REQUEST, RESPONSE);
 	}
 	
 	public boolean getReturnValue() {
 		return isSuccess();
 	}
 	
-	public ByteBuffer encode() {
-		return REQUEST.encode(REQUEST.context(magic));
+	protected void pack(PacketContext context) {
 	}
 	
-	public boolean decode(ByteBuffer in) {
-		PacketContext context = RESPONSE.context();
-		if (!RESPONSE.decode(context, in)) return false;
+	protected void unpack(PacketContext context) {
 		code = (Byte)context.get("code");
-		return true;
 	}
 }

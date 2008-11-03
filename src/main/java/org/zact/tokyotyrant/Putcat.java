@@ -2,16 +2,14 @@ package org.zact.tokyotyrant;
 
 import static org.zact.tokyotyrant.PacketSpec.*;
 
-import java.nio.ByteBuffer;
-
-public class Putcat extends Command {
+public class Putcat extends CommandSupport {
 	private static final PacketSpec REQUEST = packet(magic(), int32("ksiz"), int32("vsiz"), bytes("kbuf", "ksiz"), bytes("vbuf", "vsiz"));
 	private static final PacketSpec RESPONSE = packet(code(false));
 	private Object key;
 	private Object value;
 	
 	public Putcat(Object key, Object value) {
-		super((byte) 0x12);
+		super((byte) 0x12, REQUEST, RESPONSE);
 		this.key = key;
 		this.value = value;
 	}
@@ -20,23 +18,16 @@ public class Putcat extends Command {
 		return isSuccess();
 	}
 	
-	public ByteBuffer encode() {
-		PacketContext context = REQUEST.context(magic);
+	protected void pack(PacketContext context) {
 		byte[] kbuf = transcoder.encode(key);
 		byte[] vbuf = transcoder.encode(value);
 		context.put("ksiz", kbuf.length);
 		context.put("vsiz", vbuf.length);
 		context.put("kbuf", kbuf);
 		context.put("vbuf", vbuf);
-		return REQUEST.encode(context);
 	}
 	
-	public boolean decode(ByteBuffer in) {
-		PacketContext context = RESPONSE.context();
-		boolean done = RESPONSE.decode(context, in);
-		if (done) {
-			code = (Byte)context.get("code");
-		}
-		return done;
+	protected void unpack(PacketContext context) {
+		code = (Byte)context.get("code");
 	}
 }

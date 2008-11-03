@@ -1,13 +1,15 @@
 package org.zact.tokyotyrant;
 
-import java.nio.ByteBuffer;
+import static org.zact.tokyotyrant.PacketSpec.*;
 
-public class Vsiz extends Command {
+public class Vsiz extends CommandSupport {
+	private static final PacketSpec REQUEST = packet(magic(), int32("ksiz"), bytes("kbuf", "ksiz"));
+	private static final PacketSpec RESPONSE = packet(code(true), int32("vsiz"));
 	private Object key;
 	private int vsiz;
 
 	public Vsiz(Object key) {
-		super((byte)0x38);
+		super((byte) 0x38, REQUEST, RESPONSE);
 		this.key = key;
 	}
 	
@@ -15,28 +17,16 @@ public class Vsiz extends Command {
 		return isSuccess() ? vsiz : -1;
 	}
 
-	public ByteBuffer encode() {
+	protected void pack(PacketContext context) {
 		byte[] kbuf = transcoder.encode(key);
-		ByteBuffer buffer = ByteBuffer.allocate(magic.length + 4 + kbuf.length);
-		buffer.put(magic);
-		buffer.putInt(kbuf.length);
-		buffer.put(kbuf);
-		buffer.flip();
-		return buffer;
+		context.put("ksiz", kbuf.length);
+		context.put("kbuf", kbuf);
 	}
 
-	public boolean decode(ByteBuffer in) {
-		if (in.remaining() < 1) {
-			return false;
+	protected void unpack(PacketContext context) {
+		code = (Byte)context.get("code");
+		if (code == 0) {
+			vsiz = (Integer)context.get("vsiz");
 		}
-		code = in.get();
-		if (!isSuccess()) {
-			return true;
-		}
-		if (in.remaining() < 4) {
-			return false;
-		}
-		vsiz = in.getInt();
-		return true;
 	}
 }

@@ -2,9 +2,7 @@ package org.zact.tokyotyrant;
 
 import static org.zact.tokyotyrant.PacketSpec.*;
 
-import java.nio.ByteBuffer;
-
-public class Adddouble extends Command {
+public class Adddouble extends CommandSupport {
 	private static final PacketSpec REQUEST = packet(magic(), int32("ksiz"), int64("integ"), int64("fract"), bytes("kbuf", "ksiz"));
 	private static final PacketSpec RESPONSE = packet(code(true), int64("integ"), int64("fract"));
 	private Object key;
@@ -12,7 +10,7 @@ public class Adddouble extends Command {
 	private double sum;
 	
 	public Adddouble(Object key, double num) {
-		super((byte) 0x61);
+		super((byte) 0x61, REQUEST, RESPONSE);
 		this.key = key;
 		this.num = num;
 	}
@@ -23,28 +21,22 @@ public class Adddouble extends Command {
 	
 	private static final long TRILLION = (1000000L * 1000000L);
 	
-	public ByteBuffer encode() {
-		PacketContext context = REQUEST.context(magic);
+	protected void pack(PacketContext context) {
 		byte[] kbuf = transcoder.encode(key);
-		context.put("ksiz", kbuf.length);
-		context.put("kbuf", kbuf);
-		
 		long integ = (long)num;
 		long fract = (long)((num - integ) * TRILLION);
+		context.put("ksiz", kbuf.length);
+		context.put("kbuf", kbuf);
 		context.put("integ", integ);
 		context.put("fract", fract);
-		return REQUEST.encode(context);
 	}
 	
-	public boolean decode(ByteBuffer in) {
-		PacketContext context = RESPONSE.context();
-		if (!RESPONSE.decode(context, in)) return false;
+	protected void unpack(PacketContext context) {
 		code = (Byte)context.get("code");
 		if (code == 0) {
 			long integ = (Long)context.get("integ");
 			long fract = (Long)context.get("fract");
 			sum = integ + (fract / (double)TRILLION);
 		}
-		return true;
 	}
 }

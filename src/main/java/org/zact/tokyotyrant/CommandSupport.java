@@ -14,6 +14,7 @@ public abstract class CommandSupport extends Command {
 
 	public ByteBuffer encode() {
 		PacketContext context = encodingContext();
+		pack(context);
 		return requestPacket.encode(context);
 	}
 	

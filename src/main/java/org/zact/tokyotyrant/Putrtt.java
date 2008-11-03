@@ -2,9 +2,7 @@ package org.zact.tokyotyrant;
 
 import static org.zact.tokyotyrant.PacketSpec.*;
 
-import java.nio.ByteBuffer;
-
-public class Putrtt extends Command {
+public class Putrtt extends CommandSupport {
 	private static final PacketSpec REQUEST = packet(magic(), int32("ksiz"), int32("vsiz"), int32("width"), bytes("kbuf", "ksiz"), bytes("vbuf", "vsiz"));
 	private static final PacketSpec RESPONSE = packet(code(false));
 	private Object key;
@@ -12,7 +10,7 @@ public class Putrtt extends Command {
 	private int width;
 	
 	public Putrtt(Object key, Object value, int width) {
-		super((byte) 0x13);
+		super((byte) 0x13, REQUEST, RESPONSE);
 		this.key = key;
 		this.value = value;
 		this.width = width;
@@ -22,8 +20,7 @@ public class Putrtt extends Command {
 		return isSuccess();
 	}
 	
-	public ByteBuffer encode() {
-		PacketContext context = REQUEST.context(magic);
+	protected void pack(PacketContext context) {
 		byte[] kbuf = transcoder.encode(key);
 		byte[] vbuf = transcoder.encode(value);
 		context.put("ksiz", kbuf.length);
@@ -31,15 +28,9 @@ public class Putrtt extends Command {
 		context.put("width", width);
 		context.put("kbuf", kbuf);
 		context.put("vbuf", vbuf);
-		return REQUEST.encode(context);
 	}
 	
-	public boolean decode(ByteBuffer in) {
-		PacketContext context = RESPONSE.context();
-		boolean done = RESPONSE.decode(context, in);
-		if (done) {
-			code = (Byte)context.get("code");
-		}
-		return done;
+	protected void unpack(PacketContext context) {
+		code = (Byte)context.get("code");
 	}
 }

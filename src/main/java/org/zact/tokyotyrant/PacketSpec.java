@@ -9,15 +9,6 @@ public class PacketSpec {
 		this.fields = fields;
 	}
 
-	/**
-	 * Create new context for encoding.
-	 */
-	public PacketContext context(byte[] magic) {
-		PacketContext context = new PacketContext(fields.length);
-		context.put("magic", magic);
-		return context;
-	}
-	
 	public ByteBuffer encode(PacketContext context) {
 		int capacity = 0;
 		for (FieldSpec each : fields) {
@@ -40,13 +31,6 @@ public class PacketSpec {
 		}
 		out.flip();
 		return out;
-	}
-
-	/**
-	 * Create new context for decoding.
-	 */
-	public PacketContext context() {
-		return new PacketContext(fields.length);
 	}
 
 	public boolean decode(PacketContext context, ByteBuffer in) {

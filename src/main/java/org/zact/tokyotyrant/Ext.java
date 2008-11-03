@@ -2,9 +2,7 @@ package org.zact.tokyotyrant;
 
 import static org.zact.tokyotyrant.PacketSpec.*;
 
-import java.nio.ByteBuffer;
-
-public class Ext extends Command {
+public class Ext extends CommandSupport {
 	private static final PacketSpec REQUEST = packet(magic(), int32("nsiz"), int32("opts"), int32("ksiz"), int32("vsiz"), bytes("nbuf", "nsiz"), bytes("kbuf", "ksiz"), bytes("vbuf", "vsiz"));
 	private static final PacketSpec RESPONSE = packet(code(true), int32("rsiz"), bytes("rbuf", "rsiz"));
 	private String name;
@@ -14,7 +12,7 @@ public class Ext extends Command {
 	private Object result;
 	
 	public Ext(String name, int opts, Object key, Object value) {
-		super((byte) 0x68);
+		super((byte) 0x68, REQUEST, RESPONSE);
 		this.name = name;
 		this.opts = opts;
 		this.key = key;
@@ -25,8 +23,7 @@ public class Ext extends Command {
 		return isSuccess() ? result : null;
 	}
 	
-	public ByteBuffer encode() {
-		PacketContext context = REQUEST.context(magic);
+	protected void pack(PacketContext context) {
 		byte[] nbuf = name.getBytes();
 		byte[] kbuf = transcoder.encode(key);
 		byte[] vbuf = transcoder.encode(value);
@@ -37,17 +34,13 @@ public class Ext extends Command {
 		context.put("nbuf", nbuf);
 		context.put("kbuf", kbuf);
 		context.put("vbuf", vbuf);
-		return REQUEST.encode(context);
 	}
 	
-	public boolean decode(ByteBuffer in) {
-		PacketContext context = RESPONSE.context();
-		if (!RESPONSE.decode(context, in)) return false;
+	protected void unpack(PacketContext context) {
 		code = (Byte)context.get("code");
 		if (code == 0) {
 			byte[] rbuf = (byte[])context.get("rbuf");
 			result = transcoder.decode(rbuf);
 		}
-		return true;
 	}
 }
