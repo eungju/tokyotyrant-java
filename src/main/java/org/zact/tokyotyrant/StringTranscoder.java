@@ -2,13 +2,15 @@ package org.zact.tokyotyrant;
 
 import java.io.UnsupportedEncodingException;
 
+import org.apache.commons.lang.ArrayUtils;
+
 
 public class StringTranscoder implements Transcoder {
 	public Object decode(byte[] encoded) {
 		try {
 			return new String(encoded, "UTF-8");
 		} catch (UnsupportedEncodingException e) {
-			throw new IllegalArgumentException("Unable to decode " + encoded, e);
+			throw new IllegalArgumentException("Unable to decode " + ArrayUtils.toString(encoded), e);
 		}
 	}
 
