@@ -11,7 +11,6 @@ import org.slf4j.LoggerFactory;
 
 public class SynchronousNetworking implements Networking {
 	private final Logger log = LoggerFactory.getLogger(getClass());
-	private NetworkingHelper helper;
 	private SocketAddress serverAddress;
 	private SocketChannel channel;
 
@@ -63,7 +62,7 @@ public class SynchronousNetworking implements Networking {
 			
 			buffer.position(oldPos);
 			buffer.limit(buffer.capacity());
-			buffer = helper.accumulateBuffer(buffer, fragment);
+			buffer = BufferHelper.accumulateBuffer(buffer, fragment);
 			oldPos = buffer.position();
 			buffer.flip();
 		}

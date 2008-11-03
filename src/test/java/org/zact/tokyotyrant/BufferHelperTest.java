@@ -4,22 +4,15 @@ import static org.junit.Assert.*;
 
 import java.nio.ByteBuffer;
 
-import org.junit.Before;
 import org.junit.Test;
 
-public class NetworkingHelperTest {
-	private NetworkingHelper dut;
-
-	@Before public void beforeEach() {
-		dut = new NetworkingHelper();
-	}
-
+public class BufferHelperTest {
 	@Test public void accumulateBuffer() {
 		ByteBuffer buffer = ByteBuffer.allocate(8);
 		buffer.putInt(1);
 		ByteBuffer addition = ByteBuffer.allocate(4);
 		addition.putInt(2).flip();
-		ByteBuffer accumulatedBuffer = dut.accumulateBuffer(buffer, addition);
+		ByteBuffer accumulatedBuffer = BufferHelper.accumulateBuffer(buffer, addition);
 		accumulatedBuffer.flip();
 		assertEquals(1, accumulatedBuffer.getInt());
 		assertEquals(2, accumulatedBuffer.getInt());
@@ -32,7 +25,7 @@ public class NetworkingHelperTest {
 		buffer.putInt(1);
 		ByteBuffer addition = ByteBuffer.allocate(4);
 		addition.putInt(2).flip();
-		ByteBuffer accumulatedBuffer = dut.accumulateBuffer(buffer, addition);
+		ByteBuffer accumulatedBuffer = BufferHelper.accumulateBuffer(buffer, addition);
 		accumulatedBuffer.flip();
 		assertEquals(1, accumulatedBuffer.getInt());
 		assertEquals(2, accumulatedBuffer.getInt());

@@ -16,7 +16,6 @@ import org.slf4j.LoggerFactory;
 
 public class AsynchronousNetworking implements Networking, Runnable {
 	private final Logger log = LoggerFactory.getLogger(getClass());  
-	private NetworkingHelper helper;
 	private SocketAddress serverAddress;
 	private Selector selector;
 	private SocketChannel channel;
@@ -96,7 +95,7 @@ public class AsynchronousNetworking implements Networking, Runnable {
 						fragment.flip();
 						log.debug("Received fragment " + fragment);
 							
-						readBuffer = helper.accumulateBuffer(readBuffer, fragment);
+						readBuffer = BufferHelper.accumulateBuffer(readBuffer, fragment);
 						int pos = readBuffer.position();
 						readBuffer.flip();
 						if (currentCommand.decode(readBuffer)) {

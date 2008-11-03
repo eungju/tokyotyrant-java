@@ -33,7 +33,7 @@ public class Get extends Command {
 		if (!isSuccess()) {
 			return true;
 		}
-		if (!prefixedDataAvailable(in, 4)) {
+		if (!BufferHelper.prefixedDataAvailable(in, 4)) {
 			return false;
 		}
 		int vsiz = in.getInt();
