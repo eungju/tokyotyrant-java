@@ -23,7 +23,7 @@ public class SynchronousNetworking implements Networking {
     	try {
 			channel = SocketChannel.open(serverAddress);
 		} catch (IOException e) {
-			e.printStackTrace();
+			log.error("Cannot open connection to " + serverAddress, e);
 		}
 	}
 
@@ -31,10 +31,9 @@ public class SynchronousNetworking implements Networking {
 		try {
 			channel.close();
 		} catch (IOException e) {
-			e.printStackTrace();
+			log.error("Error while closing connection to " + serverAddress, e);
 		}
 	}
-
 
 	public void execute(Command command) throws IOException {
 		cumulativeWrite(command, channel);
