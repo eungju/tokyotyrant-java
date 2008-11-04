@@ -114,7 +114,7 @@ public class SynchronousNetworking implements Networking {
 		
 		public void write(ByteBuffer buffer) throws IOException {
 			//In blocking-mode, a write operation will return only after writing all of the requested bytes.
-			outputStream.write(buffer.array(), 0, buffer.limit());
+			outputStream.write(buffer.array(), buffer.position(), buffer.limit() - buffer.position());
 			buffer.position(buffer.limit());
 		}
 		
@@ -123,7 +123,7 @@ public class SynchronousNetworking implements Networking {
 			if (n == -1) {
 				return n;
 			}
-			buffer.position(n);
+			buffer.position(buffer.position() + n);
 			return n;
 		}
 	}
