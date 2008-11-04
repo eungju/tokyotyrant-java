@@ -99,6 +99,7 @@ public class SynchronousNetworking implements Networking {
 		}
 		
 		public void close() {
+			if (socket.isClosed()) return;
 			try {
 				socket.close();
 			} catch (IOException e) {
@@ -108,8 +109,8 @@ public class SynchronousNetworking implements Networking {
 		
 		public void reconnect() {
 			logger.info("Reconnecting to " + address);
-			connect();
 			close();
+			connect();
 		}
 		
 		public void write(ByteBuffer buffer) throws IOException {
