@@ -16,7 +16,7 @@ public class TyrantClient {
     
     public TyrantClient(String host, int port) throws IOException {
 		log.info("Initializing...");
-    	networking = new AsynchronousNetworking(new InetSocketAddress(host, port));
+    	networking = new SynchronousNetworking(new InetSocketAddress(host, port));
     	networking.start();
 		log.info("Initialized");
 	}
