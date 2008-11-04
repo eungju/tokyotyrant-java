@@ -19,14 +19,23 @@ public class SynchronousNetworking implements Networking {
 	}
 
 	public void start() {
-    	try {
-			channel = SocketChannel.open(serverAddress);
-		} catch (IOException e) {
-			log.error("Cannot open connection to " + serverAddress, e);
-		}
+    	channel = openConnection(serverAddress);
 	}
 
 	public void stop() {
+		closeConnection(channel);
+	}
+
+	SocketChannel openConnection(SocketAddress address) {
+		try {
+			return SocketChannel.open(address);
+		} catch (IOException e) {
+			log.error("Cannot open connection to {}" + address, e);
+		}
+		return null;
+	}
+
+	void closeConnection(SocketChannel channel) {
 		try {
 			channel.close();
 		} catch (IOException e) {
@@ -42,7 +51,9 @@ public class SynchronousNetworking implements Networking {
 	void sendRequest(Command command, ByteChannel channel) throws IOException {
 		//In blocking-mode, a write operation will return only after writing all of the requested bytes.
 		ByteBuffer buffer = command.encode();
-		channel.write(buffer);
+		if (channel.write(buffer) == -1) {
+			log.info("EOF");
+		}
 		log.debug("Sent message " + buffer);
 	}
 	
@@ -56,7 +67,10 @@ public class SynchronousNetworking implements Networking {
 		while (!command.decode(buffer)) {
 			log.debug("Trying to read fragment");
 			fragment.clear();
-			channel.read(fragment);
+			if (channel.read(fragment) == -1) {
+				log.info("EOF");
+				break;
+			}
 			fragment.flip();
 			log.debug("Received fragment " + fragment);
 			

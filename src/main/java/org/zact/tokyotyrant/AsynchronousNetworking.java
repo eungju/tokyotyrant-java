@@ -16,15 +16,18 @@ import org.slf4j.LoggerFactory;
 
 public class AsynchronousNetworking implements Networking, Runnable {
 	private final Logger log = LoggerFactory.getLogger(getClass());  
-	private SocketAddress serverAddress;
+	private final int fragmentCapacity = 2048;
 	private Selector selector;
-	private SocketChannel channel;
-	
 	private Thread ioThread;
 	private boolean running;
-	
+
+	//to synchronize
 	private CountDownLatch latch;
 	private Command currentCommand;
+
+	//per server
+	private SocketAddress serverAddress;
+	private SocketChannel channel;
 	private ByteBuffer readBuffer;
 	
 	public AsynchronousNetworking(SocketAddress serverAddress) throws IOException {
@@ -66,7 +69,7 @@ public class AsynchronousNetworking implements Networking, Runnable {
 	public void run() {		
 		while (running) {
 			try {
-				log.info("Selecting...");
+				log.debug("Selecting...");
 				selector.select();
 				Set<SelectionKey> selectedKeys = selector.selectedKeys();
 				Iterator<SelectionKey> i = selectedKeys.iterator();
@@ -83,33 +86,14 @@ public class AsynchronousNetworking implements Networking, Runnable {
 					}
 					if (key.isReadable()) {
 						log.debug("Ready to read");
-						
-						final int fragmentCapacity = 2048;
-						if (readBuffer == null) {
-							readBuffer = ByteBuffer.allocate(fragmentCapacity);
-						}
 
-						log.debug("Trying to read fragment");
 						ByteBuffer fragment = ByteBuffer.allocate(fragmentCapacity);
-						channel.read(fragment);
-						fragment.flip();
-						log.debug("Received fragment " + fragment);
-							
-						readBuffer = BufferHelper.accumulateBuffer(readBuffer, fragment);
-						int pos = readBuffer.position();
-						readBuffer.flip();
-						if (currentCommand.decode(readBuffer)) {
-							log.debug("Received message " + readBuffer + ", " + currentCommand.code);
-							latch.countDown();
-							if (readBuffer.hasRemaining()) {
-								ByteBuffer newBuffer = ByteBuffer.allocate(readBuffer.remaining() + fragmentCapacity);
-								newBuffer.put(readBuffer);
-								readBuffer = newBuffer;
-							} else {
-								readBuffer = null;
-							}
+						if (channel.read(fragment) == -1) {
+							log.info("Channel {} closed", channel);
 						} else {
-							readBuffer.position(pos);
+							fragment.flip();
+							log.debug("Received fragment {}", fragment);
+							received(fragment);
 						}
 					}
 					i.remove();
@@ -119,12 +103,36 @@ public class AsynchronousNetworking implements Networking, Runnable {
 			}
 		}
 	}
+
+	void received(ByteBuffer fragment) throws IOException {
+		if (readBuffer == null) {
+			readBuffer = ByteBuffer.allocate(fragmentCapacity);
+		}
+		
+		readBuffer = BufferHelper.accumulateBuffer(readBuffer, fragment);
+		int pos = readBuffer.position();
+		readBuffer.flip();
+		if (currentCommand.decode(readBuffer)) {
+			log.debug("Received message " + readBuffer + ", " + currentCommand.code);
+			latch.countDown();
+			
+			if (readBuffer.hasRemaining()) {
+				ByteBuffer newBuffer = ByteBuffer.allocate(readBuffer.remaining() + fragmentCapacity);
+				newBuffer.put(readBuffer);
+				readBuffer = newBuffer;
+			} else {
+				readBuffer = null;
+			}
+		} else {
+			readBuffer.position(pos);
+		}
+	}
 	
 	public void execute(Command command) throws IOException {
 		currentCommand = command;
 		latch = new CountDownLatch(1);
-		channel.register(selector, SelectionKey.OP_WRITE);
-		channel.register(selector, SelectionKey.OP_READ);
+		//channel.register(selector, SelectionKey.OP_WRITE);
+		//channel.register(selector, SelectionKey.OP_READ);
 		sendRequest(command, channel);
 		try {
 			latch.await();
