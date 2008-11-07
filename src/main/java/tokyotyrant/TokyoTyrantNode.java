@@ -3,7 +3,9 @@ package tokyotyrant;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 
-public interface ServerNode {
+public interface TokyoTyrantNode {
+	boolean isActive();
+	
 	void connect();
 	
 	void disconnect();

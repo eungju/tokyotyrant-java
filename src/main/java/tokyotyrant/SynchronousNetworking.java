@@ -19,19 +19,19 @@ public class SynchronousNetworking implements Networking {
 	private final Logger logger = LoggerFactory.getLogger(getClass());
 	/** In millisecond */
 	private int timeout = 1000;
-	private ServerNode serverNode;
+	private TokyoTyrantNode node;
 	private Lock lock = new ReentrantLock();
 
 	public SynchronousNetworking(SocketAddress serverAddress) {
-		serverNode = new SynchronousServerNode(serverAddress, timeout);
+		node = new SynchronousServerNode(serverAddress, timeout);
 	}
 
 	public void start() {
-		serverNode.connect();
+		node.connect();
 	}
 
 	public void stop() {
-		serverNode.disconnect();
+		node.disconnect();
 	}
 
 	public void execute(Command command) throws IOException {
@@ -45,24 +45,24 @@ public class SynchronousNetworking implements Networking {
 		}
 		
 		try {
-			sendRequest(command, serverNode);
-			receiveResponse(command, serverNode);
+			sendRequest(command, node);
+			receiveResponse(command, node);
 		} catch (IOException e) {
-			logger.error("Failed to communicate with " + serverNode, e);
-			serverNode.reconnect();
+			logger.error("Failed to communicate with " + node, e);
+			node.reconnect();
 			throw e;
 		} finally {
 			lock.unlock();
 		}
 	}
 	
-	void sendRequest(Command command, ServerNode node) throws IOException {
+	void sendRequest(Command command, TokyoTyrantNode node) throws IOException {
 		ByteBuffer buffer = command.encode();
 		node.write(buffer);
 		logger.debug("Sent message " + buffer);
 	}
 	
-	void receiveResponse(Command command, ServerNode node) throws IOException {
+	void receiveResponse(Command command, TokyoTyrantNode node) throws IOException {
 		final int fragmentCapacity = 2048;
 		ByteBuffer buffer = ByteBuffer.allocate(fragmentCapacity);
 		ByteBuffer fragment = ByteBuffer.allocate(fragmentCapacity);
@@ -88,10 +88,12 @@ public class SynchronousNetworking implements Networking {
 		logger.debug("Received message " + buffer);
 	}
 	
-	public static class SynchronousServerNode implements ServerNode {
+	public static class SynchronousServerNode implements TokyoTyrantNode {
 		private final Logger logger = LoggerFactory.getLogger(getClass());
 		private SocketAddress address;
 		private int timeout;
+		private volatile int reconnectAttempt = 1;
+		
 		private Socket socket;
 		private InputStream inputStream;
 		private OutputStream outputStream;
@@ -100,7 +102,11 @@ public class SynchronousNetworking implements Networking {
 			this.address = address;
 			this.timeout = timeout;
 		}
-		
+
+		public final boolean isActive() {
+			return reconnectAttempt == 0 && socket != null && socket.isConnected();
+		}
+
 		public void connect() {
 			try {
 				socket = new Socket();
@@ -108,6 +114,7 @@ public class SynchronousNetworking implements Networking {
 				socket.connect(address, timeout);
 				inputStream = socket.getInputStream();
 				outputStream = socket.getOutputStream();
+				reconnectAttempt = 0;
 			} catch (IOException e) {
 				logger.error("Cannot open connection to " + address, e);
 			}
@@ -124,6 +131,7 @@ public class SynchronousNetworking implements Networking {
 		
 		public void reconnect() {
 			logger.info("Reconnecting to " + address);
+			reconnectAttempt++;
 			disconnect();
 			connect();
 		}
