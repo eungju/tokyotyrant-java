@@ -6,6 +6,9 @@ import java.io.OutputStream;
 import java.net.Socket;
 import java.net.SocketAddress;
 import java.nio.ByteBuffer;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -17,6 +20,7 @@ public class SynchronousNetworking implements Networking {
 	/** In millisecond */
 	private int timeout = 1000;
 	private ServerNode serverNode;
+	private Lock lock = new ReentrantLock();
 
 	public SynchronousNetworking(SocketAddress serverAddress) {
 		serverNode = new SynchronousServerNode(serverAddress, timeout);
@@ -27,19 +31,28 @@ public class SynchronousNetworking implements Networking {
 	}
 
 	public void stop() {
-		serverNode.close();
+		serverNode.disconnect();
 	}
 
 	public void execute(Command command) throws IOException {
-		while (true) {
-			try {
-				sendRequest(command, serverNode);
-				receiveResponse(command, serverNode);
-				break;
-			} catch (Exception e) {
-				logger.error("Failed to communicate with " + serverNode, e);
-				serverNode.reconnect();
+		try {
+			if (!lock.tryLock(timeout, TimeUnit.MILLISECONDS)) {
+				throw new IOException("Unable to aquire access to the node");
 			}
+		} catch (InterruptedException e) {
+			logger.error("Lock acquisition is interrupted", e);
+			return;
+		}
+		
+		try {
+			sendRequest(command, serverNode);
+			receiveResponse(command, serverNode);
+		} catch (IOException e) {
+			logger.error("Failed to communicate with " + serverNode, e);
+			serverNode.reconnect();
+			throw e;
+		} finally {
+			lock.unlock();
 		}
 	}
 	
@@ -100,7 +113,7 @@ public class SynchronousNetworking implements Networking {
 			}
 		}
 		
-		public void close() {
+		public void disconnect() {
 			if (socket.isClosed()) return;
 			try {
 				socket.close();
@@ -111,7 +124,7 @@ public class SynchronousNetworking implements Networking {
 		
 		public void reconnect() {
 			logger.info("Reconnecting to " + address);
-			close();
+			disconnect();
 			connect();
 		}
 		

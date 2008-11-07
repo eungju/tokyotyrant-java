@@ -6,7 +6,7 @@ import java.nio.ByteBuffer;
 public interface ServerNode {
 	void connect();
 	
-	void close();
+	void disconnect();
 	
 	void reconnect();
 	
