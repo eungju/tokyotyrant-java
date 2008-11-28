@@ -2,7 +2,7 @@ package tokyotyrant.command;
 
 import static tokyotyrant.command.PacketSpec.*;
 
-public class Copy extends CommandSupport {
+public class Copy extends CommandSupport<Boolean> {
 	private static final PacketSpec REQUEST = packet(magic(), int32("psiz"), bytes("path", "psiz"));
 	private static final PacketSpec RESPONSE = packet(code(false));
 	private String path;
@@ -12,7 +12,7 @@ public class Copy extends CommandSupport {
 		this.path = path;
 	}
 
-	public boolean getReturnValue() {
+	public Boolean getReturnValue() {
 		return isSuccess();
 	}
 	

@@ -2,7 +2,7 @@ package tokyotyrant.command;
 
 import static tokyotyrant.command.PacketSpec.*;
 
-public class Vanish extends CommandSupport {
+public class Vanish extends CommandSupport<Boolean> {
 	private static final PacketSpec REQUEST = packet(magic());
 	private static final PacketSpec RESPONSE = packet(code(true));
 	             
@@ -10,7 +10,7 @@ public class Vanish extends CommandSupport {
 		super((byte) 0x71, REQUEST, RESPONSE);
 	}
 	
-	public boolean getReturnValue() {
+	public Boolean getReturnValue() {
 		return isSuccess();
 	}
 	

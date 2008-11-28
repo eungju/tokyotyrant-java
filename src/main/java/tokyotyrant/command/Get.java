@@ -5,7 +5,7 @@ import java.nio.ByteBuffer;
 import tokyotyrant.Command;
 import tokyotyrant.helper.BufferHelper;
 
-public class Get extends Command {
+public class Get extends Command<Object> {
 	private Object key;
 	private Object value;
 

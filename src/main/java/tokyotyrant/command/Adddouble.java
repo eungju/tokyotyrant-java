@@ -2,7 +2,7 @@ package tokyotyrant.command;
 
 import static tokyotyrant.command.PacketSpec.*;
 
-public class Adddouble extends CommandSupport {
+public class Adddouble extends CommandSupport<Double> {
 	private static final PacketSpec REQUEST = packet(magic(), int32("ksiz"), int64("integ"), int64("fract"), bytes("kbuf", "ksiz"));
 	private static final PacketSpec RESPONSE = packet(code(true), int64("integ"), int64("fract"));
 	private Object key;
@@ -15,7 +15,7 @@ public class Adddouble extends CommandSupport {
 		this.num = num;
 	}
 	
-	public double getReturnValue() {
+	public Double getReturnValue() {
 		return isSuccess() ? sum : Double.NaN;
 	}
 	

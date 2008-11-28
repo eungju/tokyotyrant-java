@@ -2,7 +2,7 @@ package tokyotyrant.command;
 
 import static tokyotyrant.command.PacketSpec.*;
 
-public class Iternext extends CommandSupport {
+public class Iternext extends CommandSupport<Object> {
 	private static final PacketSpec REQUEST = packet(magic());
 	private static final PacketSpec RESPONSE = packet(code(true), int32("ksiz"), bytes("kbuf", "ksiz"));
 	private Object key;

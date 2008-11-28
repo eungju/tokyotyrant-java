@@ -4,7 +4,7 @@ import java.nio.ByteBuffer;
 
 import tokyotyrant.Command;
 
-public abstract class CommandSupport extends Command {
+public abstract class CommandSupport<T> extends Command<T> {
 	private final PacketSpec requestPacket;
 	private final PacketSpec responsePacket;
 	

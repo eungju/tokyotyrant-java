@@ -2,7 +2,7 @@ package tokyotyrant.command;
 
 import static tokyotyrant.command.PacketSpec.*;
 
-public class Restore extends CommandSupport {
+public class Restore extends CommandSupport<Boolean> {
 	private static final PacketSpec REQUEST = packet(magic(), int32("psiz"), int64("ts"), bytes("path", "psiz"));
 	private static final PacketSpec RESPONSE = packet(code(false));
 	private String path;
@@ -14,7 +14,7 @@ public class Restore extends CommandSupport {
 		this.ts = ts;
 	}
 
-	public boolean getReturnValue() {
+	public Boolean getReturnValue() {
 		return isSuccess();
 	}
 	

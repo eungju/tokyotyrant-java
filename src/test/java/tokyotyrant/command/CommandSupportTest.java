@@ -18,6 +18,10 @@ public class CommandSupportTest {
 			this.ping = ping;
 		}
 		
+		public Boolean getReturnValue() {
+			return true;
+		}
+		
 		protected void pack(PacketContext context) {
 			context.put("ping", ping);
 		}

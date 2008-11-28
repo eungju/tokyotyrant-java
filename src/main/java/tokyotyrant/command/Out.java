@@ -4,7 +4,7 @@ import java.nio.ByteBuffer;
 
 import tokyotyrant.Command;
 
-public class Out extends Command {
+public class Out extends Command<Boolean> {
 	private Object key;
 
 	public Out(Object key) {
@@ -12,7 +12,7 @@ public class Out extends Command {
 		this.key = key;
 	}
 	
-	public boolean getReturnValue() {
+	public Boolean getReturnValue() {
 		return isSuccess();
 	}
 	

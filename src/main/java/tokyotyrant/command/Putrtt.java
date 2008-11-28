@@ -2,7 +2,7 @@ package tokyotyrant.command;
 
 import static tokyotyrant.command.PacketSpec.*;
 
-public class Putrtt extends CommandSupport {
+public class Putrtt extends CommandSupport<Boolean> {
 	private static final PacketSpec REQUEST = packet(magic(), int32("ksiz"), int32("vsiz"), int32("width"), bytes("kbuf", "ksiz"), bytes("vbuf", "vsiz"));
 	private static final PacketSpec RESPONSE = packet(code(false));
 	private Object key;
@@ -16,7 +16,7 @@ public class Putrtt extends CommandSupport {
 		this.width = width;
 	}
 
-	public boolean getReturnValue() {
+	public Boolean getReturnValue() {
 		return isSuccess();
 	}
 	

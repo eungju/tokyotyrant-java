@@ -2,7 +2,7 @@ package tokyotyrant.command;
 
 import static tokyotyrant.command.PacketSpec.*;
 
-public class Ext extends CommandSupport {
+public class Ext extends CommandSupport<Object> {
 	private static final PacketSpec REQUEST = packet(magic(), int32("nsiz"), int32("opts"), int32("ksiz"), int32("vsiz"), bytes("nbuf", "nsiz"), bytes("kbuf", "ksiz"), bytes("vbuf", "vsiz"));
 	private static final PacketSpec RESPONSE = packet(code(true), int32("rsiz"), bytes("rbuf", "rsiz"));
 	private String name;

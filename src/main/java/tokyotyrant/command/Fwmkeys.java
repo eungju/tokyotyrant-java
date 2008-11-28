@@ -6,7 +6,7 @@ import java.util.List;
 
 import tokyotyrant.Command;
 
-public class Fwmkeys extends Command {
+public class Fwmkeys extends Command<List<Object>> {
 	private Object prefix;
 	private int max;
 	private List<Object> keys;

@@ -55,7 +55,7 @@ public class TokyoTyrantClient {
 		return defaultTranscoder;
 	}
 
-	void execute(Command command) throws IOException {
+	void execute(Command<?> command) throws IOException {
 		command.setTranscoder(getTranscoder());
 		networking.execute(command);
 	}

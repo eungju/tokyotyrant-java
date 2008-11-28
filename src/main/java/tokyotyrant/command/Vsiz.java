@@ -2,7 +2,7 @@ package tokyotyrant.command;
 
 import static tokyotyrant.command.PacketSpec.*;
 
-public class Vsiz extends CommandSupport {
+public class Vsiz extends CommandSupport<Integer> {
 	private static final PacketSpec REQUEST = packet(magic(), int32("ksiz"), bytes("kbuf", "ksiz"));
 	private static final PacketSpec RESPONSE = packet(code(true), int32("vsiz"));
 	private Object key;
@@ -13,7 +13,7 @@ public class Vsiz extends CommandSupport {
 		this.key = key;
 	}
 	
-	public int getReturnValue() {
+	public Integer getReturnValue() {
 		return isSuccess() ? vsiz : -1;
 	}
 

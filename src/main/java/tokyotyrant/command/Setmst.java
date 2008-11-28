@@ -2,7 +2,7 @@ package tokyotyrant.command;
 
 import static tokyotyrant.command.PacketSpec.*;
 
-public class Setmst extends CommandSupport {
+public class Setmst extends CommandSupport<Boolean> {
 	private static final PacketSpec REQUEST = packet(magic(), int32("hsiz"), int32("port"), bytes("host", "hsiz"));
 	private static final PacketSpec RESPONSE = packet(code(false));
 	private String host;
@@ -14,7 +14,7 @@ public class Setmst extends CommandSupport {
 		this.port = port;
 	}
 
-	public boolean getReturnValue() {
+	public Boolean getReturnValue() {
 		return isSuccess();
 	}
 	

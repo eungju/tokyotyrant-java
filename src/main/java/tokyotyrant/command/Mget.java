@@ -6,7 +6,7 @@ import java.util.Map;
 
 import tokyotyrant.Command;
 
-public class Mget extends Command {
+public class Mget extends Command<Map<Object, Object>> {
 	private Object[] keys;
 	private Map<Object, Object> values;
 

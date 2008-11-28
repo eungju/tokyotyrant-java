@@ -2,7 +2,7 @@ package tokyotyrant.command;
 
 import static tokyotyrant.command.PacketSpec.*;
 
-public class Addint extends CommandSupport {
+public class Addint extends CommandSupport<Integer> {
 	private static final PacketSpec REQUEST = packet(magic(), int32("ksiz"), int32("num"), bytes("kbuf", "ksiz"));
 	private static final PacketSpec RESPONSE = packet(code(true), int32("sum"));
 	private Object key;
@@ -15,7 +15,7 @@ public class Addint extends CommandSupport {
 		this.num = num;
 	}
 	
-	public int getReturnValue() {
+	public Integer getReturnValue() {
 		return isSuccess() ? sum : Integer.MIN_VALUE;
 	}
 	

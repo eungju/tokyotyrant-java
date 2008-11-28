@@ -5,7 +5,7 @@ import static tokyotyrant.command.PacketSpec.*;
 import java.util.HashMap;
 import java.util.Map;
 
-public class Stat extends CommandSupport {
+public class Stat extends CommandSupport<Map<String, String>> {
 	private static final PacketSpec REQUEST = packet(magic());
 	private static final PacketSpec RESPONSE = packet(code(false), int32("ssiz"), bytes("sbuf", "ssiz"));
 	private Map<String, String> stat;

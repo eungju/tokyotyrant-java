@@ -25,7 +25,7 @@ public class AsynchronousNetworking implements Networking, Runnable {
 
 	//to synchronize
 	private CountDownLatch latch;
-	private Command currentCommand;
+	private Command<?> currentCommand;
 
 	//per server
 	private SocketAddress serverAddress;
@@ -130,7 +130,7 @@ public class AsynchronousNetworking implements Networking, Runnable {
 		}
 	}
 	
-	public void execute(Command command) throws IOException {
+	public void execute(Command<?> command) throws IOException {
 		currentCommand = command;
 		latch = new CountDownLatch(1);
 		//channel.register(selector, SelectionKey.OP_WRITE);
@@ -143,7 +143,7 @@ public class AsynchronousNetworking implements Networking, Runnable {
 		}
 	}
 
-	void sendRequest(Command command, ByteChannel channel) throws IOException {
+	void sendRequest(Command<?> command, ByteChannel channel) throws IOException {
 		ByteBuffer buffer = command.encode();
 		int written = 0;
 		do {

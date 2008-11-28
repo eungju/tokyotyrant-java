@@ -34,7 +34,7 @@ public class SynchronousNetworking implements Networking {
 		node.disconnect();
 	}
 
-	public void execute(Command command) throws IOException {
+	public void execute(Command<?> command) throws IOException {
 		try {
 			if (!lock.tryLock(timeout, TimeUnit.MILLISECONDS)) {
 				throw new IOException("Unable to aquire access to the node");
@@ -56,13 +56,13 @@ public class SynchronousNetworking implements Networking {
 		}
 	}
 	
-	void sendRequest(Command command, TokyoTyrantNode node) throws IOException {
+	void sendRequest(Command<?> command, TokyoTyrantNode node) throws IOException {
 		ByteBuffer buffer = command.encode();
 		node.write(buffer);
 		logger.debug("Sent message " + buffer);
 	}
 	
-	void receiveResponse(Command command, TokyoTyrantNode node) throws IOException {
+	void receiveResponse(Command<?> command, TokyoTyrantNode node) throws IOException {
 		final int fragmentCapacity = 2048;
 		ByteBuffer buffer = ByteBuffer.allocate(fragmentCapacity);
 		ByteBuffer fragment = ByteBuffer.allocate(fragmentCapacity);
