@@ -50,8 +50,8 @@ public class RDB {
 	private Transcoder transcoder = new StringTranscoder();
 	private int timeout = 1000;
 	private Socket socket;
-	private InputStream inputStream;
-	private OutputStream outputStream;
+	InputStream inputStream;
+	OutputStream outputStream;
 
 	public void open(SocketAddress address) throws IOException {
 		socket = new Socket();
