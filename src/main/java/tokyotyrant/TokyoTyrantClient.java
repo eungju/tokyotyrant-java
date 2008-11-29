@@ -70,58 +70,47 @@ public class TokyoTyrantClient {
 	}
 
 	public Future<Boolean> put(Object key, Object value) throws IOException {
-		Put command = new Put(key, value);
-		return execute(command);
+		return execute(new Put(key, value));
 	}
 
 	public Future<Boolean> putkeep(Object key, Object value) throws IOException {
-		Putkeep command = new Putkeep(key, value);
-		return execute(command);
+		return execute(new Putkeep(key, value));
 	}
 
 	public Future<Boolean> putcat(Object key, Object value) throws IOException {
-		Putcat command = new Putcat(key, value);
-		return execute(command);
+		return execute(new Putcat(key, value));
 	}
 
 	public Future<Boolean> putrtt(Object key, Object value, int width) throws IOException {
-		Putrtt command = new Putrtt(key, value, width);
-		return execute(command);
+		return execute(new Putrtt(key, value, width));
 	}
 
 	public void putnr(Object key, Object value) throws IOException {
-		Putnr command = new Putnr(key, value);
-		execute(command);
+		execute(new Putnr(key, value));
 	}
 
 	public Future<Boolean> out(Object key) throws IOException {
-		Out command = new Out(key);
-		return execute(command);
+		return execute(new Out(key));
 	}
 	
 	public Future<Object> get(Object key) throws IOException {
-		Get command = new Get(key);
-		return execute(command);
+		return execute(new Get(key));
 	}
 	
-	public Future<Map<Object, Object>> mget(Object[] keys) throws IOException {
-		Mget command = new Mget(keys);
-		return execute(command);
+	public Future<Map<Object, Object>> mget(Object... keys) throws IOException {
+		return execute(new Mget(keys));
 	}
 
 	public Future<Integer> vsiz(Object key) throws IOException {
-		Vsiz command = new Vsiz(key);
-		return execute(command);
+		return execute(new Vsiz(key));
 	}
 
 	public Future<Boolean> iterinit() throws IOException {
-		Iterinit command = new Iterinit();
-		return execute(command);
+		return execute(new Iterinit());
 	}
 	
 	public Future<Object> iternext() throws IOException {
-		Iternext command = new Iternext();
-		return execute(command);
+		return execute(new Iternext());
 	}
 
 	public List<Object> list() throws IOException, InterruptedException, ExecutionException {
@@ -141,62 +130,50 @@ public class TokyoTyrantClient {
 	}
 
 	public Future<List<Object>> fwmkeys(Object prefix, int max) throws IOException {
-		Fwmkeys command = new Fwmkeys(prefix, max);
-		return execute(command);
+		return execute(new Fwmkeys(prefix, max));
 	}
 
 	public Future<Integer> addint(Object key, int num) throws IOException {
-		Addint command = new Addint(key, num);
-		return execute(command);
+		return execute(new Addint(key, num));
 	}
 
 	public Future<Double> adddouble(Object key, double num) throws IOException {
-		Adddouble command = new Adddouble(key, num);
-		return execute(command);
+		return execute(new Adddouble(key, num));
 	}
 
 	public Future<Object> ext(String name, int opts, Object key, Object value) throws IOException {
-		Ext command = new Ext(name, opts, key, value);
-		return execute(command);
+		return execute(new Ext(name, opts, key, value));
 	}
 
 	public Future<Boolean> sync() throws IOException {
-		Sync command = new Sync();
-		return execute(command);
+		return execute(new Sync());
 	}
 
 	public Future<Boolean> vanish() throws IOException {
-		Vanish command = new Vanish();
-		return execute(command);
+		return execute(new Vanish());
 	}
 
 	public Future<Boolean> copy(String path) throws IOException {
-		Copy command = new Copy(path);
-		return execute(command);
+		return execute(new Copy(path));
 	}
 
 	public Future<Boolean> restore(String path, long ts) throws IOException {
-		Restore command = new Restore(path, ts);
-		return execute(command);
+		return execute(new Restore(path, ts));
 	}
 	
 	public Future<Boolean> setmst(String host, int port) throws IOException {
-		Setmst command = new Setmst(host, port);
-		return execute(command);
+		return execute(new Setmst(host, port));
 	}
 
 	public Future<Long> rnum() throws IOException {
-		Rnum command = new Rnum();
-		return execute(command);
+		return execute(new Rnum());
 	}
 
 	public Future<Map<String, String>> stat() throws IOException {
-		Stat command = new Stat();
-		return execute(command);
+		return execute(new Stat());
 	}
 
 	public Future<Long> size() throws IOException {
-		Size command = new Size();
-		return execute(command);
+		return execute(new Size());
 	}
 }
