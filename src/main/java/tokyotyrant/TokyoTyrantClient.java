@@ -5,6 +5,8 @@ import java.net.InetSocketAddress;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -37,10 +39,11 @@ public class TokyoTyrantClient {
 	private final Logger log = LoggerFactory.getLogger(getClass());  
     private Transcoder defaultTranscoder = new StringTranscoder();
 	private Networking networking;
+	private long globalTimeout = 1000L;
     
     public TokyoTyrantClient(String host, int port) throws IOException {
 		log.info("Initializing...");
-    	networking = new SynchronousNetworking(new InetSocketAddress(host, port));
+    	networking = new AsynchronousNetworking(new InetSocketAddress(host, port));
     	networking.start();
 		log.info("Initialized");
 	}
@@ -51,37 +54,39 @@ public class TokyoTyrantClient {
 		log.info("Disposed");
 	}
 	
+	public void setGlobalTimeout(long timeout) {
+		this.globalTimeout = timeout;
+	}
+	
 	Transcoder getTranscoder() {
 		return defaultTranscoder;
 	}
 
-	void execute(Command<?> command) throws IOException {
+	<T> Future<T> execute(Command<T> command) throws IOException {
 		command.setTranscoder(getTranscoder());
-		networking.execute(command);
+		CommandFuture<T> future = new CommandFuture<T>(command, globalTimeout);
+		networking.send(command);
+		return future;
 	}
 
-	public boolean put(Object key, Object value) throws IOException {
+	public Future<Boolean> put(Object key, Object value) throws IOException {
 		Put command = new Put(key, value);
-		execute(command);
-		return command.getReturnValue();
+		return execute(command);
 	}
 
-	public boolean putkeep(Object key, Object value) throws IOException {
+	public Future<Boolean> putkeep(Object key, Object value) throws IOException {
 		Putkeep command = new Putkeep(key, value);
-		execute(command);
-		return command.getReturnValue();
+		return execute(command);
 	}
 
-	public boolean putcat(Object key, Object value) throws IOException {
+	public Future<Boolean> putcat(Object key, Object value) throws IOException {
 		Putcat command = new Putcat(key, value);
-		execute(command);
-		return command.getReturnValue();
+		return execute(command);
 	}
 
-	public boolean putrtt(Object key, Object value, int width) throws IOException {
+	public Future<Boolean> putrtt(Object key, Object value, int width) throws IOException {
 		Putrtt command = new Putrtt(key, value, width);
-		execute(command);
-		return command.getReturnValue();
+		return execute(command);
 	}
 
 	public void putnr(Object key, Object value) throws IOException {
@@ -89,126 +94,109 @@ public class TokyoTyrantClient {
 		execute(command);
 	}
 
-	public boolean out(Object key) throws IOException {
+	public Future<Boolean> out(Object key) throws IOException {
 		Out command = new Out(key);
-		execute(command);
-		return command.getReturnValue();
+		return execute(command);
 	}
 	
-	public Object get(Object key) throws IOException {
+	public Future<Object> get(Object key) throws IOException {
 		Get command = new Get(key);
-		execute(command);
-		return command.getReturnValue();
+		return execute(command);
 	}
 	
-	public Map<Object, Object> mget(Object[] keys) throws IOException {
+	public Future<Map<Object, Object>> mget(Object[] keys) throws IOException {
 		Mget command = new Mget(keys);
-		execute(command);
-		return command.getReturnValue();
+		return execute(command);
 	}
 
-	public int vsiz(Object key) throws IOException {
+	public Future<Integer> vsiz(Object key) throws IOException {
 		Vsiz command = new Vsiz(key);
-		execute(command);
-		return command.getReturnValue();
+		return execute(command);
 	}
 
-	public boolean iterinit() throws IOException {
+	public Future<Boolean> iterinit() throws IOException {
 		Iterinit command = new Iterinit();
-		execute(command);
-		return command.getReturnValue();
+		return execute(command);
 	}
 	
-	public Object iternext() throws IOException {
+	public Future<Object> iternext() throws IOException {
 		Iternext command = new Iternext();
-		execute(command);
-		return command.getReturnValue();
+		return execute(command);
 	}
 
-	public List<Object> list() throws IOException {
-		List<Object> result = null;
-		if (iterinit()) {
-			result = new ArrayList<Object>();
-			while (true) {
-				Object key = iternext();
-				if (key == null) {
-					break;
-				}
-				result.add(key);
+	public List<Object> list() throws IOException, InterruptedException, ExecutionException {
+		if (!iterinit().get()) {
+			return null;
+		}
+
+		List<Object> result = new ArrayList<Object>();
+		while (true) {
+			Object key = iternext().get();
+			if (key == null) {
+				break;
 			}
+			result.add(key);
 		}
 		return result;
 	}
 
-	public List<Object> fwmkeys(Object prefix, int max) throws IOException {
+	public Future<List<Object>> fwmkeys(Object prefix, int max) throws IOException {
 		Fwmkeys command = new Fwmkeys(prefix, max);
-		execute(command);
-		return command.getReturnValue();
+		return execute(command);
 	}
 
-	public int addint(Object key, int num) throws IOException {
+	public Future<Integer> addint(Object key, int num) throws IOException {
 		Addint command = new Addint(key, num);
-		execute(command);
-		return command.getReturnValue();
+		return execute(command);
 	}
 
-	public double adddouble(Object key, double num) throws IOException {
+	public Future<Double> adddouble(Object key, double num) throws IOException {
 		Adddouble command = new Adddouble(key, num);
-		execute(command);
-		return command.getReturnValue();
+		return execute(command);
 	}
 
-	public Object ext(String name, int opts, Object key, Object value) throws IOException {
+	public Future<Object> ext(String name, int opts, Object key, Object value) throws IOException {
 		Ext command = new Ext(name, opts, key, value);
-		execute(command);
-		return command.getReturnValue();
+		return execute(command);
 	}
 
-	public boolean sync() throws IOException {
+	public Future<Boolean> sync() throws IOException {
 		Sync command = new Sync();
-		execute(command);
-		return command.getReturnValue();
+		return execute(command);
 	}
 
-	public boolean vanish() throws IOException {
+	public Future<Boolean> vanish() throws IOException {
 		Vanish command = new Vanish();
-		execute(command);
-		return command.getReturnValue();
+		return execute(command);
 	}
 
-	public boolean copy(String path) throws IOException {
+	public Future<Boolean> copy(String path) throws IOException {
 		Copy command = new Copy(path);
-		execute(command);
-		return command.getReturnValue();
+		return execute(command);
 	}
 
-	public boolean restore(String path, long ts) throws IOException {
+	public Future<Boolean> restore(String path, long ts) throws IOException {
 		Restore command = new Restore(path, ts);
-		execute(command);
-		return command.getReturnValue();
+		return execute(command);
 	}
 	
-	public boolean setmst(String host, int port) throws IOException {
+	public Future<Boolean> setmst(String host, int port) throws IOException {
 		Setmst command = new Setmst(host, port);
-		execute(command);
-		return command.getReturnValue();
+		return execute(command);
 	}
 
-	public long rnum() throws IOException {
+	public Future<Long> rnum() throws IOException {
 		Rnum command = new Rnum();
-		execute(command);
-		return command.getReturnValue();
+		return execute(command);
 	}
 
-	public Map<String, String> stat() throws IOException {
+	public Future<Map<String, String>> stat() throws IOException {
 		Stat command = new Stat();
-		execute(command);
-		return command.getReturnValue();
+		return execute(command);
 	}
 
-	public long size() throws IOException {
+	public Future<Long> size() throws IOException {
 		Size command = new Size();
-		execute(command);
-		return command.getReturnValue();
+		return execute(command);
 	}
 }

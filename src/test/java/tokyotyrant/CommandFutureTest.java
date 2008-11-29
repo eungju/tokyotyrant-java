@@ -5,6 +5,8 @@ import static org.junit.Assert.*;
 import java.nio.ByteBuffer;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 import org.junit.Test;
 
@@ -47,11 +49,20 @@ public class CommandFutureTest {
 		future.get();
 	}
 	
-	@Test public void whenCancel() {
+	@Test(expected=ExecutionException.class)
+	public void whenCancel() throws InterruptedException, ExecutionException {
 		DummyCommand command = new DummyCommand();
 		Future<Object> future = new CommandFuture<Object>(command);
 		future.cancel(true);
 		assertTrue(command.isCancelled());
 		assertTrue(future.isDone());
+		future.get();
+	}
+	
+	@Test(expected=TimeoutException.class)
+	public void getThrowsTimeoutExceptionWhenTimeoutExpired() throws InterruptedException, ExecutionException, TimeoutException {
+		DummyCommand command = new DummyCommand();
+		Future<Object> future = new CommandFuture<Object>(command);
+		future.get(10, TimeUnit.MILLISECONDS);
 	}
 }

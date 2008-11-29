@@ -9,16 +9,21 @@ import java.util.concurrent.TimeoutException;
 public class CommandFuture<T> implements Future<T> {
 	private final Command<T> command;
 	private final CountDownLatch latch;
-	private long globalOperationTimeout = Long.MAX_VALUE;
+	private long globalTimeout;
 
 	public CommandFuture(Command<T> command) {
+		this(command, Long.MAX_VALUE);
+	}
+
+	public CommandFuture(Command<T> command, long globalTimeout) {
 		this.command = command;
 		this.latch = command.getLatch();
+		this.globalTimeout = globalTimeout;
 	}
 
 	public T get() throws InterruptedException, ExecutionException {
 		try {
-			return get(globalOperationTimeout , TimeUnit.MILLISECONDS);
+			return get(globalTimeout , TimeUnit.MILLISECONDS);
 		} catch (TimeoutException e) {
 			throw new RuntimeException("Timed out waiting for operation", e);
 		}
@@ -28,7 +33,7 @@ public class CommandFuture<T> implements Future<T> {
 		if (!latch.await(timeout, unit)) {
 			throw new TimeoutException("Timed out waiting for operation");
 		}
-		if (command != null && command.hasError()) {
+		if (command.hasError()) {
 			throw new ExecutionException(command.getErrorException());
 		}
 		if (isCancelled()) {

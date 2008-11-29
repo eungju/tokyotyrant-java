@@ -2,8 +2,6 @@ package tokyotyrant.command;
 
 import java.nio.ByteBuffer;
 
-import tokyotyrant.helper.ObjectSupport;
-
 public class PacketSpec {
 	private FieldSpec[] fields;
 	
@@ -95,7 +93,7 @@ public class PacketSpec {
 		return new FieldSpec(name, byte[].class, sizeVariable);
 	}
 	
-	static class FieldSpec extends ObjectSupport {
+	static class FieldSpec {
 		public String name;
 		public Class<?> type;
 		public int size;

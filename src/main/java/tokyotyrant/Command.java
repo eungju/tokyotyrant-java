@@ -32,11 +32,16 @@ public abstract class Command<T> {
 	public CountDownLatch getLatch() {
 		return latch;
 	}
-	
+
+	public void reading() {
+		state = CommandState.READING;
+	}
+
 	/**
 	 * Should be invoked when the command is cancelled.
 	 */
 	public void cancel() {
+		latch.countDown();
 		cancelled = true;
 	}
 	

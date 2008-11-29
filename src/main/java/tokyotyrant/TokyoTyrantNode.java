@@ -1,9 +1,13 @@
 package tokyotyrant;
 
-import java.io.IOException;
-import java.nio.ByteBuffer;
 
 public interface TokyoTyrantNode {
+	void start();
+	
+	void stop();
+
+	void send(Command<?> command);
+	
 	boolean isActive();
 	
 	void connect();
@@ -11,8 +15,4 @@ public interface TokyoTyrantNode {
 	void disconnect();
 	
 	void reconnect();
-	
-	void write(ByteBuffer buffer) throws IOException;
-	
-	int read(ByteBuffer buffer) throws IOException;
 }
