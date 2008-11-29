@@ -6,7 +6,7 @@ import java.util.concurrent.CountDownLatch;
 public abstract class Command<T> {
 	protected Transcoder transcoder;
 	protected byte[] magic;
-	protected byte code;
+	protected byte code = (byte) 0xff;
 	
 	private CommandState state = CommandState.WRITING;
 	private CountDownLatch latch = new CountDownLatch(1);
