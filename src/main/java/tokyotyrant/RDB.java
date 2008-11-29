@@ -12,8 +12,6 @@ import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
 
 import org.apache.commons.lang.ArrayUtils;
 import org.slf4j.Logger;
@@ -223,23 +221,15 @@ public class RDB {
 	}
 	
 	public static class Synchronized extends RDB {
-		private Lock lock = new ReentrantLock();
-
 		protected <T> T execute(Command<T> command) throws IOException {
-			lock.lock();
-			try {
+			synchronized (this) {
 				return super.execute(command);
-			} finally {
-				lock.unlock();
 			}
 		}
 		
 		public List<Object> list() throws IOException {
-			lock.lock();
-			try {
-				return list();
-			} finally {
-				lock.unlock();
+			synchronized (this) {
+				return super.list();
 			}
 		}
 	}
