@@ -54,7 +54,6 @@ public class RDB {
 	private Socket socket;
 	private InputStream inputStream;
 	private OutputStream outputStream;
-	private Lock lock = new ReentrantLock();
 
 	public void open(SocketAddress address) throws IOException {
 		socket = new Socket();
@@ -74,16 +73,11 @@ public class RDB {
 		}
 	}
 	
-	<T> T execute(Command<T> command) throws IOException {
+	protected <T> T execute(Command<T> command) throws IOException {
 		command.setTranscoder(transcoder);
-		lock.lock();
-		try {
-			sendRequest(command);
-			receiveResponse(command);
-			return command.getReturnValue();
-		} finally {
-			lock.unlock();
-		}
+		sendRequest(command);
+		receiveResponse(command);
+		return command.getReturnValue();
 	}
 
 	void sendRequest(Command<?> command) throws IOException {
@@ -165,24 +159,19 @@ public class RDB {
 	}
 
 	public List<Object> list() throws IOException {
-		lock.lock();
-		try {
-			if (!iterinit()) {
-				return null;
-			}
-	
-			List<Object> result = new ArrayList<Object>();
-			while (true) {
-				Object key = iternext();
-				if (key == null) {
-					break;
-				}
-				result.add(key);
-			}
-			return result;
-		} finally {
-			lock.unlock();
+		if (!iterinit()) {
+			return null;
 		}
+
+		List<Object> result = new ArrayList<Object>();
+		while (true) {
+			Object key = iternext();
+			if (key == null) {
+				break;
+			}
+			result.add(key);
+		}
+		return result;
 	}
 
 	public List<Object> fwmkeys(Object prefix, int max) throws IOException {
@@ -231,6 +220,28 @@ public class RDB {
 
 	public long size() throws IOException {
 		return execute(new Size());
+	}
+	
+	public static class Synchronized extends RDB {
+		private Lock lock = new ReentrantLock();
+
+		protected <T> T execute(Command<T> command) throws IOException {
+			lock.lock();
+			try {
+				return super.execute(command);
+			} finally {
+				lock.unlock();
+			}
+		}
+		
+		public List<Object> list() throws IOException {
+			lock.lock();
+			try {
+				return list();
+			} finally {
+				lock.unlock();
+			}
+		}
 	}
 
 	public static void main(String[] args) throws IOException {
