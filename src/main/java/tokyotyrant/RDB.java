@@ -156,22 +156,6 @@ public class RDB {
 		return execute(new Iternext());
 	}
 
-	public List<Object> list() throws IOException {
-		if (!iterinit()) {
-			return null;
-		}
-
-		List<Object> result = new ArrayList<Object>();
-		while (true) {
-			Object key = iternext();
-			if (key == null) {
-				break;
-			}
-			result.add(key);
-		}
-		return result;
-	}
-
 	public List<Object> fwmkeys(Object prefix, int max) throws IOException {
 		return execute(new Fwmkeys(prefix, max));
 	}
@@ -226,12 +210,6 @@ public class RDB {
 				return super.execute(command);
 			}
 		}
-		
-		public List<Object> list() throws IOException {
-			synchronized (this) {
-				return super.list();
-			}
-		}
 	}
 
 	public static void main(String[] args) throws IOException {
@@ -265,8 +243,23 @@ public class RDB {
 				}
 			} else if ("vsiz".equals(command)) {
 				System.out.println(db.vsiz(tokens[1]));
+			} else if ("iterinit".equals(command)) {
+				System.out.println(db.iterinit());
+			} else if ("iternext".equals(command)) {
+				System.out.println(db.iternext());
 			} else if ("list".equals(command)) {
-				System.out.println(db.list());
+				List<Object> keys = null;
+				if (db.iterinit()) {
+					keys = new ArrayList<Object>();
+					while (true) {
+						Object key = db.iternext();
+						if (key == null) {
+							break;
+						}
+						keys.add(key);
+					}
+				}
+				System.out.println(keys);
 			} else if ("fwmkeys".equals(command)) {
 				System.out.println(db.fwmkeys(tokens[1], Integer.parseInt(tokens[2])));
 			} else if ("addint".equals(command)) {

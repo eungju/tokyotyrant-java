@@ -2,10 +2,8 @@ package tokyotyrant;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 
 import org.slf4j.Logger;
@@ -111,22 +109,6 @@ public class TokyoTyrantClient {
 	
 	public Future<Object> iternext() throws IOException {
 		return execute(new Iternext());
-	}
-
-	public List<Object> list() throws IOException, InterruptedException, ExecutionException {
-		if (!iterinit().get()) {
-			return null;
-		}
-
-		List<Object> result = new ArrayList<Object>();
-		while (true) {
-			Object key = iternext().get();
-			if (key == null) {
-				break;
-			}
-			result.add(key);
-		}
-		return result;
 	}
 
 	public Future<List<Object>> fwmkeys(Object prefix, int max) throws IOException {

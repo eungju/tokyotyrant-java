@@ -3,6 +3,8 @@ package tokyotyrant;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
 
@@ -39,8 +41,23 @@ public class Shell {
 				}
 			} else if ("vsiz".equals(command)) {
 				System.out.println(client.vsiz(tokens[1]).get());
+			} else if ("iterinit".equals(command)) {
+				System.out.println(client.iterinit().get());
+			} else if ("iternext".equals(command)) {
+				System.out.println(client.iternext().get());
 			} else if ("list".equals(command)) {
-				System.out.println(client.list());
+				List<Object> keys = null;
+				if (client.iterinit().get()) {
+					keys = new ArrayList<Object>();
+					while (true) {
+						Object key = client.iternext().get();
+						if (key == null) {
+							break;
+						}
+						keys.add(key);
+					}
+				}
+				System.out.println(keys);
 			} else if ("fwmkeys".equals(command)) {
 				System.out.println(client.fwmkeys(tokens[1], Integer.parseInt(tokens[2])).get());
 			} else if ("addint".equals(command)) {
