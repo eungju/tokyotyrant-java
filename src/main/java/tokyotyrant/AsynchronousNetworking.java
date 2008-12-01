@@ -38,7 +38,7 @@ public class AsynchronousNetworking implements Networking, Runnable {
 		node.stop();
 
 		try {
-			selector.close();
+			selector.wakeup().close();
 		} catch (IOException e) {
 			log.error("Error while closing selector", e);
 		}
@@ -48,24 +48,27 @@ public class AsynchronousNetworking implements Networking, Runnable {
 		while (running) {
 			try {
 				log.debug("Selecting...");
-				selector.select();
+				int n = selector.select();
+				if (n == 0 || !selector.isOpen()) {
+					continue;
+				}
 				Set<SelectionKey> selectedKeys = selector.selectedKeys();
 				Iterator<SelectionKey> i = selectedKeys.iterator();
 				while (i.hasNext()) {
 					SelectionKey key = i.next();
-					if (key.isConnectable()) {
+					SocketChannel channel = (SocketChannel)key.channel();
+					AsynchronousNode node = (AsynchronousNode)key.attachment();
+					
+					if (!key.isValid() || !channel.isOpen()) {
+						continue;
+					} else if (key.isConnectable()) {
 						log.debug("Ready to connect");
-						((SocketChannel)key.channel()).finishConnect();
-						key.channel().register(selector, SelectionKey.OP_WRITE);
-						key.channel().register(selector, SelectionKey.OP_READ);
-						node.connected();
-					}
-					if (key.isWritable()) {
-						log.debug("Ready to write");
-					}
-					if (key.isReadable()) {
+						
+						doConnect(channel, node);
+					} else if (key.isReadable()) {
 						log.debug("Ready to read");
-						node.read();
+						
+						doRead(channel, node);
 					}
 					i.remove();
 				}
@@ -74,8 +77,31 @@ public class AsynchronousNetworking implements Networking, Runnable {
 			}
 		}
 	}
+
+	void doConnect(SocketChannel channel, AsynchronousNode node) {
+		try {
+			node.doConnect();
+		} catch (IOException e) {
+			log.error("Error while connecting to " + node, e);
+			node.reconnect();
+		}
+	}
+	
+	void doRead(SocketChannel channel, AsynchronousNode node) {
+		try {
+			node.doRead();
+		} catch (IOException e) {
+			log.error("Error while reading from " + node, e);
+			node.reconnect();
+		}
+	}
 	
 	public void send(Command<?> command) {
-		node.send(command);
+		try {
+			node.send(command);
+		} catch (IOException e) {
+			log.error("Error while sending command " + command + " to " + node, e);
+			node.reconnect();
+		}
 	}
 }

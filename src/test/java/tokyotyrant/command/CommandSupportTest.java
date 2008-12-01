@@ -9,7 +9,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 public class CommandSupportTest {
-	private static class TestCommand extends CommandSupport {
+	private static class TestCommand extends CommandSupport<Boolean> {
 		private int ping;
 		private int pong;
 		

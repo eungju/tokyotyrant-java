@@ -38,13 +38,14 @@ public class AsynchronousNode implements TokyoTyrantNode {
 		disconnect();
 	}
 
-	public void send(Command<?> command) {
+	public void send(Command<?> command) throws IOException {
 		try {
 			sendRequest(command);
 			command.reading();
 			readingQueue.add(command);
 		} catch (IOException exception) {
 			command.error(exception);
+			throw exception;
 		}
 	}
 
@@ -67,13 +68,15 @@ public class AsynchronousNode implements TokyoTyrantNode {
 			channel = SocketChannel.open();
 			channel.configureBlocking(false);
 			channel.connect(address);
-			channel.register(selector, SelectionKey.OP_CONNECT);
+			channel.register(selector, SelectionKey.OP_CONNECT, this);
 		} catch (IOException e) {
 			logger.error("Cannot open connection to " + address, e);
 		}
 	}
 
-	public void connected() {
+	public void doConnect() throws IOException {
+		channel.finishConnect();
+		channel.register(selector, SelectionKey.OP_READ, this);
 		reconnectAttempt = 0;
 	}
 
@@ -94,7 +97,7 @@ public class AsynchronousNode implements TokyoTyrantNode {
 
 	private static final int FRAGMENT_CAPACITY = 2 * 1024;
 	
-	void read() {
+	public void doRead() throws IOException {
 		Command<?> command = readingQueue.peek();
 		try {
 			ByteBuffer fragment = ByteBuffer.allocate(FRAGMENT_CAPACITY);
@@ -108,6 +111,7 @@ public class AsynchronousNode implements TokyoTyrantNode {
 			received(fragment, command);
 		} catch (IOException exception) {
 			command.error(exception);
+			throw exception;
 		}
 	}
 	
@@ -134,5 +138,9 @@ public class AsynchronousNode implements TokyoTyrantNode {
 		} else {
 			readBuffer.position(pos);
 		}
+	}
+	
+	public String toString() {
+		return "AsynchronousNode[" + address.toString() + "]";
 	}
 }

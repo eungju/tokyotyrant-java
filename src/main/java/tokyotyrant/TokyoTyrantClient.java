@@ -6,9 +6,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Future;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import tokyotyrant.command.Adddouble;
 import tokyotyrant.command.Addint;
 import tokyotyrant.command.Copy;
@@ -34,23 +31,18 @@ import tokyotyrant.command.Vanish;
 import tokyotyrant.command.Vsiz;
 
 public class TokyoTyrantClient {
-	private final Logger log = LoggerFactory.getLogger(getClass());
 	private Transcoder keyTranscoder = new StringTranscoder();
     private Transcoder valueTranscoder = new StringTranscoder();
 	private Networking networking;
 	private long globalTimeout = 1000L;
     
     public TokyoTyrantClient(String host, int port) throws IOException {
-		log.info("Initializing...");
     	networking = new AsynchronousNetworking(new InetSocketAddress(host, port));
     	networking.start();
-		log.info("Initialized");
 	}
 	
 	public void dispose() {
-		log.info("Disposing...");
 		networking.stop();
-		log.info("Disposed");
 	}
 	
 	public void setGlobalTimeout(long timeout) {
