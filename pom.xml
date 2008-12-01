@@ -1,13 +1,38 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
   xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
   <modelVersion>4.0.0</modelVersion>
-  <groupId>org.zact.tokyotyrant</groupId>
+  <groupId>tokyotyrant</groupId>
   <artifactId>tokyotyrant</artifactId>
   <packaging>jar</packaging>
   <version>0.1-SNAPSHOT</version>
   <name>tokyotyrant</name>
-  <url>http://maven.apache.org</url>
+  <description>This module implements the pure Java client which connects to the server of Tokyo Tyrant and speaks its original binary protocol.</description>
+  <url>http://code.google.com/p/tokyotyrant-java</url>
 
+	<scm>
+		<connection>scm:hg:http://colus.cafe24.com/hgwebdir.cgi/tokyotyrant-java/</connection>
+		<developerConnection>scm:hg:http://colus.cafe24.com/hgwebdir.cgi/tokyotyrant-java/</developerConnection>
+		<url>http://colus.cafe24.com/hgwebdir.cgi/tokyotyrant-java/</url>
+	</scm>
+	
+	<issueManagement>
+		<url>http://code.google.com/p/tokyotyrant-java/issues/</url>
+	</issueManagement>
+	
+	<developers>
+		<developer>
+			<id>eungju</id>
+			<name>Eung-ju PARK</name>
+		</developer>
+	</developers>
+	
+	<licenses>
+		<license>
+			<name>Apache License 2.0</name>
+			<url>http://www.apache.org/licenses/LICENSE-2.0</url>
+		</license>
+	</licenses>
+	
   <dependencies>
     <dependency>
       <groupId>org.slf4j</groupId>

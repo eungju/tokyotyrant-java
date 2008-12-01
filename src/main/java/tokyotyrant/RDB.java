@@ -90,6 +90,13 @@ public class RDB {
 		}
 	}
 	
+	/**
+	 * Execute the command.
+	 * 
+	 * @param <T> the type of the return value of the command.
+	 * @param command the command to execute.
+	 * @return the return value of the command.
+	 */
 	protected <T> T execute(Command<T> command) throws IOException {
 		command.setKeyTranscoder(keyTranscoder);
 		command.setValueTranscoder(valueTranscoder);
@@ -98,6 +105,11 @@ public class RDB {
 		return command.getReturnValue();
 	}
 
+	/**
+	 * Send request.
+	 * 
+	 * @param command the command to send request.
+	 */
 	void sendRequest(Command<?> command) throws IOException {
 		ByteBuffer buffer = command.encode();
 		//In blocking-mode, a write operation will return only after writing all of the requested bytes.
@@ -105,6 +117,11 @@ public class RDB {
 		logger.debug("Sent request " + buffer);
 	}
 	
+	/**
+	 * Receive response.
+	 * 
+	 * @param command the command to receive response.
+	 */
 	void receiveResponse(Command<?> command) throws IOException {
 		final int fragmentCapacity = 2048;
 		ByteBuffer buffer = ByteBuffer.allocate(fragmentCapacity);
