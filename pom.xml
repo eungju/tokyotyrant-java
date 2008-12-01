@@ -10,9 +10,9 @@
   <url>http://code.google.com/p/tokyotyrant-java</url>
 
 	<scm>
-		<connection>scm:hg:http://colus.cafe24.com/hgwebdir.cgi/tokyotyrant-java/</connection>
-		<developerConnection>scm:hg:http://colus.cafe24.com/hgwebdir.cgi/tokyotyrant-java/</developerConnection>
-		<url>http://colus.cafe24.com/hgwebdir.cgi/tokyotyrant-java/</url>
+		<connection>scm:hg:http://bitbucket.org/EP/tokyotyrant-java/</connection>
+		<developerConnection>scm:hg:https://bitbucket.org/EP/tokyotyrant-java/</developerConnection>
+		<url>http://www.bitbucket.org/EP/tokyotyrant-java/</url>
 	</scm>
 	
 	<issueManagement>
