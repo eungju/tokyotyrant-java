@@ -4,11 +4,23 @@ import java.io.UnsupportedEncodingException;
 
 import org.apache.commons.lang.ArrayUtils;
 
-
+/**
+ * Always treat values as character string.
+ */
 public class StringTranscoder implements Transcoder {
+	private final String characterEncoding;
+	
+	public StringTranscoder() {
+		this("UTF-8");
+	}
+	
+	public StringTranscoder(String characterEncoding) {
+		this.characterEncoding = characterEncoding;
+	}
+	
 	public Object decode(byte[] encoded) {
 		try {
-			return new String(encoded, "UTF-8");
+			return new String(encoded, characterEncoding);
 		} catch (UnsupportedEncodingException e) {
 			throw new IllegalArgumentException("Unable to decode " + ArrayUtils.toString(encoded), e);
 		}
@@ -16,7 +28,7 @@ public class StringTranscoder implements Transcoder {
 
 	public byte[] encode(Object decoded) {
 		try {
-			return decoded.toString().getBytes("UTF-8");
+			return decoded.toString().getBytes(characterEncoding);
 		} catch (UnsupportedEncodingException e) {
 			throw new IllegalArgumentException("Unable to encode " + decoded, e);
 		}

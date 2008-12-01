@@ -15,10 +15,12 @@ public class ByteArrayTranscoderTest {
 	@Test public void encode() {
 		byte[] value = new byte[] {42};
 		assertArrayEquals(value, dut.encode(value));
+		assertNotSame(value, dut.encode(value));
 	}
 
 	@Test public void decode() {
 		byte[] value = new byte[] {42};
 		assertArrayEquals(value, (byte[])dut.decode(value));
+		assertNotSame(value, dut.decode(value));
 	}
 }

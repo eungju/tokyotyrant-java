@@ -2,25 +2,28 @@ package tokyotyrant;
 
 import static org.junit.Assert.*;
 
+import java.io.UnsupportedEncodingException;
+
 import org.junit.Before;
 import org.junit.Test;
 
 public class StringTranscoderTest {
 	private StringTranscoder dut;
-
+	private String characterEncoding = "ISO-8859-1";
+	
 	@Before public void beforeEach() {
-		dut = new StringTranscoder();
+		dut = new StringTranscoder(characterEncoding);
 	}
 	
-	@Test public void encodeString() {
-		assertArrayEquals("value".getBytes(), dut.encode("value"));
+	@Test public void encodeString() throws UnsupportedEncodingException {
+		assertArrayEquals("value".getBytes(characterEncoding), dut.encode("value"));
 	}
 
-	@Test public void encodeInt() {
-		assertArrayEquals("42".getBytes(), dut.encode(42));
+	@Test public void encodeInteger() throws UnsupportedEncodingException {
+		assertArrayEquals("42".getBytes(characterEncoding), dut.encode(42));
 	}
 
-	@Test public void decode() {
-		assertEquals("value", (String)dut.decode("value".getBytes()));
+	@Test public void decode() throws UnsupportedEncodingException {
+		assertEquals("value", (String)dut.decode("value".getBytes(characterEncoding)));
 	}
 }
