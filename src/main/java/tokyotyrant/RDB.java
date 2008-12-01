@@ -168,10 +168,6 @@ public class RDB {
 	 * @param key specifies the key.
 	 * @param value specifies the value.
 	 * @return If successful, the return value is true, else, it is false.
-	 * @param key
-	 * @param value
-	 * @return
-	 * @throws IOException
 	 */
 	public boolean putkeep(Object key, Object value) throws IOException {
 		return execute(new Putkeep(key, value));
@@ -209,9 +205,6 @@ public class RDB {
 	 * @param key specifies the key.
 	 * @param value specifies the value.
 	 * @return If successful, the return value is true, else, it is false.
-	 * @param key
-	 * @param value
-	 * @throws IOException
 	 */
 	public void putnr(Object key, Object value) throws IOException {
 		execute(new Putnr(key, value));
@@ -389,7 +382,6 @@ public class RDB {
 
 	/**
 	 * Get the status string of the database server.
-	 *  The message format is TSV. The first field of each line means the parameter name and the second field means the value.
 	 *  
 	 * @return The return value is the status items of the database.
 	 */
