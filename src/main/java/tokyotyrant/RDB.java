@@ -46,6 +46,15 @@ import tokyotyrant.helper.BufferHelper;
  * Tokyo Tyrant C/Perl/Ruby API like interface.
  */
 public class RDB {
+	/**
+	 * scripting extension option: record locking
+	 */
+	public static final int XOLCKREC = 1 << 0;
+	/**
+	 * scripting extension option: global locking 
+	 */
+	public static final int XOLCKGLB = 1 << 1;
+	
 	private final Logger logger = LoggerFactory.getLogger(getClass());
 	private Transcoder keyTranscoder = new StringTranscoder();
 	private Transcoder valueTranscoder = new StringTranscoder();
@@ -54,6 +63,11 @@ public class RDB {
 	InputStream inputStream;
 	OutputStream outputStream;
 
+	/**
+	 * Open a remote database connection.
+	 * 
+	 * @param address specifies the address of the server.
+	 */
 	public void open(SocketAddress address) throws IOException {
 		socket = new Socket();
 		socket.setSoTimeout(timeout);
@@ -62,13 +76,17 @@ public class RDB {
 		outputStream = socket.getOutputStream();
 	}
 	
+	/**
+	 * Close the database connection.
+	 */
 	public void close() {
 		if (socket == null) {
 			return;
 		}
 		try {
 			socket.close();
-		} catch (IOException ignore) {
+		} catch (IOException e) {
+			logger.error("Error while closing connection " + socket, e);
 		}
 	}
 	
@@ -114,94 +132,259 @@ public class RDB {
 		logger.debug("Received response " + buffer);
 	}
 
+	/**
+	 * Store a record.
+	 * If a record with the same key exists in the database, it is overwritten.
+	 *  
+	 * @param key specifies the key.
+	 * @param value specifies the value.
+	 * @return If successful, the return value is true, else, it is false.
+	 */
 	public boolean put(Object key, Object value) throws IOException {
 		return execute(new Put(key, value));
 	}
 
+	/**
+	 * Store a new record.
+	 * If a record with the same key exists in the database, this method has no effect.
+	 * 
+	 * @param key specifies the key.
+	 * @param value specifies the value.
+	 * @return If successful, the return value is true, else, it is false.
+	 * @param key
+	 * @param value
+	 * @return
+	 * @throws IOException
+	 */
 	public boolean putkeep(Object key, Object value) throws IOException {
 		return execute(new Putkeep(key, value));
 	}
 
+	/**
+	 * Concatenate a value at the end of the existing record.
+	 * If there is no corresponding record, a new record is created.
+	 * 
+	 * @param key specifies the key.
+	 * @param value specifies the value.
+	 * @return If successful, the return value is true, else, it is false.
+	 */
 	public boolean putcat(Object key, Object value) throws IOException {
 		return execute(new Putcat(key, value));
 	}
 
+	/**
+	 * Concatenate a value at the end of the existing record and rotate it to the left.
+	 * If there is no corresponding record, a new record is created.
+	 *  
+	 * @param key specifies the key.
+	 * @param value specifies the value.
+	 * @param width specifies the width of the record.
+	 * @return If successful, the return value is true, else, it is false.
+	 */
 	public boolean putrtt(Object key, Object value, int width) throws IOException {
 		return execute(new Putrtt(key, value, width));
 	}
 
+	/**
+	 * Store a record without response from the server
+	 * If a record with the same key exists in the database, it is overwritten.
+	 * 
+	 * @param key specifies the key.
+	 * @param value specifies the value.
+	 * @return If successful, the return value is true, else, it is false.
+	 * @param key
+	 * @param value
+	 * @throws IOException
+	 */
 	public void putnr(Object key, Object value) throws IOException {
 		execute(new Putnr(key, value));
 	}
 
+	/**
+	 * Remove a record.
+	 * 
+	 * @param key specifies the key.
+	 * @return If successful, the return value is true, else, it is false.
+	 */
 	public boolean out(Object key) throws IOException {
 		return execute(new Out(key));
 	}
 	
+	/**
+	 * Retrieve a record.
+	 * 
+	 * @param key specifies the key.
+	 * @return If successful, the return value is the value of the corresponding record. {@code null} is returned if no record corresponds.
+	 */
 	public Object get(Object key) throws IOException {
 		return execute(new Get(key));
 	}
 	
+	/**
+	 * Retrieve records.
+	 * 
+	 * @param keys specifies an array containing the retrieval keys.
+	 * @return If successful, the return value is the map contains corresponding values, else, it is {@code null}. As a result of this method, keys existing in the database have the corresponding values and keys not existing in the database are removed.
+	 */
 	public Map<Object, Object> mget(Object... keys) throws IOException {
 		return execute(new Mget(keys));
 	}
 
+	/**
+	 * Get the size of the value of a record.
+	 * 
+	 * @param key specifies the key.
+	 * @return If successful, the return value is the size of the value of the corresponding record, else, it is -1.
+	 */
 	public int vsiz(Object key) throws IOException {
 		return execute(new Vsiz(key));
 	}
 
+	/**
+	 * Initialize the iterator.
+	 * The iterator is used in order to access the key of every record stored in a database.
+	 *  
+	 * @return If successful, the return value is true, else, it is false.
+	 */
 	public boolean iterinit() throws IOException {
 		return execute(new Iterinit());
 	}
 	
+	/**
+	 * Get the next key of the iterator.
+	 * It is possible to access every record by iteration of calling this method. It is allowed to update or remove records whose keys are fetched while the iteration. However, it is not assured if updating the database is occurred while the iteration. Besides, the order of this traversal access method is arbitrary, so it is not assured that the order of storing matches the one of the traversal access.
+	 * 
+	 * @return If successful, the return value is the next key, else, it is {@code null}. {@code null} is returned when no record is to be get out of the iterator.
+	 */
 	public Object iternext() throws IOException {
 		return execute(new Iternext());
 	}
 
+	/**
+	 * Get forward matching keys.
+	 * Note that this method may be very slow because every key in the database is scanned.
+	 * 
+	 * @param prefix specifies the prefix of the corresponding keys.
+	 * @param max specifies the maximum number of keys to be fetched. If it is not defined or negative, no limit is specified.
+	 * @return The return value is an array of the keys of the corresponding records. This method does never fail and return an empty list even if no record corresponds.
+	 */
 	public List<Object> fwmkeys(Object prefix, int max) throws IOException {
 		return execute(new Fwmkeys(prefix, max));
 	}
 
+	/**
+	 * Add an integer to a record.
+	 * If the corresponding record exists, the value is treated as an integer and is added to. If no record corresponds, a new record of the additional value is stored.
+	 * 
+	 * @param key specifies the key.
+	 * @param num specifies the additional value. If it is not defined, 0 is specified.
+	 * @return If successful, the return value is the summation value, else, it is {@link Integer#MIN_VALUE}.
+	 */
 	public int addint(Object key, int num) throws IOException {
 		return execute(new Addint(key, num));
 	}
 
+	/**
+	 * Add a real number to a record.
+	 * If the corresponding record exists, the value is treated as a real number and is added to. If no record corresponds, a new record of the additional value is stored.
+	 * 
+	 * @param key specifies the key.
+	 * @param num specifies the additional value. If it is not defined, 0 is specified.
+	 * @return If successful, the return value is the summation value, else, it is {@link Double#NaN}.
+	 */
 	public double adddouble(Object key, double num) throws IOException {
 		return execute(new Adddouble(key, num));
 	}
 
+	/**
+	 * Call a function of the script language extension.
+	 * 
+	 * @param name specifies the function name.
+	 * @param key specifies the key. If it is not defined, an empty string is specified.
+	 * @param value specifies the value. If it is not defined, an empty string is specified.
+	 * @param opts specifies options by bitwise or: {@link RDB#XOLCKREC} for record locking, {@link RDB#XOLCKGLB} for global locking. If it is not defined, no option is specified.
+	 * @return If successful, the return value is the value of the response or {@code null} on failure.
+	 */
 	public Object ext(String name, int opts, Object key, Object value) throws IOException {
 		return execute(new Ext(name, opts, key, value));
 	}
 
+	/**
+	 * Synchronize updated contents with the file and the device.
+	 * This method is useful when another process connects the same database file.
+	 * 
+	 * @return If successful, the return value is true, else, it is false.
+	 */
 	public boolean sync() throws IOException {
 		return execute(new Sync());
 	}
 
+	/**
+	 * Remove all records.
+	 * 
+	 * @return If successful, the return value is true, else, it is false.
+	 */
 	public boolean vanish() throws IOException {
 		return execute(new Vanish());
 	}
 
+	/**
+	 * Copy the database file.
+	 * The database file is assured to be kept synchronized and not modified while the copying or executing operation is in progress. So, this method is useful to create a backup file of the database file.
+	 * 
+	 * @param path specifies the path of the destination file. If it begins with {@code @}, the trailing substring is executed as a command line.
+	 * @return If successful, the return value is true, else, it is false. False is returned if the executed command returns non-zero code.
+	 */
 	public boolean copy(String path) throws IOException {
 		return execute(new Copy(path));
 	}
 
+	/**
+	 * Restore the database file from the update log.
+	 * 
+	 * @param path specifies the path of the update log directory. If it begins with `+', the trailing substring is treated as the path and consistency checking is omitted.
+	 * @param ts specifies the beginning time stamp in microseconds.
+	 * @return If successful, the return value is true, else, it is false.
+	 */
 	public boolean restore(String path, long ts) throws IOException {
 		return execute(new Restore(path, ts));
 	}
 	
+	/**
+	 * Set the replication master. 
+	 * 
+	 * @param host specifies the name or the address of the server. If it is {@code null}, replication of the database is disabled.
+	 * @param port specifies the port number.
+	 * @return If successful, the return value is true, else, it is false.
+	 */
 	public boolean setmst(String host, int port) throws IOException {
 		return execute(new Setmst(host, port));
 	}
 
+	/**
+	 * Get the number of records.
+	 * 
+	 * @return The return value is the number of records or 0 if the object does not connect to any database server.
+	 */
 	public long rnum() throws IOException {
 		return execute(new Rnum());
 	}
 
+	/**
+	 * Get the status string of the database server.
+	 *  The message format is TSV. The first field of each line means the parameter name and the second field means the value.
+	 *  
+	 * @return The return value is the status items of the database.
+	 */
 	public Map<String, String> stat() throws IOException {
 		return execute(new Stat());
 	}
 
+	/**
+	 * Get the size of the database.
+	 *
+	 * @return The return value is the size of the database or 0 if the object does not connect to any database server.
+	 */
 	public long size() throws IOException {
 		return execute(new Size());
 	}
