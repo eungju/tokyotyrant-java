@@ -18,7 +18,7 @@ public class Vsiz extends CommandSupport<Integer> {
 	}
 
 	protected void pack(PacketContext context) {
-		byte[] kbuf = transcoder.encode(key);
+		byte[] kbuf = keyTranscoder.encode(key);
 		context.put("ksiz", kbuf.length);
 		context.put("kbuf", kbuf);
 	}

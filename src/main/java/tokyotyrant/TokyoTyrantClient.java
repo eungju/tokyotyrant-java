@@ -34,8 +34,9 @@ import tokyotyrant.command.Vanish;
 import tokyotyrant.command.Vsiz;
 
 public class TokyoTyrantClient {
-	private final Logger log = LoggerFactory.getLogger(getClass());  
-    private Transcoder defaultTranscoder = new StringTranscoder();
+	private final Logger log = LoggerFactory.getLogger(getClass());
+	private Transcoder keyTranscoder = new StringTranscoder();
+    private Transcoder valueTranscoder = new StringTranscoder();
 	private Networking networking;
 	private long globalTimeout = 1000L;
     
@@ -55,13 +56,10 @@ public class TokyoTyrantClient {
 	public void setGlobalTimeout(long timeout) {
 		this.globalTimeout = timeout;
 	}
-	
-	Transcoder getTranscoder() {
-		return defaultTranscoder;
-	}
 
 	<T> Future<T> execute(Command<T> command) throws IOException {
-		command.setTranscoder(getTranscoder());
+		command.setKeyTranscoder(keyTranscoder);
+		command.setValueTranscoder(valueTranscoder);
 		CommandFuture<T> future = new CommandFuture<T>(command, globalTimeout);
 		networking.send(command);
 		return future;

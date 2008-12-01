@@ -21,8 +21,8 @@ public class Putrtt extends CommandSupport<Boolean> {
 	}
 	
 	protected void pack(PacketContext context) {
-		byte[] kbuf = transcoder.encode(key);
-		byte[] vbuf = transcoder.encode(value);
+		byte[] kbuf = keyTranscoder.encode(key);
+		byte[] vbuf = valueTranscoder.encode(value);
 		context.put("ksiz", kbuf.length);
 		context.put("vsiz", vbuf.length);
 		context.put("width", width);

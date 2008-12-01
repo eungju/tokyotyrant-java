@@ -22,7 +22,7 @@ public class Fwmkeys extends Command<List<Object>> {
 	}
 
 	public ByteBuffer encode() {
-		byte[] pbuf = transcoder.encode(prefix);
+		byte[] pbuf = keyTranscoder.encode(prefix);
 		ByteBuffer buffer = ByteBuffer.allocate(magic.length + 4 + 4 + pbuf.length);
 		buffer.put(magic);
 		buffer.putInt(pbuf.length);
@@ -54,7 +54,7 @@ public class Fwmkeys extends Command<List<Object>> {
 			}
 			byte[] kbuf = new byte[ksiz];
 			in.get(kbuf);
-			keys.add(transcoder.decode(kbuf));
+			keys.add(keyTranscoder.decode(kbuf));
 		}
 		return true;
 	}

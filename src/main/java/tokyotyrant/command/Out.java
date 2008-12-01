@@ -17,7 +17,7 @@ public class Out extends Command<Boolean> {
 	}
 	
 	public ByteBuffer encode() {
-		byte[] kbuf = transcoder.encode(key);
+		byte[] kbuf = keyTranscoder.encode(key);
 		ByteBuffer buffer = ByteBuffer.allocate(magic.length + 4 + kbuf.length);
 		buffer.put(magic);
 		buffer.putInt(kbuf.length);

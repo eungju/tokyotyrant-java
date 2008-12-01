@@ -23,7 +23,7 @@ public class Mget extends Command<Map<Object, Object>> {
 		int capacity = magic.length + 4;
 		byte[][] kbufs = new byte[keys.length][];
 		for (int i = 0; i < keys.length; i++) {
-			kbufs[i] = transcoder.encode(keys[i]);
+			kbufs[i] = keyTranscoder.encode(keys[i]);
 			capacity += 4 + kbufs[i].length;
 		}
 		ByteBuffer buffer = ByteBuffer.allocate(capacity);
@@ -62,7 +62,7 @@ public class Mget extends Command<Map<Object, Object>> {
 			in.get(kbuf);
 			byte[] vbuf = new byte[vsiz];
 			in.get(vbuf);
-			values.put(transcoder.decode(kbuf), transcoder.decode(vbuf));
+			values.put(keyTranscoder.decode(kbuf), valueTranscoder.decode(vbuf));
 		}
 		return true;
 	}

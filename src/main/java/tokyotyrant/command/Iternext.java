@@ -22,7 +22,7 @@ public class Iternext extends CommandSupport<Object> {
 		code = (Byte)context.get("code");
 		if (code == 0) {
 			byte[] kbuf = (byte[])context.get("kbuf");
-			key = transcoder.decode(kbuf);
+			key = keyTranscoder.decode(kbuf);
 		}
 	}
 }

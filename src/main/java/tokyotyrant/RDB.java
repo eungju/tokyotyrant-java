@@ -47,7 +47,8 @@ import tokyotyrant.helper.BufferHelper;
  */
 public class RDB {
 	private final Logger logger = LoggerFactory.getLogger(getClass());
-	private Transcoder transcoder = new StringTranscoder();
+	private Transcoder keyTranscoder = new StringTranscoder();
+	private Transcoder valueTranscoder = new StringTranscoder();
 	private int timeout = 1000;
 	private Socket socket;
 	InputStream inputStream;
@@ -72,7 +73,8 @@ public class RDB {
 	}
 	
 	protected <T> T execute(Command<T> command) throws IOException {
-		command.setTranscoder(transcoder);
+		command.setKeyTranscoder(keyTranscoder);
+		command.setValueTranscoder(valueTranscoder);
 		sendRequest(command);
 		receiveResponse(command);
 		return command.getReturnValue();

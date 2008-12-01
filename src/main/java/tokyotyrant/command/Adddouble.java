@@ -22,7 +22,7 @@ public class Adddouble extends CommandSupport<Double> {
 	private static final long TRILLION = (1000000L * 1000000L);
 	
 	protected void pack(PacketContext context) {
-		byte[] kbuf = transcoder.encode(key);
+		byte[] kbuf = keyTranscoder.encode(key);
 		long integ = (long)num;
 		long fract = (long)((num - integ) * TRILLION);
 		context.put("ksiz", kbuf.length);

@@ -4,7 +4,8 @@ import java.nio.ByteBuffer;
 import java.util.concurrent.CountDownLatch;
 
 public abstract class Command<T> {
-	protected Transcoder transcoder;
+	protected Transcoder keyTranscoder;
+	protected Transcoder valueTranscoder;
 	protected byte[] magic;
 	protected byte code = (byte) 0xff;
 	
@@ -17,8 +18,12 @@ public abstract class Command<T> {
 		magic = new byte[] {(byte) 0xC8, commandId};
 	}
 	
-	public void setTranscoder(Transcoder transcoder) {
-		this.transcoder = transcoder;
+	public void setKeyTranscoder(Transcoder transcoder) {
+		this.keyTranscoder = transcoder;
+	}
+	
+	public void setValueTranscoder(Transcoder transcoder) {
+		this.valueTranscoder = transcoder;
 	}
 	
 	public boolean isSuccess() {

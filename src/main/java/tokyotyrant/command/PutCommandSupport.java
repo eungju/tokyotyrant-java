@@ -19,8 +19,8 @@ public abstract class PutCommandSupport extends Command<Boolean> {
 	}
 	
 	public ByteBuffer encode() {
-		byte[] kbuf = transcoder.encode(key);
-		byte[] vbuf = transcoder.encode(value);
+		byte[] kbuf = keyTranscoder.encode(key);
+		byte[] vbuf = valueTranscoder.encode(value);
 		ByteBuffer buffer = ByteBuffer.allocate(magic.length + 4 + 4 + kbuf.length + vbuf.length);
 		buffer.put(magic);
 		buffer.putInt(kbuf.length);

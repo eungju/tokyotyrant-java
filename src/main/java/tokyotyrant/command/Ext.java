@@ -25,8 +25,8 @@ public class Ext extends CommandSupport<Object> {
 	
 	protected void pack(PacketContext context) {
 		byte[] nbuf = name.getBytes();
-		byte[] kbuf = transcoder.encode(key);
-		byte[] vbuf = transcoder.encode(value);
+		byte[] kbuf = keyTranscoder.encode(key);
+		byte[] vbuf = valueTranscoder.encode(value);
 		context.put("nsiz", nbuf.length);
 		context.put("opts", opts);
 		context.put("ksiz", kbuf.length);
@@ -40,7 +40,7 @@ public class Ext extends CommandSupport<Object> {
 		code = (Byte)context.get("code");
 		if (code == 0) {
 			byte[] rbuf = (byte[])context.get("rbuf");
-			result = transcoder.decode(rbuf);
+			result = valueTranscoder.decode(rbuf);
 		}
 	}
 }
