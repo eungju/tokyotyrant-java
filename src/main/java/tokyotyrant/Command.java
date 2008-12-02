@@ -4,10 +4,12 @@ import java.nio.ByteBuffer;
 import java.util.concurrent.CountDownLatch;
 
 public abstract class Command<T> {
+	public static final byte ESUCCESS = 0x00;
+	public static final byte EUNKNOWN = (byte) 0xff;
 	protected Transcoder keyTranscoder;
 	protected Transcoder valueTranscoder;
 	protected byte[] magic;
-	protected byte code = (byte) 0xff;
+	protected byte code = EUNKNOWN;
 	
 	private CommandState state = CommandState.WRITING;
 	private CountDownLatch latch = new CountDownLatch(1);
@@ -27,7 +29,7 @@ public abstract class Command<T> {
 	}
 	
 	public boolean isSuccess() {
-		return code == 0;
+		return code == ESUCCESS;
 	}
 	
 	public CommandState getState() {
