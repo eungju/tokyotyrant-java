@@ -5,7 +5,10 @@ import java.net.SocketAddress;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
 import java.nio.channels.SocketChannel;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Set;
 
 import org.slf4j.Logger;
@@ -17,26 +20,37 @@ public class AsynchronousNetworking implements Networking, Runnable {
 	private Thread ioThread;
 	private boolean running;
 
-	private AsynchronousNode node;
+	private List<AsynchronousNode> nodes;
 	
-	public AsynchronousNetworking(SocketAddress serverAddress) throws IOException {
+	public AsynchronousNetworking(SocketAddress address) throws IOException {
+		this(Arrays.asList(address));
+	}
+
+	public AsynchronousNetworking(List<SocketAddress> addresses) throws IOException {
 		selector = Selector.open();
 		ioThread = new Thread(this);
-		node = new AsynchronousNode(serverAddress, selector);
+		
+		nodes = new ArrayList<AsynchronousNode>();
+		for (SocketAddress each : addresses) {
+			nodes.add(new AsynchronousNode(each, selector));
+		}
 	}
-	
+
 	public void start() {
-		node.start();
+		for (AsynchronousNode each : nodes) {
+			each.start();
+		}
 
 		running = true;
 		ioThread.start();
 	}
 	
 	public void stop() {
+		for (AsynchronousNode each : nodes) {
+			each.stop();
+		}
+
 		running = false;
-
-		node.stop();
-
 		try {
 			selector.wakeup().close();
 		} catch (IOException e) {
@@ -44,12 +58,18 @@ public class AsynchronousNetworking implements Networking, Runnable {
 		}
 	}
 	
+	public void send(Command<?> command) {
+		AsynchronousNode node = nodes.get(0);
+		node.send(command);
+	}
+
 	public void run() {		
 		while (running) {
 			try {
 				log.debug("Selecting...");
 				int n = selector.select();
-				if (n == 0 || !selector.isOpen()) {
+				log.debug("{} keys are selected", n);
+				if (!selector.isOpen()) {
 					continue;
 				}
 				Set<SelectionKey> selectedKeys = selector.selectedKeys();
@@ -59,18 +79,26 @@ public class AsynchronousNetworking implements Networking, Runnable {
 					SocketChannel channel = (SocketChannel)key.channel();
 					AsynchronousNode node = (AsynchronousNode)key.attachment();
 					
-					if (!key.isValid() || !channel.isOpen()) {
-						continue;
+					if (!key.isValid()) {
+						log.warn("SelectionKey {} is not valid", key);
+					} else if (!channel.isOpen()) {
+						log.warn("Channel {} is not open", channel);
 					} else if (key.isConnectable()) {
-						log.debug("Ready to connect");
+						log.debug("Ready to connect to {}", node);
 						
-						doConnect(channel, node);
-					} else if (key.isReadable()) {
-						log.debug("Ready to read");
-						
-						doRead(channel, node);
+						doConnect(node);
+					} else {
+						if (key.isReadable()) {
+							log.debug("Ready to read from {}", node);
+						 
+							doRead(node);
+						}
+						if (key.isWritable()) {
+							log.debug("Ready to write to {}", node);
+							
+							doWrite(node);
+						}
 					}
-					i.remove();
 				}
 			} catch (Exception e) {
 				log.error("Error while processing network communication", e);
@@ -78,7 +106,7 @@ public class AsynchronousNetworking implements Networking, Runnable {
 		}
 	}
 
-	void doConnect(SocketChannel channel, AsynchronousNode node) {
+	void doConnect(AsynchronousNode node) {
 		try {
 			node.doConnect();
 		} catch (IOException e) {
@@ -87,20 +115,20 @@ public class AsynchronousNetworking implements Networking, Runnable {
 		}
 	}
 	
-	void doRead(SocketChannel channel, AsynchronousNode node) {
+	void doWrite(AsynchronousNode node) {
+		try {
+			node.doWrite();
+		} catch (IOException e) {
+			log.error("Error while writing to " + node, e);
+			node.reconnect();
+		}
+	}
+
+	void doRead(AsynchronousNode node) {
 		try {
 			node.doRead();
 		} catch (IOException e) {
 			log.error("Error while reading from " + node, e);
-			node.reconnect();
-		}
-	}
-	
-	public void send(Command<?> command) {
-		try {
-			node.send(command);
-		} catch (IOException e) {
-			log.error("Error while sending command " + command + " to " + node, e);
 			node.reconnect();
 		}
 	}

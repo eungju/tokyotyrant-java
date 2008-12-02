@@ -22,6 +22,8 @@ public class AsynchronousNode implements TokyoTyrantNode {
 
 	private Selector selector;
 	private SocketChannel channel;
+	private SelectionKey selectionKey;
+	private BlockingQueue<Command<?>> writingQueue = new ArrayBlockingQueue<Command<?>>(16 * 1024);
 	private BlockingQueue<Command<?>> readingQueue = new ArrayBlockingQueue<Command<?>>(16 * 1024);
 	private ByteBuffer readBuffer;
 	
@@ -38,15 +40,10 @@ public class AsynchronousNode implements TokyoTyrantNode {
 		disconnect();
 	}
 
-	public void send(Command<?> command) throws IOException {
-		try {
-			sendRequest(command);
-			command.reading();
-			readingQueue.add(command);
-		} catch (IOException exception) {
-			command.error(exception);
-			throw exception;
-		}
+	public void send(Command<?> command) {
+		writingQueue.add(command);
+		fixupOperations();
+		selector.wakeup();
 	}
 
 	void sendRequest(Command<?> command) throws IOException {
@@ -68,19 +65,14 @@ public class AsynchronousNode implements TokyoTyrantNode {
 			channel = SocketChannel.open();
 			channel.configureBlocking(false);
 			channel.connect(address);
-			channel.register(selector, SelectionKey.OP_CONNECT, this);
+			selectionKey = channel.register(selector, SelectionKey.OP_CONNECT, this);
 		} catch (IOException e) {
 			logger.error("Cannot open connection to " + address, e);
 		}
 	}
 
-	public void doConnect() throws IOException {
-		channel.finishConnect();
-		channel.register(selector, SelectionKey.OP_READ, this);
-		reconnectAttempt = 0;
-	}
-
 	public void disconnect() {
+		readingQueue.clear();
 		try {
 			channel.close();
 		} catch (IOException e) {
@@ -95,17 +87,50 @@ public class AsynchronousNode implements TokyoTyrantNode {
 		connect();
 	}
 
+	void fixupOperations() {
+		int ops = 0;
+		if (channel.isConnected()) {
+			if (!readingQueue.isEmpty()) {
+				ops |= SelectionKey.OP_READ;
+			}
+			if (!writingQueue.isEmpty()) {
+				ops |= SelectionKey.OP_WRITE;
+			}
+		} else {
+			ops = SelectionKey.OP_CONNECT;
+		}
+		selectionKey.interestOps(ops);
+	}
+
+	public void doConnect() throws IOException {
+		channel.finishConnect();
+		fixupOperations();
+		reconnectAttempt = 0;
+	}
+
 	private static final int FRAGMENT_CAPACITY = 2 * 1024;
+	
+	public void doWrite() throws IOException {
+		Command<?> command = writingQueue.peek();
+		try {
+			sendRequest(command);
+			writingQueue.remove();
+			command.reading();
+			readingQueue.add(command);
+		} catch (IOException exception) {
+			command.error(exception);
+			throw exception;
+		}
+		fixupOperations();
+	}
 	
 	public void doRead() throws IOException {
 		Command<?> command = readingQueue.peek();
 		try {
 			ByteBuffer fragment = ByteBuffer.allocate(FRAGMENT_CAPACITY);
 			if (channel.read(fragment) == -1) {
-				logger.info("Channel {} closed", channel);
-				throw new IOException("Closed channel");
+				throw new IOException("Channel " + channel + " is closed");
 			}
-			
 			fragment.flip();
 			logger.debug("Received fragment {}", fragment);
 			received(fragment, command);
@@ -113,9 +138,10 @@ public class AsynchronousNode implements TokyoTyrantNode {
 			command.error(exception);
 			throw exception;
 		}
+		fixupOperations();
 	}
 	
-	void received(ByteBuffer fragment, Command<?> command) throws IOException {
+	void received(ByteBuffer fragment, Command<?> command) {
 		if (readBuffer == null) {
 			readBuffer = ByteBuffer.allocate(FRAGMENT_CAPACITY);
 		}
