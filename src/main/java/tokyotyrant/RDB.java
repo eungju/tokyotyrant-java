@@ -58,7 +58,6 @@ public class RDB {
 	private final Logger logger = LoggerFactory.getLogger(getClass());
 	private Transcoder keyTranscoder = new StringTranscoder();
 	private Transcoder valueTranscoder = new StringTranscoder();
-	private int timeout = 1000;
 	private Socket socket;
 	InputStream inputStream;
 	OutputStream outputStream;
@@ -69,13 +68,23 @@ public class RDB {
 	 * @param address specifies the address of the server.
 	 */
 	public void open(SocketAddress address) throws IOException {
+		open(address, 0);
+	}
+
+	/**
+	 * Open a remote database connection.
+	 * 
+	 * @param address specifies the address of the server.
+	 * @param timeout specified the socket timeout.
+	 */
+	public void open(SocketAddress address, int timeout) throws IOException {
 		socket = new Socket();
 		socket.setSoTimeout(timeout);
 		socket.connect(address, timeout);
 		inputStream = socket.getInputStream();
 		outputStream = socket.getOutputStream();
 	}
-	
+
 	/**
 	 * Close the database connection.
 	 */
