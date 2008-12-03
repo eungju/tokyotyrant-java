@@ -47,6 +47,10 @@ import tokyotyrant.helper.BufferHelper;
  */
 public class RDB {
 	/**
+	 * scripting extension option: no option
+	 */
+	public static final int XONONE = 0;
+	/**
 	 * scripting extension option: record locking
 	 */
 	public static final int XOLCKREC = 1 << 0;
@@ -321,11 +325,11 @@ public class RDB {
 	 * @param name specifies the function name.
 	 * @param key specifies the key. If it is not defined, an empty string is specified.
 	 * @param value specifies the value. If it is not defined, an empty string is specified.
-	 * @param opts specifies options by bitwise or: {@link RDB#XOLCKREC} for record locking, {@link RDB#XOLCKGLB} for global locking. If it is not defined, no option is specified.
+	 * @param opts specifies options by bitwise or: {@link RDB#XOLCKREC} for record locking, {@link RDB#XOLCKGLB} for global locking. If it is {@link RDB#XONONE}, no option is specified.
 	 * @return If successful, the return value is the value of the response or {@code null} on failure.
 	 */
-	public Object ext(String name, int opts, Object key, Object value) throws IOException {
-		return execute(new Ext(name, opts, key, value));
+	public Object ext(String name, Object key, Object value, int opts) throws IOException {
+		return execute(new Ext(name, key, value, opts));
 	}
 
 	/**
@@ -470,7 +474,7 @@ public class RDB {
 			} else if ("adddouble".equals(command)) {
 				System.out.println(db.adddouble(tokens[1], Double.parseDouble(tokens[2])));
 			} else if ("ext".equals(command)) {
-				System.out.println(db.ext(tokens[1], Integer.parseInt(tokens[2]), tokens[3], tokens[4]));
+				System.out.println(db.ext(tokens[1], tokens[3], tokens[4], Integer.parseInt(tokens[2])));
 			} else if ("sync".equals(command)) {
 				System.out.println(db.sync());
 			} else if ("vanish".equals(command)) {

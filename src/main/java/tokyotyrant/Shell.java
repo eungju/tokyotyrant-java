@@ -65,7 +65,7 @@ public class Shell {
 				} else if ("adddouble".equals(command)) {
 					System.out.println(client.adddouble(tokens[1], Double.parseDouble(tokens[2])).get());
 				} else if ("ext".equals(command)) {
-					System.out.println(client.ext(tokens[1], Integer.parseInt(tokens[2]), tokens[3], tokens[4]).get());
+					System.out.println(client.ext(tokens[1], tokens[2], tokens[3], Integer.parseInt(tokens[4])).get());
 				} else if ("sync".equals(command)) {
 					System.out.println(client.sync().get());
 				} else if ("vanish".equals(command)) {

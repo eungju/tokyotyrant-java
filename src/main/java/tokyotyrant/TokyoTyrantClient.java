@@ -113,8 +113,8 @@ public class TokyoTyrantClient {
 		return execute(new Adddouble(key, num));
 	}
 
-	public Future<Object> ext(String name, int opts, Object key, Object value) throws IOException {
-		return execute(new Ext(name, opts, key, value));
+	public Future<Object> ext(String name, Object key, Object value, int opts) throws IOException {
+		return execute(new Ext(name, key, value, opts));
 	}
 
 	public Future<Boolean> sync() throws IOException {

@@ -3,11 +3,14 @@ package tokyotyrant.command;
 import static org.junit.Assert.*;
 
 import java.nio.ByteBuffer;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.junit.Test;
 
 import tokyotyrant.ByteArrayTranscoder;
 import tokyotyrant.Command;
+import tokyotyrant.RDB;
 import tokyotyrant.Transcoder;
 
 public class ProtocolTest {
@@ -358,5 +361,238 @@ public class ProtocolTest {
 		response.put(Command.EUNKNOWN).flip();
 		assertTrue(dut.decode(response));
 		assertEquals(Double.NaN, (double)dut.getReturnValue(), 0.0);
+	}
+
+	@Test public void ext() {
+		String name = "function";
+		Ext dut = new Ext(name, key, value, RDB.XOLCKREC);
+		setupTranscoders(dut);
+		
+		ByteBuffer request = ByteBuffer.allocate(2 + 4 + 4 + 4 + 4 + name.getBytes().length + key.length + value.length)
+			.put(new byte[] { (byte) 0xC8, (byte) 0x68 })
+			.putInt(name.getBytes().length).putInt(RDB.XOLCKREC).putInt(key.length).putInt(value.length)
+			.put(name.getBytes()).put(key).put(value);
+		assertArrayEquals(request.array(), dut.encode().array());
+		
+		ByteBuffer response = ByteBuffer.allocate(1 + 4 + value.length);
+		response.flip();
+		assertFalse(dut.decode(response));
+		
+		response.limit(response.capacity());
+		response.put(Command.ESUCCESS).flip();
+		assertFalse(dut.decode(response));
+		
+		response.limit(response.capacity());
+		response.putInt(value.length).put(value).flip();
+		assertTrue(dut.decode(response));
+		assertArrayEquals(value, (byte[])dut.getReturnValue());
+		
+		//error
+		response.clear();
+		response.put(Command.EUNKNOWN).flip();
+		assertTrue(dut.decode(response));
+		assertNull(dut.getReturnValue());
+	}
+
+	@Test public void sync() {
+		Sync dut = new Sync();
+		setupTranscoders(dut);
+		
+		ByteBuffer request = ByteBuffer.allocate(2)
+			.put(new byte[] { (byte) 0xC8, (byte) 0x70 });
+		assertArrayEquals(request.array(), dut.encode().array());
+		
+		ByteBuffer response = ByteBuffer.allocate(1);
+		response.flip();
+		assertFalse(dut.decode(response));
+		
+		response.limit(response.capacity());
+		response.put(Command.ESUCCESS).flip();
+		assertTrue(dut.decode(response));
+		assertTrue(dut.getReturnValue());
+		
+		//error
+		response.clear();
+		response.put(Command.EUNKNOWN).flip();
+		assertTrue(dut.decode(response));
+		assertFalse(dut.getReturnValue());
+	}
+
+	@Test public void vanish() {
+		Vanish dut = new Vanish();
+		setupTranscoders(dut);
+		
+		ByteBuffer request = ByteBuffer.allocate(2)
+			.put(new byte[] { (byte) 0xC8, (byte) 0x71 });
+		assertArrayEquals(request.array(), dut.encode().array());
+		
+		ByteBuffer response = ByteBuffer.allocate(1);
+		response.flip();
+		assertFalse(dut.decode(response));
+		
+		response.limit(response.capacity());
+		response.put(Command.ESUCCESS).flip();
+		assertTrue(dut.decode(response));
+		assertTrue(dut.getReturnValue());
+		
+		//error
+		response.clear();
+		response.put(Command.EUNKNOWN).flip();
+		assertTrue(dut.decode(response));
+		assertFalse(dut.getReturnValue());
+	}
+
+	@Test public void copy() {
+		String path = "path";
+		Copy dut = new Copy(path);
+		setupTranscoders(dut);
+		
+		ByteBuffer request = ByteBuffer.allocate(2 + 4 + path.getBytes().length)
+			.put(new byte[] { (byte) 0xC8, (byte) 0x72 }).putInt(path.getBytes().length).put(path.getBytes());
+		assertArrayEquals(request.array(), dut.encode().array());
+		
+		ByteBuffer response = ByteBuffer.allocate(1);
+		response.flip();
+		assertFalse(dut.decode(response));
+		
+		response.limit(response.capacity());
+		response.put(Command.ESUCCESS).flip();
+		assertTrue(dut.decode(response));
+		assertTrue(dut.getReturnValue());
+		
+		//error
+		response.clear();
+		response.put(Command.EUNKNOWN).flip();
+		assertTrue(dut.decode(response));
+		assertFalse(dut.getReturnValue());
+	}
+
+	@Test public void restore() {
+		String path = "path";
+		long timestamp = System.currentTimeMillis();
+		Restore dut = new Restore(path, timestamp);
+		setupTranscoders(dut);
+		
+		ByteBuffer request = ByteBuffer.allocate(2 + 4 + 8 + path.getBytes().length)
+			.put(new byte[] { (byte) 0xC8, (byte) 0x73 }).putInt(path.getBytes().length).putLong(timestamp).put(path.getBytes());
+		assertArrayEquals(request.array(), dut.encode().array());
+		
+		ByteBuffer response = ByteBuffer.allocate(1);
+		response.flip();
+		assertFalse(dut.decode(response));
+		
+		response.limit(response.capacity());
+		response.put(Command.ESUCCESS).flip();
+		assertTrue(dut.decode(response));
+		assertTrue(dut.getReturnValue());
+		
+		//error
+		response.clear();
+		response.put(Command.EUNKNOWN).flip();
+		assertTrue(dut.decode(response));
+		assertFalse(dut.getReturnValue());
+	}
+
+	@Test public void setmst() {
+		String host = "host";
+		int port = 1978;
+		Setmst dut = new Setmst(host, port);
+		setupTranscoders(dut);
+		
+		ByteBuffer request = ByteBuffer.allocate(2 + 4 + 4 + host.getBytes().length)
+			.put(new byte[] { (byte) 0xC8, (byte) 0x78 }).putInt(host.getBytes().length).putInt(port).put(host.getBytes());
+		assertArrayEquals(request.array(), dut.encode().array());
+		
+		ByteBuffer response = ByteBuffer.allocate(1);
+		response.flip();
+		assertFalse(dut.decode(response));
+		
+		response.limit(response.capacity());
+		response.put(Command.ESUCCESS).flip();
+		assertTrue(dut.decode(response));
+		assertTrue(dut.getReturnValue());
+		
+		//error
+		response.clear();
+		response.put(Command.EUNKNOWN).flip();
+		assertTrue(dut.decode(response));
+		assertFalse(dut.getReturnValue());
+	}
+
+	@Test public void rnum() {
+		long rnum = 123;
+		Rnum dut = new Rnum();
+		setupTranscoders(dut);
+		
+		ByteBuffer request = ByteBuffer.allocate(2)
+			.put(new byte[] { (byte) 0xC8, (byte) 0x80 });
+		assertArrayEquals(request.array(), dut.encode().array());
+		
+		ByteBuffer response = ByteBuffer.allocate(1 + 8);
+		response.flip();
+		assertFalse(dut.decode(response));
+		
+		response.limit(response.capacity());
+		response.put(Command.ESUCCESS).flip();
+		assertFalse(dut.decode(response));
+		
+		response.limit(response.capacity());
+		response.putLong(rnum).flip();
+		assertTrue(dut.decode(response));
+		assertEquals(rnum, (long)dut.getReturnValue());
+	}
+
+	@Test public void size() {
+		long size = 12345;
+		Size dut = new Size();
+		setupTranscoders(dut);
+		
+		ByteBuffer request = ByteBuffer.allocate(2)
+			.put(new byte[] { (byte) 0xC8, (byte) 0x81 });
+		assertArrayEquals(request.array(), dut.encode().array());
+		
+		ByteBuffer response = ByteBuffer.allocate(1 + 8);
+		response.flip();
+		assertFalse(dut.decode(response));
+		
+		response.limit(response.capacity());
+		response.put(Command.ESUCCESS).flip();
+		assertFalse(dut.decode(response));
+		
+		response.limit(response.capacity());
+		response.putLong(size).flip();
+		assertTrue(dut.decode(response));
+		assertEquals(size, (long)dut.getReturnValue());
+	}
+
+
+	@Test public void stat() {
+		String stat = "k1\tv1\nk2\tv2\n";
+		Stat dut = new Stat();
+		setupTranscoders(dut);
+		
+		ByteBuffer request = ByteBuffer.allocate(2)
+			.put(new byte[] { (byte) 0xC8, (byte) 0x88 });
+		assertArrayEquals(request.array(), dut.encode().array());
+		
+		ByteBuffer response = ByteBuffer.allocate(1 + 4 + stat.getBytes().length);
+		response.flip();
+		assertFalse(dut.decode(response));
+		
+		response.limit(response.capacity());
+		response.put(Command.ESUCCESS).flip();
+		assertFalse(dut.decode(response));
+
+		response.limit(response.capacity());
+		response.putInt(stat.getBytes().length).flip();
+		assertFalse(dut.decode(response));
+
+		response.limit(response.capacity());
+		response.put(stat.getBytes()).flip();
+		assertTrue(dut.decode(response));
+		Map<String, String> expected = new HashMap<String, String>();
+		expected.put("k1", "v1");
+		expected.put("k2", "v2");
+		assertEquals(expected, dut.getReturnValue());
 	}
 }

@@ -6,17 +6,17 @@ public class Ext extends CommandSupport<Object> {
 	private static final PacketSpec REQUEST = packet(magic(), int32("nsiz"), int32("opts"), int32("ksiz"), int32("vsiz"), bytes("nbuf", "nsiz"), bytes("kbuf", "ksiz"), bytes("vbuf", "vsiz"));
 	private static final PacketSpec RESPONSE = packet(code(true), int32("rsiz"), bytes("rbuf", "rsiz"));
 	private String name;
-	private int opts;
 	private Object key;
 	private Object value;
+	private int opts;
 	private Object result;
 	
-	public Ext(String name, int opts, Object key, Object value) {
+	public Ext(String name, Object key, Object value, int opts) {
 		super((byte) 0x68, REQUEST, RESPONSE);
 		this.name = name;
-		this.opts = opts;
 		this.key = key;
 		this.value = value;
+		this.opts = opts;
 	}
 	
 	public Object getReturnValue() {
