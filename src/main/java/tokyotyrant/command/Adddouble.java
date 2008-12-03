@@ -21,22 +21,30 @@ public class Adddouble extends CommandSupport<Double> {
 	
 	private static final long TRILLION = (1000000L * 1000000L);
 	
+	long _integ(double num) {
+		return (long)num;
+	}
+	
+	long _fract(double num) {
+		return (long)((num - _integ(num)) * TRILLION);
+	}
+	
+	double _double(long integ, long fract) {
+		return integ + (fract / (double)TRILLION);
+	}
+	
 	protected void pack(PacketContext context) {
 		byte[] kbuf = keyTranscoder.encode(key);
-		long integ = (long)num;
-		long fract = (long)((num - integ) * TRILLION);
 		context.put("ksiz", kbuf.length);
 		context.put("kbuf", kbuf);
-		context.put("integ", integ);
-		context.put("fract", fract);
+		context.put("integ", _integ(num));
+		context.put("fract", _fract(num));
 	}
 	
 	protected void unpack(PacketContext context) {
 		code = (Byte)context.get("code");
 		if (code == 0) {
-			long integ = (Long)context.get("integ");
-			long fract = (Long)context.get("fract");
-			sum = integ + (fract / (double)TRILLION);
+			sum = _double((Long)context.get("integ"), (Long)context.get("fract"));
 		}
 	}
 }

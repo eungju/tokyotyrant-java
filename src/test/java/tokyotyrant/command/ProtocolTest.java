@@ -297,4 +297,66 @@ public class ProtocolTest {
 		assertTrue(dut.decode(response));
 		assertNull(dut.getReturnValue());
 	}
+
+	@Test public void addint() {
+		int num = 4;
+		Addint dut = new Addint(key, num);
+		setupTranscoders(dut);
+		
+		ByteBuffer request = ByteBuffer.allocate(2 + 4 + 4 + key.length)
+			.put(new byte[] { (byte) 0xC8, (byte) 0x60 }).putInt(key.length).putInt(num).put(key);
+		assertArrayEquals(request.array(), dut.encode().array());
+		
+		ByteBuffer response = ByteBuffer.allocate(1 + 4);
+		response.flip();
+		assertFalse(dut.decode(response));
+		
+		response.limit(response.capacity());
+		response.put(Command.ESUCCESS).flip();
+		assertFalse(dut.decode(response));
+		
+		response.limit(response.capacity());
+		response.putInt(3 + num).flip();
+		assertTrue(dut.decode(response));
+		assertEquals(3 + num, (int)dut.getReturnValue());
+		
+		//error
+		response.clear();
+		response.put(Command.EUNKNOWN).flip();
+		assertTrue(dut.decode(response));
+		assertEquals(Integer.MIN_VALUE, (int)dut.getReturnValue());
+	}
+
+	@Test public void adddouble() {
+		double num = 4;
+		Adddouble dut = new Adddouble(key, num);
+		setupTranscoders(dut);
+		
+		ByteBuffer request = ByteBuffer.allocate(2 + 4 + 8 + 8 + key.length)
+			.put(new byte[] { (byte) 0xC8, (byte) 0x61 }).putInt(key.length).putLong(dut._integ(num)).putLong(dut._fract(num)).put(key);
+		assertArrayEquals(request.array(), dut.encode().array());
+		
+		ByteBuffer response = ByteBuffer.allocate(1 + 8 + 8);
+		response.flip();
+		assertFalse(dut.decode(response));
+		
+		response.limit(response.capacity());
+		response.put(Command.ESUCCESS).flip();
+		assertFalse(dut.decode(response));
+		
+		response.limit(response.capacity());
+		response.putLong(dut._integ(3.0 + num)).flip();
+		assertFalse(dut.decode(response));
+
+		response.limit(response.capacity());
+		response.putLong(dut._fract(3.0 + num)).flip();
+		assertTrue(dut.decode(response));
+		assertEquals(3.0 + num, (double)dut.getReturnValue(), 0.0);
+		
+		//error
+		response.clear();
+		response.put(Command.EUNKNOWN).flip();
+		assertTrue(dut.decode(response));
+		assertEquals(Double.NaN, (double)dut.getReturnValue(), 0.0);
+	}
 }
