@@ -74,6 +74,7 @@ public class AsynchronousNode implements TokyoTyrantNode {
 	public void disconnect() {
 		readingQueue.clear();
 		try {
+			selectionKey.cancel();
 			channel.close();
 		} catch (IOException e) {
 			logger.error("Error while closing connection to " + address, e);

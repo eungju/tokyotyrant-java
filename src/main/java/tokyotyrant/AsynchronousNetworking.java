@@ -76,6 +76,7 @@ public class AsynchronousNetworking implements Networking, Runnable {
 				Iterator<SelectionKey> i = selectedKeys.iterator();
 				while (i.hasNext()) {
 					SelectionKey key = i.next();
+					i.remove();
 					SocketChannel channel = (SocketChannel)key.channel();
 					AsynchronousNode node = (AsynchronousNode)key.attachment();
 					
