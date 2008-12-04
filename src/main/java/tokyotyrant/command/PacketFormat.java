@@ -2,20 +2,20 @@ package tokyotyrant.command;
 
 import java.nio.ByteBuffer;
 
-public class PacketSpec {
-	private FieldSpec[] fields;
+public class PacketFormat {
+	private Field[] fields;
 	
-	public PacketSpec(FieldSpec... fields) {
+	public PacketFormat(Field... fields) {
 		this.fields = fields;
 	}
 
 	public ByteBuffer encode(PacketContext context) {
 		int capacity = 0;
-		for (FieldSpec each : fields) {
+		for (Field each : fields) {
 			capacity += each.size(context);
 		}
 		ByteBuffer out = ByteBuffer.allocate(capacity);
-		for (FieldSpec each : fields) {
+		for (Field each : fields) {
 			Object value = context.get(each.name);
 			if (each.type.equals(byte[].class)) {
 				out.put((byte[])value);
@@ -34,7 +34,7 @@ public class PacketSpec {
 	}
 
 	public boolean decode(PacketContext context, ByteBuffer in) {
-		for (FieldSpec each : fields) {
+		for (Field each : fields) {
 			int size = each.size(context);
 			if (in.remaining() < size) {
 				return false;
@@ -60,52 +60,20 @@ public class PacketSpec {
 		}
 		return true;
 	}
-	
-	public static PacketSpec packet(FieldSpec...fields) {
-		return new PacketSpec(fields);
-	}
-	
-	public static FieldSpec magic() {
-		return bytes("magic", 2);
-	}
-	
-	public static FieldSpec code(boolean stopWhenError) {
-		return new CodeFieldSpec(stopWhenError);
-	}
-	
-	public static FieldSpec int8(String name) {
-		return new FieldSpec(name, Byte.class, 1);
-	}
 
-	public static FieldSpec int32(String name) {
-		return new FieldSpec(name, Integer.class, 4);
-	}
-
-	public static FieldSpec int64(String name) {
-		return new FieldSpec(name, Long.class, 8);
-	}
-	
-	public static FieldSpec bytes(String name, int size) {
-		return new FieldSpec(name, byte[].class, size);
-	}
-
-	public static FieldSpec bytes(String name, String sizeVariable) {
-		return new FieldSpec(name, byte[].class, sizeVariable);
-	}
-	
-	static class FieldSpec {
+	static class Field {
 		public String name;
 		public Class<?> type;
 		public int size;
 		public String sizeVariable = null;
 		
-		public FieldSpec(String name, Class<?> type, int size) {
+		public Field(String name, Class<?> type, int size) {
 			this.name = name;
 			this.type = type;
 			this.size = size;
 		}
 
-		public FieldSpec(String name, Class<?> type, String sizeVariable) {
+		public Field(String name, Class<?> type, String sizeVariable) {
 			this.name = name;
 			this.type = type;
 			this.sizeVariable = sizeVariable;
@@ -120,10 +88,10 @@ public class PacketSpec {
 		}
 	}
 	
-	private static class CodeFieldSpec extends FieldSpec {
+	static class CodeField extends Field {
 		private boolean stopWhenError;
 
-		public CodeFieldSpec(boolean stopWhenError) {
+		public CodeField(boolean stopWhenError) {
 			super("code", Byte.class, 1);
 			this.stopWhenError = stopWhenError;
 		}
