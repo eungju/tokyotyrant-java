@@ -1,10 +1,8 @@
 package tokyotyrant.command;
 
-import static tokyotyrant.command.PacketSpec.*;
-
 public class Adddouble extends CommandSupport<Double> {
-	private static final PacketSpec REQUEST = packet(magic(), int32("ksiz"), int64("integ"), int64("fract"), bytes("kbuf", "ksiz"));
-	private static final PacketSpec RESPONSE = packet(code(true), int64("integ"), int64("fract"));
+	private static final PacketFormat REQUEST = packet().magic().int32("ksiz").int64("integ").int64("fract").bytes("kbuf", "ksiz").end();
+	private static final PacketFormat RESPONSE = new PacketFormatBuilder().code(true).int64("integ").int64("fract").end();
 	private Object key;
 	private double num;
 	private double sum;

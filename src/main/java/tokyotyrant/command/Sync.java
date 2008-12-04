@@ -1,10 +1,8 @@
 package tokyotyrant.command;
 
-import static tokyotyrant.command.PacketSpec.*;
-
 public class Sync extends CommandSupport<Boolean> {
-	private static final PacketSpec REQUEST = packet(magic());
-	private static final PacketSpec RESPONSE = packet(code(true));
+	private static final PacketFormat REQUEST = new PacketFormatBuilder().magic().end();
+	private static final PacketFormat RESPONSE = new PacketFormatBuilder().code(true).end();
 	             
 	public Sync() {
 		super((byte) 0x70, REQUEST, RESPONSE);

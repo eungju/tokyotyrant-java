@@ -1,13 +1,11 @@
 package tokyotyrant.command;
 
-import static tokyotyrant.command.PacketSpec.*;
-
 import java.util.HashMap;
 import java.util.Map;
 
 public class Stat extends CommandSupport<Map<String, String>> {
-	private static final PacketSpec REQUEST = packet(magic());
-	private static final PacketSpec RESPONSE = packet(code(false), int32("ssiz"), bytes("sbuf", "ssiz"));
+	private static final PacketFormat REQUEST = new PacketFormatBuilder().magic().end();
+	private static final PacketFormat RESPONSE = new PacketFormatBuilder().code(false).int32("ssiz").bytes("sbuf", "ssiz").end();
 	private Map<String, String> stat;
 	             
 	public Stat() {

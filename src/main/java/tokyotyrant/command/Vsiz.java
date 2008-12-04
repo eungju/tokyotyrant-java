@@ -1,10 +1,8 @@
 package tokyotyrant.command;
 
-import static tokyotyrant.command.PacketSpec.*;
-
 public class Vsiz extends CommandSupport<Integer> {
-	private static final PacketSpec REQUEST = packet(magic(), int32("ksiz"), bytes("kbuf", "ksiz"));
-	private static final PacketSpec RESPONSE = packet(code(true), int32("vsiz"));
+	private static final PacketFormat REQUEST = new PacketFormatBuilder().magic().int32("ksiz").bytes("kbuf", "ksiz").end();
+	private static final PacketFormat RESPONSE = new PacketFormatBuilder().code(true).int32("vsiz").end();
 	private Object key;
 	private int vsiz;
 

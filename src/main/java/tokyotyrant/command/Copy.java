@@ -1,10 +1,8 @@
 package tokyotyrant.command;
 
-import static tokyotyrant.command.PacketSpec.*;
-
 public class Copy extends CommandSupport<Boolean> {
-	private static final PacketSpec REQUEST = packet(magic(), int32("psiz"), bytes("path", "psiz"));
-	private static final PacketSpec RESPONSE = packet(code(false));
+	private static final PacketFormat REQUEST = new PacketFormatBuilder().magic().int32("psiz").bytes("path", "psiz").end();
+	private static final PacketFormat RESPONSE = new PacketFormatBuilder().code(false).end();
 	private String path;
 	
 	public Copy(String path) {

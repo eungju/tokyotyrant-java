@@ -1,10 +1,8 @@
 package tokyotyrant.command;
 
-import static tokyotyrant.command.PacketSpec.*;
-
 public class Addint extends CommandSupport<Integer> {
-	private static final PacketSpec REQUEST = packet(magic(), int32("ksiz"), int32("num"), bytes("kbuf", "ksiz"));
-	private static final PacketSpec RESPONSE = packet(code(true), int32("sum"));
+	private static final PacketFormat REQUEST = new PacketFormatBuilder().magic().int32("ksiz").int32("num").bytes("kbuf", "ksiz").end();
+	private static final PacketFormat RESPONSE = new PacketFormatBuilder().code(true).int32("sum").end();
 	private Object key;
 	private int num;
 	private int sum;

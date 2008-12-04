@@ -5,10 +5,14 @@ import java.nio.ByteBuffer;
 import tokyotyrant.Command;
 
 public abstract class CommandSupport<T> extends Command<T> {
-	private final PacketSpec requestPacket;
-	private final PacketSpec responsePacket;
+	private final PacketFormat requestPacket;
+	private final PacketFormat responsePacket;
 	
-	public CommandSupport(byte commandId, PacketSpec requestPacket, PacketSpec responsePacket) {
+	static PacketFormatBuilder packet() {
+		return new PacketFormatBuilder();
+	}
+	
+	public CommandSupport(byte commandId, PacketFormat requestPacket, PacketFormat responsePacket) {
 		super(commandId);
 		this.requestPacket = requestPacket;
 		this.responsePacket = responsePacket;
