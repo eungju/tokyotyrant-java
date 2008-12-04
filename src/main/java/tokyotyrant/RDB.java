@@ -1,19 +1,14 @@
 package tokyotyrant;
 
-import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.io.OutputStream;
-import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.net.SocketAddress;
 import java.nio.ByteBuffer;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.commons.lang.ArrayUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -412,86 +407,6 @@ public class RDB {
 			synchronized (this) {
 				return super.execute(command);
 			}
-		}
-	}
-
-	public static void main(String[] args) throws IOException {
-		RDB db = new RDB();
-		db.open(new InetSocketAddress(args[0], Integer.parseInt(args[1])));
-		BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
-		while (true) {
-			System.out.print("> ");
-			String[] tokens = reader.readLine().split("\\s");
-			String command = tokens[0];
-			long s = System.currentTimeMillis();
-			if ("put".equals(command)) {
-				System.out.println(db.put(tokens[1], tokens[2]));
-			} else if ("putkeep".equals(command)) {
-				System.out.println(db.putkeep(tokens[1], tokens[2]));
-			} else if ("putcat".equals(command)) {
-				System.out.println(db.putcat(tokens[1], tokens[2]));
-			} else if ("putrtt".equals(command)) {
-				System.out.println(db.putrtt(tokens[1], tokens[2], Integer.parseInt(tokens[3])));
-			} else if ("putnr".equals(command)) {
-				db.putnr(tokens[1], tokens[2]);
-			} else if ("out".equals(command)) {
-				System.out.println(db.out(tokens[1]));
-			} else if ("get".equals(command)) {
-				System.out.println(tokens[1] + "\t" + db.get(tokens[1]));
-			} else if ("mget".equals(command)) {
-				Object[] keys = ArrayUtils.subarray(tokens, 1, tokens.length);
-				Map<Object, Object> values = db.mget(keys);
-				for (Object key : values.keySet()) {
-					System.out.println(key + "\t" + values.get(key));
-				}
-			} else if ("vsiz".equals(command)) {
-				System.out.println(db.vsiz(tokens[1]));
-			} else if ("iterinit".equals(command)) {
-				System.out.println(db.iterinit());
-			} else if ("iternext".equals(command)) {
-				System.out.println(db.iternext());
-			} else if ("list".equals(command)) {
-				List<Object> keys = null;
-				if (db.iterinit()) {
-					keys = new ArrayList<Object>();
-					while (true) {
-						Object key = db.iternext();
-						if (key == null) {
-							break;
-						}
-						keys.add(key);
-					}
-				}
-				System.out.println(keys);
-			} else if ("fwmkeys".equals(command)) {
-				System.out.println(db.fwmkeys(tokens[1], Integer.parseInt(tokens[2])));
-			} else if ("addint".equals(command)) {
-				System.out.println(db.addint(tokens[1], Integer.parseInt(tokens[2])));
-			} else if ("adddouble".equals(command)) {
-				System.out.println(db.adddouble(tokens[1], Double.parseDouble(tokens[2])));
-			} else if ("ext".equals(command)) {
-				System.out.println(db.ext(tokens[1], tokens[3], tokens[4], Integer.parseInt(tokens[2])));
-			} else if ("sync".equals(command)) {
-				System.out.println(db.sync());
-			} else if ("vanish".equals(command)) {
-				System.out.println(db.vanish());
-			} else if ("copy".equals(command)) {
-				System.out.println(db.copy(tokens[1]));
-			} else if ("restore".equals(command)) {
-				System.out.println(db.restore(tokens[1], Long.parseLong(tokens[2])));
-			} else if ("setmst".equals(command)) {
-				System.out.println(db.setmst(tokens[1], Integer.parseInt(tokens[2])));
-			} else if ("rnum".equals(command)) {
-				System.out.println(db.rnum());
-			} else if ("stat".equals(command)) {
-				System.out.println(db.stat());
-			} else if ("size".equals(command)) {
-				System.out.println(db.size());
-			} else if ("quit".equals(command)) {
-				db.close();
-				break;
-			}
-			System.out.println("It takes " + (System.currentTimeMillis() - s) + "ms");
 		}
 	}
 }
