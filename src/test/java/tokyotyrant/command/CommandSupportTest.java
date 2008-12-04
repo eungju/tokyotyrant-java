@@ -13,7 +13,7 @@ public class CommandSupportTest {
 		private int pong;
 		
 		public TestCommand(int ping) {
-			super((byte)0xff, new PacketFormatBuilder().magic().int32("ping").end(), new PacketFormatBuilder().code(true).int32("pong").end());
+			super((byte)0xff, magic().int32("ping").end(), code(true).int32("pong").end());
 			this.ping = ping;
 		}
 		

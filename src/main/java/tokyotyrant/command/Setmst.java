@@ -1,8 +1,8 @@
 package tokyotyrant.command;
 
 public class Setmst extends CommandSupport<Boolean> {
-	private static final PacketFormat REQUEST = new PacketFormatBuilder().magic().int32("hsiz").int32("port").bytes("host", "hsiz").end();
-	private static final PacketFormat RESPONSE = new PacketFormatBuilder().code(false).end();
+	private static final PacketFormat REQUEST = magic().int32("hsiz").int32("port").bytes("host", "hsiz").end();
+	private static final PacketFormat RESPONSE = code(false).end();
 	private String host;
 	private int port;
 	

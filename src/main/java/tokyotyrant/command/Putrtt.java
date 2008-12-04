@@ -1,8 +1,8 @@
 package tokyotyrant.command;
 
 public class Putrtt extends CommandSupport<Boolean> {
-	private static final PacketFormat REQUEST = new PacketFormatBuilder().magic().int32("ksiz").int32("vsiz").int32("width").bytes("kbuf", "ksiz").bytes("vbuf", "vsiz").end();
-	private static final PacketFormat RESPONSE = new PacketFormatBuilder().code(false).end();
+	private static final PacketFormat REQUEST = magic().int32("ksiz").int32("vsiz").int32("width").bytes("kbuf", "ksiz").bytes("vbuf", "vsiz").end();
+	private static final PacketFormat RESPONSE = code(false).end();
 	private Object key;
 	private Object value;
 	private int width;

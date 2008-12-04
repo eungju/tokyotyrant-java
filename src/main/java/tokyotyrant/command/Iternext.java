@@ -1,8 +1,8 @@
 package tokyotyrant.command;
 
 public class Iternext extends CommandSupport<Object> {
-	private static final PacketFormat REQUEST = new PacketFormatBuilder().magic().end();
-	private static final PacketFormat RESPONSE = new PacketFormatBuilder().code(true).int32("ksiz").bytes("kbuf", "ksiz").end();
+	private static final PacketFormat REQUEST = magic().end();
+	private static final PacketFormat RESPONSE = code(true).int32("ksiz").bytes("kbuf", "ksiz").end();
 	private Object key;
 	
 	public Iternext() {

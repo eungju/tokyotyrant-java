@@ -1,8 +1,8 @@
 package tokyotyrant.command;
 
 public class Restore extends CommandSupport<Boolean> {
-	private static final PacketFormat REQUEST = new PacketFormatBuilder().magic().int32("psiz").int64("ts").bytes("path", "psiz").end();
-	private static final PacketFormat RESPONSE = new PacketFormatBuilder().code(false).end();
+	private static final PacketFormat REQUEST = magic().int32("psiz").int64("ts").bytes("path", "psiz").end();
+	private static final PacketFormat RESPONSE = code(false).end();
 	private String path;
 	private long ts;
 	

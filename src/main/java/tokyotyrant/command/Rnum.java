@@ -1,8 +1,8 @@
 package tokyotyrant.command;
 
 public class Rnum extends CommandSupport<Long> {
-	private static final PacketFormat REQUEST = new PacketFormatBuilder().magic().end();
-	private static final PacketFormat RESPONSE = new PacketFormatBuilder().code(false).int64("rnum").end();
+	private static final PacketFormat REQUEST = magic().end();
+	private static final PacketFormat RESPONSE = code(false).int64("rnum").end();
 	private long rnum;
 
 	public Rnum() {

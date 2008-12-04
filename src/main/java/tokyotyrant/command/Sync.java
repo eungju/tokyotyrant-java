@@ -1,8 +1,8 @@
 package tokyotyrant.command;
 
 public class Sync extends CommandSupport<Boolean> {
-	private static final PacketFormat REQUEST = new PacketFormatBuilder().magic().end();
-	private static final PacketFormat RESPONSE = new PacketFormatBuilder().code(true).end();
+	private static final PacketFormat REQUEST = magic().end();
+	private static final PacketFormat RESPONSE = code(true).end();
 	             
 	public Sync() {
 		super((byte) 0x70, REQUEST, RESPONSE);

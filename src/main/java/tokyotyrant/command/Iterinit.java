@@ -1,8 +1,8 @@
 package tokyotyrant.command;
 
 public class Iterinit extends CommandSupport<Boolean> {
-	private static final PacketFormat REQUEST = new PacketFormatBuilder().magic().end();
-	private static final PacketFormat RESPONSE = new PacketFormatBuilder().code(false).end();
+	private static final PacketFormat REQUEST = magic().end();
+	private static final PacketFormat RESPONSE = code(false).end();
 	             
 	public Iterinit() {
 		super((byte) 0x50, REQUEST, RESPONSE);

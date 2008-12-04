@@ -5,28 +5,45 @@ import java.nio.ByteBuffer;
 import tokyotyrant.Command;
 
 public abstract class CommandSupport<T> extends Command<T> {
-	private final PacketFormat requestPacket;
-	private final PacketFormat responsePacket;
-	
-	static PacketFormatBuilder packet() {
-		return new PacketFormatBuilder();
+	/**
+	 * Requests are start with magic number.
+	 */
+	static PacketFormatBuilder magic() {
+		return new PacketFormatBuilder().magic();
 	}
 	
-	public CommandSupport(byte commandId, PacketFormat requestPacket, PacketFormat responsePacket) {
+	/**
+	 * Responses are start with code.
+	 */
+	static PacketFormatBuilder code(boolean stopWhenError) {
+		return new PacketFormatBuilder().code(stopWhenError);
+	}
+
+	/**
+	 * Format of the request.
+	 */
+	private final PacketFormat requestFormat;
+	
+	/**
+	 * Format of the response.
+	 */
+	private final PacketFormat responseFormat;
+	
+	public CommandSupport(byte commandId, PacketFormat requestFormat, PacketFormat responseFormat) {
 		super(commandId);
-		this.requestPacket = requestPacket;
-		this.responsePacket = responsePacket;
+		this.requestFormat = requestFormat;
+		this.responseFormat = responseFormat;
 	}
 
 	public ByteBuffer encode() {
 		PacketContext context = encodingContext();
 		pack(context);
-		return requestPacket.encode(context);
+		return requestFormat.encode(context);
 	}
 	
 	public boolean decode(ByteBuffer in) {
 		PacketContext context = decodingContext();
-		if (!responsePacket.decode(context, in)) {
+		if (!responseFormat.decode(context, in)) {
 			return false;
 		}
 		unpack(context);

@@ -1,8 +1,8 @@
 package tokyotyrant.command;
 
 public class Size extends CommandSupport<Long> {
-	private static final PacketFormat REQUEST = new PacketFormatBuilder().magic().end();
-	private static final PacketFormat RESPONSE = new PacketFormatBuilder().code(false).int64("size").end();
+	private static final PacketFormat REQUEST = magic().end();
+	private static final PacketFormat RESPONSE = code(false).int64("size").end();
 	private long size;
 	             
 	public Size() {
