@@ -16,7 +16,10 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
-import tokyotyrant.command.Vanish;
+import tokyotyrant.protocol.Vanish;
+import tokyotyrant.transcoder.ByteArrayTranscoder;
+import tokyotyrant.transcoder.StringTranscoder;
+import tokyotyrant.transcoder.Transcoder;
 
 @RunWith(JMock.class)
 public class RDBTest {
