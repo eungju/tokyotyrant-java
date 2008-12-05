@@ -47,4 +47,24 @@ public class RDBTest {
 		
 		assertTrue(dut.execute(command));
 	}
+	
+	@Test public void defaultKeyTranscoderIsStringTranscoder() {
+		assertEquals(StringTranscoder.class, dut.getKeyTranscoder().getClass());
+	}
+
+	@Test public void keyTranscoderCanBeChanged() {
+		Transcoder newTranscoder = new ByteArrayTranscoder();
+		dut.setKeyTranscoder(newTranscoder);
+		assertEquals(newTranscoder.getClass(), dut.getKeyTranscoder().getClass());
+	}
+	
+	@Test public void defaultValueTranscoderIsStringTranscoder() {
+		assertEquals(StringTranscoder.class, dut.getValueTranscoder().getClass());
+	}
+
+	@Test public void valueTranscoderCanBeChanged() {
+		Transcoder newTranscoder = new ByteArrayTranscoder();
+		dut.setValueTranscoder(newTranscoder);
+		assertEquals(newTranscoder.getClass(), dut.getValueTranscoder().getClass());
+	}
 }

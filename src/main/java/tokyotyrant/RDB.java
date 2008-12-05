@@ -38,7 +38,7 @@ import tokyotyrant.command.Vsiz;
 import tokyotyrant.helper.BufferHelper;
 
 /**
- * Tokyo Tyrant C/Perl/Ruby API like interface.
+ * Official Tokyo Tyrant API(C/Perl/Ruby) like interface.
  */
 public class RDB {
 	/**
@@ -92,6 +92,36 @@ public class RDB {
 		} catch (IOException e) {
 			logger.error("Error while closing connection " + socket, e);
 		}
+	}
+	
+	/**
+	 * Set the {@link Transcoder} to be used to transcode keys.
+	 * Not required: @{link StringTranscoder} is the default.
+	 */
+	public void setKeyTranscoder(Transcoder transcoder) {
+		this.keyTranscoder = transcoder;
+	}
+	
+	/**
+	 * Set the {@link Transcoder} to be used to transcode values.
+	 * Not required: @{link StringTranscoder} is the default.
+	 */
+	public void setValueTranscoder(Transcoder transcoder) {
+		this.valueTranscoder = transcoder;
+	}
+	
+	/**
+	 * Get the {@link Transcoder} to be used to transcode keys.
+	 */
+	protected Transcoder getKeyTranscoder() {
+		return keyTranscoder;
+	}
+	
+	/**
+	 * Get the {@link Transcoder} to be used to transcode values.
+	 */
+	protected Transcoder getValueTranscoder() {
+		return valueTranscoder;
 	}
 	
 	/**
