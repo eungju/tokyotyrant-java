@@ -241,7 +241,6 @@ public class RDB {
 	 * 
 	 * @param key specifies the key.
 	 * @param value specifies the value.
-	 * @return If successful, the return value is true, else, it is false.
 	 */
 	public void putnr(Object key, Object value) throws IOException {
 		execute(new Putnr(key, value));
