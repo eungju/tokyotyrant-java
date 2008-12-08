@@ -29,8 +29,8 @@ public class TokyoTyrantClientShell extends Shell {
 			result = client.putkeep(tokens[1], tokens[2]).get();
 		} else if ("putcat".equals(command)) {
 			result = client.putcat(tokens[1], tokens[2]).get();
-		} else if ("putrtt".equals(command)) {
-			result = client.putrtt(tokens[1], tokens[2], Integer.parseInt(tokens[3])).get();
+		} else if ("putshl".equals(command)) {
+			result = client.putshl(tokens[1], tokens[2], Integer.parseInt(tokens[3])).get();
 		} else if ("putnr".equals(command)) {
 			client.putnr(tokens[1], tokens[2]);
 		} else if ("out".equals(command)) {

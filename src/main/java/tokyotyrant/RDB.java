@@ -28,7 +28,7 @@ import tokyotyrant.protocol.Put;
 import tokyotyrant.protocol.Putcat;
 import tokyotyrant.protocol.Putkeep;
 import tokyotyrant.protocol.Putnr;
-import tokyotyrant.protocol.Putrtt;
+import tokyotyrant.protocol.Putshl;
 import tokyotyrant.protocol.Restore;
 import tokyotyrant.protocol.Rnum;
 import tokyotyrant.protocol.Setmst;
@@ -223,7 +223,7 @@ public class RDB {
 	}
 
 	/**
-	 * Concatenate a value at the end of the existing record and rotate it to the left.
+	 * Concatenate a value at the end of the existing record and shift it to the left.
 	 * If there is no corresponding record, a new record is created.
 	 *  
 	 * @param key specifies the key.
@@ -231,8 +231,8 @@ public class RDB {
 	 * @param width specifies the width of the record.
 	 * @return If successful, the return value is true, else, it is false.
 	 */
-	public boolean putrtt(Object key, Object value, int width) throws IOException {
-		return execute(new Putrtt(key, value, width));
+	public boolean putshl(Object key, Object value, int width) throws IOException {
+		return execute(new Putshl(key, value, width));
 	}
 
 	/**
@@ -357,7 +357,6 @@ public class RDB {
 
 	/**
 	 * Synchronize updated contents with the file and the device.
-	 * This method is useful when another process connects the same database file.
 	 * 
 	 * @return If successful, the return value is true, else, it is false.
 	 */

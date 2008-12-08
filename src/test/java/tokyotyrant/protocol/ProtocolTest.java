@@ -55,9 +55,9 @@ public class ProtocolTest {
 		putFamily(new Putcat(key, value), 0x12);
 	}
 
-	@Test public void putrtt() {
+	@Test public void putshl() {
 		int width = 1;
-		Putrtt dut = new Putrtt(key, value, width);
+		Putshl dut = new Putshl(key, value, width);
 		setupTranscoders(dut);
 		
 		ByteBuffer request = ByteBuffer.allocate(2 + 4 + 4 + 4 + key.length + value.length)

@@ -24,7 +24,7 @@ import tokyotyrant.protocol.Put;
 import tokyotyrant.protocol.Putcat;
 import tokyotyrant.protocol.Putkeep;
 import tokyotyrant.protocol.Putnr;
-import tokyotyrant.protocol.Putrtt;
+import tokyotyrant.protocol.Putshl;
 import tokyotyrant.protocol.Restore;
 import tokyotyrant.protocol.Rnum;
 import tokyotyrant.protocol.Setmst;
@@ -75,8 +75,8 @@ public class TokyoTyrantClient {
 		return execute(new Putcat(key, value));
 	}
 
-	public Future<Boolean> putrtt(Object key, Object value, int width) throws IOException {
-		return execute(new Putrtt(key, value, width));
+	public Future<Boolean> putshl(Object key, Object value, int width) throws IOException {
+		return execute(new Putshl(key, value, width));
 	}
 
 	public void putnr(Object key, Object value) throws IOException {

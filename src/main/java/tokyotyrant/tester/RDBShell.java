@@ -31,8 +31,8 @@ public class RDBShell extends Shell {
 			result = db.putkeep(tokens[1], tokens[2]);
 		} else if ("putcat".equals(command)) {
 			result = db.putcat(tokens[1], tokens[2]);
-		} else if ("putrtt".equals(command)) {
-			result = db.putrtt(tokens[1], tokens[2], Integer.parseInt(tokens[3]));
+		} else if ("putshl".equals(command)) {
+			result = db.putshl(tokens[1], tokens[2], Integer.parseInt(tokens[3]));
 		} else if ("putnr".equals(command)) {
 			db.putnr(tokens[1], tokens[2]);
 		} else if ("out".equals(command)) {
