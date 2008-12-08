@@ -129,12 +129,25 @@ public class RDB {
 	
 	/**
 	 * Execute the command.
+	 * Use the default value transcoder.
 	 * 
 	 * @param <T> the type of the return value of the command.
 	 * @param command the command to execute.
 	 * @return the return value of the command.
 	 */
 	protected <T> T execute(Command<T> command) throws IOException {
+		return execute(command, valueTranscoder);
+	}
+
+	/**
+	 * Execute the command.
+	 * 
+	 * @param <T> the type of the return value of the command.
+	 * @param command the command to execute.
+	 * @param valueTranscoder the transcoder for the values.
+	 * @return the return value of the command.
+	 */
+	protected <T> T execute(Command<T> command, Transcoder valueTranscoder) throws IOException {
 		command.setKeyTranscoder(keyTranscoder);
 		command.setValueTranscoder(valueTranscoder);
 		sendRequest(command);
@@ -196,6 +209,10 @@ public class RDB {
 	 */
 	public boolean put(Object key, Object value) throws IOException {
 		return execute(new Put(key, value));
+	}
+
+	public boolean put(Object key, Object value, Transcoder valueTranscoder) throws IOException {
+		return execute(new Put(key, value), valueTranscoder);
 	}
 
 	/**

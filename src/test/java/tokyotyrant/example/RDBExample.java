@@ -4,6 +4,8 @@ import java.io.IOException;
 import java.net.InetSocketAddress;
 
 import tokyotyrant.RDB;
+import tokyotyrant.transcoder.DoubleTranscoder;
+import tokyotyrant.transcoder.IntegerTranscoder;
 
 public class RDBExample {
 	public static void main(String[] args) throws IOException {
@@ -39,6 +41,16 @@ public class RDBExample {
 				System.out.println(key + ":" + value);
 			}
 		}
+		
+		// add int
+		rdb.put("int", 3, new IntegerTranscoder());
+		int i = rdb.addint("int", 4);
+		System.out.println(i);
+
+		// add double
+		rdb.put("d", 3.0D, new DoubleTranscoder());
+		double d = rdb.adddouble("d", 4.0D);
+		System.out.println(d);
 
 		// close the connection
 		rdb.close();
