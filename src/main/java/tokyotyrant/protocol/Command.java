@@ -13,9 +13,8 @@ public abstract class Command<T> {
 	protected byte[] magic;
 	protected byte code = EUNKNOWN;
 	
-	private CommandState state = CommandState.WRITING;
 	private CountDownLatch latch = new CountDownLatch(1);
-	private boolean cancelled = false;
+	private CommandState state = CommandState.WRITING;
 	private Exception errorException = null; 
 	
 	public Command(byte commandId) {
@@ -33,29 +32,21 @@ public abstract class Command<T> {
 	public boolean isSuccess() {
 		return code == ESUCCESS;
 	}
-	
-	public CommandState getState() {
-		return state;
-	}
 
 	public CountDownLatch getLatch() {
 		return latch;
+	}
+	
+	public boolean isWriting() {
+		return state == CommandState.WRITING;
 	}
 
 	public void reading() {
 		state = CommandState.READING;
 	}
-
-	/**
-	 * Should be invoked when the command is cancelled.
-	 */
-	public void cancel() {
-		latch.countDown();
-		cancelled = true;
-	}
 	
-	public boolean isCancelled() {
-		return cancelled;
+	public boolean isReading() {
+		return state == CommandState.READING;
 	}
 	
 	/**
@@ -66,6 +57,22 @@ public abstract class Command<T> {
 		state = CommandState.COMPLETE;
 	}
 	
+	public boolean isCompleted() {
+		return state == CommandState.COMPLETE;
+	}
+
+	/**
+	 * Should be invoked when the command is cancelled.
+	 */
+	public void cancel() {
+		latch.countDown();
+		state = CommandState.CANCELLED;
+	}
+	
+	public boolean isCancelled() {
+		return state == CommandState.CANCELLED;
+	}
+	
 	/**
 	 * Should be invoked when the command is not completed by an error.
 	 *
@@ -73,11 +80,12 @@ public abstract class Command<T> {
 	 */
 	public void error(Exception exception) {
 		latch.countDown();
+		state = CommandState.ERROR;
 		errorException = exception;
 	}
 	
 	public boolean hasError() {
-		return errorException != null;
+		return state == CommandState.ERROR;
 	}
 	
 	public Exception getErrorException() {

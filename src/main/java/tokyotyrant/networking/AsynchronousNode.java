@@ -24,9 +24,9 @@ public class AsynchronousNode implements TokyoTyrantNode {
 	private Selector selector;
 	private SocketChannel channel;
 	private SelectionKey selectionKey;
-	private BlockingQueue<Command<?>> writingQueue = new ArrayBlockingQueue<Command<?>>(16 * 1024);
-	private BlockingQueue<Command<?>> readingQueue = new ArrayBlockingQueue<Command<?>>(16 * 1024);
-	private ByteBuffer readBuffer;
+	private BlockingQueue<Command<?>> writingCommands = new ArrayBlockingQueue<Command<?>>(16 * 1024);
+	private BlockingQueue<Command<?>> readingCommands = new ArrayBlockingQueue<Command<?>>(16 * 1024);
+	private ByteBuffer readingBuffer;
 	
 	public AsynchronousNode(SocketAddress address, Selector selector) {
 		this.address = address;
@@ -42,7 +42,7 @@ public class AsynchronousNode implements TokyoTyrantNode {
 	}
 
 	public void send(Command<?> command) {
-		writingQueue.add(command);
+		writingCommands.add(command);
 		fixupOperations();
 		selector.wakeup();
 	}
@@ -73,7 +73,8 @@ public class AsynchronousNode implements TokyoTyrantNode {
 	}
 
 	public void disconnect() {
-		readingQueue.clear();
+		readingCommands.clear();
+		readingBuffer.clear();
 		try {
 			selectionKey.cancel();
 			channel.close();
@@ -92,10 +93,10 @@ public class AsynchronousNode implements TokyoTyrantNode {
 	void fixupOperations() {
 		int ops = 0;
 		if (channel.isConnected()) {
-			if (!readingQueue.isEmpty()) {
+			if (!readingCommands.isEmpty()) {
 				ops |= SelectionKey.OP_READ;
 			}
-			if (!writingQueue.isEmpty()) {
+			if (!writingCommands.isEmpty()) {
 				ops |= SelectionKey.OP_WRITE;
 			}
 		} else {
@@ -113,12 +114,12 @@ public class AsynchronousNode implements TokyoTyrantNode {
 	private static final int FRAGMENT_CAPACITY = 2 * 1024;
 	
 	public void doWrite() throws IOException {
-		Command<?> command = writingQueue.peek();
+		Command<?> command = writingCommands.peek();
 		try {
 			sendRequest(command);
-			writingQueue.remove();
+			writingCommands.remove();
 			command.reading();
-			readingQueue.add(command);
+			readingCommands.add(command);
 		} catch (IOException exception) {
 			command.error(exception);
 			throw exception;
@@ -127,7 +128,7 @@ public class AsynchronousNode implements TokyoTyrantNode {
 	}
 	
 	public void doRead() throws IOException {
-		Command<?> command = readingQueue.peek();
+		Command<?> command = readingCommands.peek();
 		try {
 			ByteBuffer fragment = ByteBuffer.allocate(FRAGMENT_CAPACITY);
 			if (channel.read(fragment) == -1) {
@@ -144,27 +145,27 @@ public class AsynchronousNode implements TokyoTyrantNode {
 	}
 	
 	void received(ByteBuffer fragment, Command<?> command) {
-		if (readBuffer == null) {
-			readBuffer = ByteBuffer.allocate(FRAGMENT_CAPACITY);
+		if (readingBuffer == null) {
+			readingBuffer = ByteBuffer.allocate(FRAGMENT_CAPACITY);
 		}
 		
-		readBuffer = BufferHelper.accumulateBuffer(readBuffer, fragment);
-		int pos = readBuffer.position();
-		readBuffer.flip();
-		if (command.decode(readBuffer)) {
-			logger.debug("Received message " + readBuffer);
+		readingBuffer = BufferHelper.accumulateBuffer(readingBuffer, fragment);
+		int pos = readingBuffer.position();
+		readingBuffer.flip();
+		if (command.decode(readingBuffer)) {
+			logger.debug("Received message " + readingBuffer);
 			command.complete();
-			readingQueue.remove();
+			readingCommands.remove();
 			
-			if (readBuffer.hasRemaining()) {
-				ByteBuffer newBuffer = ByteBuffer.allocate(readBuffer.remaining() + FRAGMENT_CAPACITY);
-				newBuffer.put(readBuffer);
-				readBuffer = newBuffer;
+			if (readingBuffer.hasRemaining()) {
+				ByteBuffer newBuffer = ByteBuffer.allocate(readingBuffer.remaining() + FRAGMENT_CAPACITY);
+				newBuffer.put(readingBuffer);
+				readingBuffer = newBuffer;
 			} else {
-				readBuffer = null;
+				readingBuffer = null;
 			}
 		} else {
-			readBuffer.position(pos);
+			readingBuffer.position(pos);
 		}
 	}
 	

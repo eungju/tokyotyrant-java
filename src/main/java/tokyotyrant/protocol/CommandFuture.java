@@ -47,7 +47,7 @@ public class CommandFuture<T> implements Future<T> {
 		command.cancel();
 		// This isn't exactly correct, but it's close enough.  If we're in
 		// a writing state, we *probably* haven't started.
-		return command.getState() == CommandState.WRITING;
+		return command.isWriting();
 	}
 
 	public boolean isCancelled() {
@@ -55,6 +55,6 @@ public class CommandFuture<T> implements Future<T> {
 	}
 
 	public boolean isDone() {
-		return command.getState() == CommandState.COMPLETE || command.hasError() ||command.isCancelled();
+		return command.isCompleted() || command.hasError() ||command.isCancelled();
 	}
 }

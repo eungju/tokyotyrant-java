@@ -6,7 +6,6 @@ import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
 import java.nio.channels.SocketChannel;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
@@ -23,12 +22,8 @@ public class AsynchronousNetworking implements Networking, Runnable {
 	private boolean running;
 
 	private List<AsynchronousNode> nodes;
-	
-	public AsynchronousNetworking(SocketAddress address) throws IOException {
-		this(Arrays.asList(address));
-	}
 
-	public AsynchronousNetworking(List<SocketAddress> addresses) throws IOException {
+	public AsynchronousNetworking(SocketAddress... addresses) throws IOException {
 		selector = Selector.open();
 		ioThread = new Thread(this);
 		
@@ -39,12 +34,12 @@ public class AsynchronousNetworking implements Networking, Runnable {
 	}
 
 	public void start() {
+		running = true;
+		ioThread.start();
+
 		for (AsynchronousNode each : nodes) {
 			each.start();
 		}
-
-		running = true;
-		ioThread.start();
 	}
 	
 	public void stop() {
@@ -61,8 +56,14 @@ public class AsynchronousNetworking implements Networking, Runnable {
 	}
 	
 	public void send(Command<?> command) {
-		AsynchronousNode node = nodes.get(0);
-		node.send(command);
+		AsynchronousNode selected = nodes.get(0);
+		for (AsynchronousNode each : nodes) {
+			if (each.isActive()) {
+				selected = each;
+				break;
+			}
+		}
+		selected.send(command);
 	}
 
 	public void run() {		
