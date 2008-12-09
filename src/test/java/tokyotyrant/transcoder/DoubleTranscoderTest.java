@@ -7,8 +7,7 @@ import java.nio.ByteOrder;
 import org.junit.Before;
 import org.junit.Test;
 
-public class DoubleTranscoderTest {
-	private DoubleTranscoder dut;
+public class DoubleTranscoderTest extends TranscoderTest {
 
 	@Before public void beforeEach() {
 		dut = new DoubleTranscoder(ByteOrder.BIG_ENDIAN);
@@ -23,7 +22,7 @@ public class DoubleTranscoderTest {
 	}
 
 	@Test(expected=IllegalArgumentException.class)
-	public void failToDecodeWhenNotADouble() {
+	public void shouldNotDecodeInvalid() {
 		dut.decode(new byte[] {0x01});
 	}
 }

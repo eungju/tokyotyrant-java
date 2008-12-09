@@ -9,9 +9,7 @@ import org.apache.commons.lang.builder.HashCodeBuilder;
 import org.junit.Before;
 import org.junit.Test;
 
-public class SerializableTranscoderTest {
-	private SerializableTranscoder dut;
-
+public class SerializableTranscoderTest extends TranscoderTest {
 	static class SerializableObject implements Serializable {
 		private static final long serialVersionUID = -8120203185641868658L;
 		public boolean equals(Object o) {

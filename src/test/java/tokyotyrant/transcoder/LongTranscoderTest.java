@@ -7,9 +7,7 @@ import java.nio.ByteOrder;
 import org.junit.Before;
 import org.junit.Test;
 
-public class LongTranscoderTest {
-	private LongTranscoder dut;
-
+public class LongTranscoderTest extends TranscoderTest {
 	@Before public void beforeEach() {
 		dut = new LongTranscoder(ByteOrder.BIG_ENDIAN);
 	}
@@ -23,7 +21,7 @@ public class LongTranscoderTest {
 	}
 
 	@Test(expected=IllegalArgumentException.class)
-	public void failToDecodeWhenInvalid() {
+	public void shouldNotDecodeInvalid() {
 		dut.decode(new byte[] {0x12, 0x34, 0x56, 0x78, 0x12, 0x34, 0x56, 0x78, (byte) 0x90});
 	}
 }

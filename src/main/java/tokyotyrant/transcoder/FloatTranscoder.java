@@ -17,11 +17,11 @@ public class FloatTranscoder implements Transcoder {
 	}
 
 	public byte[] encode(Object decoded) {
-		return ByteBuffer.allocate(4).order(byteOrder).putFloat((Float)decoded).array();
+		return ByteBuffer.allocate(Float.SIZE / 8).order(byteOrder).putFloat((Float) decoded).array();
 	}
 
-	public Object decode(byte[] encoded) {
-		if (encoded.length != 4) {
+	public Float decode(byte[] encoded) {
+		if (encoded.length != Float.SIZE / 8) {
 			throw new IllegalArgumentException("Unable to decode " + ArrayUtils.toString(encoded));
 		}
 		return ByteBuffer.wrap(encoded).order(byteOrder).getFloat();

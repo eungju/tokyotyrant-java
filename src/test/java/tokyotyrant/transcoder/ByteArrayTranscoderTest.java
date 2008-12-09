@@ -5,9 +5,7 @@ import static org.junit.Assert.*;
 import org.junit.Before;
 import org.junit.Test;
 
-public class ByteArrayTranscoderTest {
-	private ByteArrayTranscoder dut;
-
+public class ByteArrayTranscoderTest extends TranscoderTest {
 	@Before public void beforeEach() {
 		dut = new ByteArrayTranscoder();
 	}

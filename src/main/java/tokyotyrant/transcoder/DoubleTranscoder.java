@@ -17,11 +17,11 @@ public class DoubleTranscoder implements Transcoder {
 	}
 
 	public byte[] encode(Object decoded) {
-		return ByteBuffer.allocate(8).order(byteOrder).putDouble((Double)decoded).array();
+		return ByteBuffer.allocate(Double.SIZE / 8).order(byteOrder).putDouble((Double) decoded).array();
 	}
 
 	public Object decode(byte[] encoded) {
-		if (encoded.length != 8) {
+		if (encoded.length != Double.SIZE / 8) {
 			throw new IllegalArgumentException("Unable to decode " + ArrayUtils.toString(encoded));
 		}
 		return ByteBuffer.wrap(encoded).order(byteOrder).getDouble();

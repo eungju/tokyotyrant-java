@@ -8,9 +8,7 @@ import java.util.Date;
 import org.junit.Before;
 import org.junit.Test;
 
-public class SerializingTranscoderTest {
-	private SerializingTranscoder dut;
-
+public class SerializingTranscoderTest extends TranscoderTest {
 	@Before public void beforeEach() {
 		dut = new SerializingTranscoder();
 	}
@@ -32,7 +30,7 @@ public class SerializingTranscoderTest {
 	@Test public void transcodeInteger() {
 		int decoded = 42;
 		byte[] encoded = dut.encode(decoded);
-		assertEquals(SerializingTranscoder.TYPE_INT, encoded[0]);
+		assertEquals(SerializingTranscoder.TYPE_INTEGER, encoded[0]);
 		assertEquals(decoded, dut.decode(encoded));
 	}
 

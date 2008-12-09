@@ -17,11 +17,11 @@ public class IntegerTranscoder implements Transcoder {
 	}
 	
 	public byte[] encode(Object decoded) {
-		return ByteBuffer.allocate(4).order(byteOrder).putInt((Integer)decoded).array();
+		return ByteBuffer.allocate(Integer.SIZE / 8).order(byteOrder).putInt((Integer) decoded).array();
 	}
 
 	public Object decode(byte[] encoded) {
-		if (encoded.length != 4) {
+		if (encoded.length != Integer.SIZE / 8) {
 			throw new IllegalArgumentException("Unable to decode " + ArrayUtils.toString(encoded));
 		}
 		return ByteBuffer.wrap(encoded).order(byteOrder).getInt();

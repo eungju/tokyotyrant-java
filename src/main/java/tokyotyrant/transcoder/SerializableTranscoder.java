@@ -10,6 +10,10 @@ import org.apache.commons.lang.ArrayUtils;
 
 public class SerializableTranscoder implements Transcoder {
 	public byte[] encode(Object decoded) {
+		if (decoded == null) {
+			throw new NullPointerException("Cannot encode null");
+		}
+		
 		try {
 			ByteArrayOutputStream bos = new ByteArrayOutputStream();
 			ObjectOutputStream os = new ObjectOutputStream(bos);

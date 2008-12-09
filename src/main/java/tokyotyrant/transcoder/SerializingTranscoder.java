@@ -4,26 +4,29 @@ import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.util.Date;
 
-import org.apache.commons.lang.ArrayUtils;
-
 public class SerializingTranscoder implements Transcoder {
 	static final byte TYPE_STRING = 0;
 	static final byte TYPE_BOOLEAN = 1;
-	static final byte TYPE_INT = 2;
+	static final byte TYPE_INTEGER = 2;
 	static final byte TYPE_LONG = 3;
 	static final byte TYPE_DATE = 4;
 	static final byte TYPE_BYTE = 5;
 	static final byte TYPE_FLOAT = 6;
 	static final byte TYPE_DOUBLE = 7;
 	static final byte TYPE_BYTEARRAY = 8;
-	static final byte TYPE_SERIALIZABLE = (byte) 0xff;
-	
+	static final byte TYPE_SERIALIZABLE = Byte.MAX_VALUE;
+
+    /**
+     * Use network byte order.
+     */
 	private final ByteOrder byteOrder = ByteOrder.BIG_ENDIAN;
 	private final StringTranscoder stringTranscoder = new StringTranscoder();
+    private final ByteTranscoder byteTranscoder = new ByteTranscoder();
 	private final IntegerTranscoder integerTranscoder = new IntegerTranscoder(byteOrder);
 	private final LongTranscoder longTranscoder = new LongTranscoder(byteOrder);
 	private final FloatTranscoder floatTranscoder = new FloatTranscoder(byteOrder);
 	private final DoubleTranscoder doubleTranscoder = new DoubleTranscoder(byteOrder);
+    private final ByteArrayTranscoder byteArrayTranscoder = new ByteArrayTranscoder();
 	private final SerializableTranscoder serializableTranscoder = new SerializableTranscoder();
 	
 	public byte[] encode(Object decoded) {
@@ -34,9 +37,9 @@ public class SerializingTranscoder implements Transcoder {
 			body = stringTranscoder.encode(decoded);
 		} else if (decoded instanceof Boolean) {
 			typeFlag = TYPE_BOOLEAN;
-			body = encodeByte((byte)((Boolean)decoded ? 1 : 0));
+			body = byteTranscoder.encode(((Boolean)decoded ? 1 : 0));
 		} else if (decoded instanceof Integer) {
-			typeFlag = TYPE_INT;
+			typeFlag = TYPE_INTEGER;
 			body = integerTranscoder.encode(decoded);
 		} else if (decoded instanceof Long) {
 			typeFlag = TYPE_LONG;
@@ -46,7 +49,7 @@ public class SerializingTranscoder implements Transcoder {
 			body = longTranscoder.encode(((Date)decoded).getTime());
 		} else if (decoded instanceof Byte) {
 			typeFlag = TYPE_BYTE;
-			body = encodeByte((Byte)decoded);
+			body = byteTranscoder.encode(decoded);
 		} else if (decoded instanceof Float) {
 			typeFlag = TYPE_FLOAT;
 			body = floatTranscoder.encode(decoded);
@@ -55,7 +58,7 @@ public class SerializingTranscoder implements Transcoder {
 			body = doubleTranscoder.encode(decoded);
 		} else if (decoded instanceof byte[]) {
 			typeFlag = TYPE_BYTEARRAY;
-			body = (byte[])decoded;
+			body = byteArrayTranscoder.encode(decoded);
 		} else {
 			typeFlag = TYPE_SERIALIZABLE;
 			body = serializableTranscoder.encode(decoded);
@@ -77,9 +80,9 @@ public class SerializingTranscoder implements Transcoder {
 			decoded = stringTranscoder.decode(body);
 			break;
 		case TYPE_BOOLEAN:
-			decoded = decodeByte(body) == 0 ? false : true;
+			decoded = (Byte)byteTranscoder.decode(body) == 0 ? false : true;
 			break;
-		case TYPE_INT:
+		case TYPE_INTEGER:
 			decoded = integerTranscoder.decode(body);
 			break;
 		case TYPE_LONG:
@@ -89,7 +92,7 @@ public class SerializingTranscoder implements Transcoder {
 			decoded = new Date((Long)longTranscoder.decode(body));
 			break;
 		case TYPE_BYTE:
-			decoded = decodeByte(body);
+			decoded = byteTranscoder.decode(body);
 			break;
 		case TYPE_FLOAT:
 			decoded = floatTranscoder.decode(body);
@@ -98,22 +101,11 @@ public class SerializingTranscoder implements Transcoder {
 			decoded = doubleTranscoder.decode(body);
 			break;
 		case TYPE_BYTEARRAY:
-			decoded = body;
+			decoded = byteArrayTranscoder.decode(body);
 			break;
 		default:
 			decoded = serializableTranscoder.decode(body);
 		}
 		return decoded;
-	}
-	
-	byte[] encodeByte(byte decoded) {
-		return new byte[] { decoded };
-	}
-	
-	byte decodeByte(byte[] encoded) {
-		if (encoded.length != 1) {
-			throw new IllegalArgumentException("Unable to decode " + ArrayUtils.toString(encoded));
-		}
-		return encoded[0];
 	}
 }

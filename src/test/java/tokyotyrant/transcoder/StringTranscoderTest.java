@@ -7,8 +7,7 @@ import java.io.UnsupportedEncodingException;
 import org.junit.Before;
 import org.junit.Test;
 
-public class StringTranscoderTest {
-	private StringTranscoder dut;
+public class StringTranscoderTest extends TranscoderTest {
 	private String characterEncoding = "ISO-8859-1";
 	
 	@Before public void beforeEach() {

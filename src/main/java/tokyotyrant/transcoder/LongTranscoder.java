@@ -17,11 +17,11 @@ public class LongTranscoder implements Transcoder {
 	}
 	
 	public byte[] encode(Object decoded) {
-		return ByteBuffer.allocate(8).order(byteOrder).putLong((Long)decoded).array();
+		return ByteBuffer.allocate(Long.SIZE / 8).order(byteOrder).putLong((Long) decoded).array();
 	}
 
 	public Object decode(byte[] encoded) {
-		if (encoded.length != 8) {
+		if (encoded.length != Long.SIZE / 8) {
 			throw new IllegalArgumentException("Unable to decode " + ArrayUtils.toString(encoded));
 		}
 		return ByteBuffer.wrap(encoded).order(byteOrder).getLong();
