@@ -18,7 +18,7 @@ public class SerializableTranscoder implements Transcoder {
 			bos.close();
 			return bos.toByteArray();
 		} catch (IOException e) {
-			throw new IllegalArgumentException("Unable to serialize " + decoded, e);
+			throw new IllegalArgumentException("Unable to encode " + decoded, e);
 		}
 	}
 
@@ -31,9 +31,9 @@ public class SerializableTranscoder implements Transcoder {
 			bis.close();
 			return decoded;
 		} catch (IOException e) {
-			throw new IllegalArgumentException("Unable to deserialize " + ArrayUtils.toString(encoded), e);
+			throw new IllegalArgumentException("Unable to decode " + ArrayUtils.toString(encoded), e);
 		} catch (ClassNotFoundException e) {
-			throw new IllegalArgumentException("Unable to deserialize " + ArrayUtils.toString(encoded), e);
+			throw new IllegalArgumentException("Unable to decode " + ArrayUtils.toString(encoded), e);
 		}
 	}
 }

@@ -4,17 +4,21 @@ import static org.junit.Assert.*;
 
 import java.io.Serializable;
 
+import org.apache.commons.lang.builder.EqualsBuilder;
+import org.apache.commons.lang.builder.HashCodeBuilder;
 import org.junit.Before;
 import org.junit.Test;
 
 public class SerializableTranscoderTest {
 	private SerializableTranscoder dut;
 
-	static class DummyObject implements Serializable {
+	static class SerializableObject implements Serializable {
 		private static final long serialVersionUID = -8120203185641868658L;
-		int attr;
-		public DummyObject(int attr) {
-			this.attr = attr;
+		public boolean equals(Object o) {
+			return EqualsBuilder.reflectionEquals(this, o);
+		}
+		public int hashCode() {
+			return HashCodeBuilder.reflectionHashCode(this);
 		}
 	}
 	
@@ -23,10 +27,10 @@ public class SerializableTranscoderTest {
 	}
 	
 	@Test public void encode() {
-		assertNotNull(dut.encode(new DummyObject(1)));
+		assertNotNull(dut.encode(new SerializableObject()));
 	}
 
 	@Test public void decode() {
-		assertEquals(1, ((DummyObject)dut.decode(dut.encode(new DummyObject(1)))).attr);
+		assertEquals(new SerializableObject(), ((SerializableObject)dut.decode(dut.encode(new SerializableObject()))));
 	}
 }

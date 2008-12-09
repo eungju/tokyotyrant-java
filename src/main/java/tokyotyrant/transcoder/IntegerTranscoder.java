@@ -3,8 +3,10 @@ package tokyotyrant.transcoder;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 
+import org.apache.commons.lang.ArrayUtils;
+
 public class IntegerTranscoder implements Transcoder {
-	private ByteOrder byteOrder;
+	private final ByteOrder byteOrder;
 
 	public IntegerTranscoder() {
 		this(ByteOrder.nativeOrder());
@@ -20,7 +22,7 @@ public class IntegerTranscoder implements Transcoder {
 
 	public Object decode(byte[] encoded) {
 		if (encoded.length != 4) {
-			throw new IllegalArgumentException("It's not an integer. Integers are 4 bytes");
+			throw new IllegalArgumentException("Unable to decode " + ArrayUtils.toString(encoded));
 		}
 		return ByteBuffer.wrap(encoded).order(byteOrder).getInt();
 	}

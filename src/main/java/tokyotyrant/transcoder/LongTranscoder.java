@@ -5,25 +5,25 @@ import java.nio.ByteOrder;
 
 import org.apache.commons.lang.ArrayUtils;
 
-public class DoubleTranscoder implements Transcoder {
+public class LongTranscoder implements Transcoder {
 	private final ByteOrder byteOrder;
 
-	public DoubleTranscoder() {
+	public LongTranscoder() {
 		this(ByteOrder.nativeOrder());
 	}
 	
-	public DoubleTranscoder(ByteOrder byteOrder) {
+	public LongTranscoder(ByteOrder byteOrder) {
 		this.byteOrder = byteOrder;
 	}
-
+	
 	public byte[] encode(Object decoded) {
-		return ByteBuffer.allocate(8).order(byteOrder).putDouble((Double)decoded).array();
+		return ByteBuffer.allocate(8).order(byteOrder).putLong((Long)decoded).array();
 	}
 
 	public Object decode(byte[] encoded) {
 		if (encoded.length != 8) {
 			throw new IllegalArgumentException("Unable to decode " + ArrayUtils.toString(encoded));
 		}
-		return ByteBuffer.wrap(encoded).order(byteOrder).getDouble();
+		return ByteBuffer.wrap(encoded).order(byteOrder).getLong();
 	}
 }
