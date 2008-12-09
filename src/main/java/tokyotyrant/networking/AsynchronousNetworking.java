@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.net.SocketAddress;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
-import java.nio.channels.SocketChannel;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -22,6 +21,7 @@ public class AsynchronousNetworking implements Networking, Runnable {
 	private boolean running;
 
 	private List<AsynchronousNode> nodes;
+	private ReconnectQueue reconnectQueue = new ReconnectQueue();
 
 	public AsynchronousNetworking(SocketAddress... addresses) throws IOException {
 		selector = Selector.open();
@@ -38,13 +38,18 @@ public class AsynchronousNetworking implements Networking, Runnable {
 		ioThread.start();
 
 		for (AsynchronousNode each : nodes) {
-			each.start();
+			try {
+				each.connect();
+			} catch (IOException e) {
+				log.error("Cannot open connection to " + each, e);
+				reconnectQueue.push(each);
+			}
 		}
 	}
 	
 	public void stop() {
 		for (AsynchronousNode each : nodes) {
-			each.stop();
+			each.disconnect();
 		}
 
 		running = false;
@@ -69,71 +74,48 @@ public class AsynchronousNetworking implements Networking, Runnable {
 	public void run() {		
 		while (running) {
 			try {
-				log.debug("Selecting...");
-				int n = selector.select();
-				log.debug("{} keys are selected", n);
-				if (!selector.isOpen()) {
-					continue;
-				}
-				Set<SelectionKey> selectedKeys = selector.selectedKeys();
-				Iterator<SelectionKey> i = selectedKeys.iterator();
-				while (i.hasNext()) {
-					SelectionKey key = i.next();
-					i.remove();
-					SocketChannel channel = (SocketChannel)key.channel();
-					AsynchronousNode node = (AsynchronousNode)key.attachment();
-					
-					if (!key.isValid()) {
-						log.warn("SelectionKey {} is not valid", key);
-					} else if (!channel.isOpen()) {
-						log.warn("Channel {} is not open", channel);
-					} else if (key.isConnectable()) {
-						log.debug("Ready to connect to {}", node);
-						
-						doConnect(node);
-					} else {
-						if (key.isReadable()) {
-							log.debug("Ready to read from {}", node);
-						 
-							doRead(node);
-						}
-						if (key.isWritable()) {
-							log.debug("Ready to write to {}", node);
-							
-							doWrite(node);
-						}
-					}
-				}
+				handleIO();
 			} catch (Exception e) {
-				log.error("Error while processing network communication", e);
+				log.error("Error while handling IO", e);
 			}
 		}
 	}
-
-	void doConnect(AsynchronousNode node) {
-		try {
-			node.doConnect();
-		} catch (IOException e) {
-			log.error("Error while connecting to " + node, e);
-			node.reconnect();
+	
+	void handleIO() throws IOException {
+		log.debug("Selecting...");
+		int n = selector.select(reconnectQueue.getTimeToNextAttempt());
+		log.debug("{} keys are selected", n);
+		
+		Set<SelectionKey> selectedKeys = selector.selectedKeys();
+		Iterator<SelectionKey> i = selectedKeys.iterator();
+		while (i.hasNext()) {
+			SelectionKey key = i.next();
+			i.remove();
+			handleChannelIO(key);
 		}
+		
+		reconnectQueue.reconnect();
 	}
 	
-	void doWrite(AsynchronousNode node) {
+	void handleChannelIO(SelectionKey key) {
+		AsynchronousNode node = (AsynchronousNode)key.attachment();
 		try {
-			node.doWrite();
-		} catch (IOException e) {
-			log.error("Error while writing to " + node, e);
-			node.reconnect();
-		}
-	}
-
-	void doRead(AsynchronousNode node) {
-		try {
-			node.doRead();
-		} catch (IOException e) {
-			log.error("Error while reading from " + node, e);
-			node.reconnect();
+			if (key.isConnectable()) {
+				log.debug("Ready to connect to {}", node);
+				node.doConnect();
+			} else {
+				if (key.isReadable()) {
+					log.debug("Ready to read from {}", node);
+					node.doRead();
+				}
+				if (key.isWritable()) {
+					log.debug("Ready to write to {}", node);
+					node.doWrite();
+				}
+			}
+		} catch (Exception e) {
+			log.error("Error while handling IO on " + node, e);
+			reconnectQueue.push(node);
 		}
 	}
 }

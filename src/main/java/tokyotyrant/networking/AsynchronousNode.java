@@ -33,14 +33,6 @@ public class AsynchronousNode implements TokyoTyrantNode {
 		this.selector = selector;
 	}
 		
-	public void start() {
-		connect();
-	}
-
-	public void stop() {
-		disconnect();
-	}
-
 	public void send(Command<?> command) {
 		writingCommands.add(command);
 		fixupOperations();
@@ -60,21 +52,21 @@ public class AsynchronousNode implements TokyoTyrantNode {
 	public boolean isActive() {
 		return reconnectAttempt == 0 && channel != null && channel.isConnected();
 	}
+	
+	public int getReconnectAttempt() {
+		return reconnectAttempt;
+	}
 
-	public void connect() {
-		try {
-			channel = SocketChannel.open();
-			channel.configureBlocking(false);
-			channel.connect(address);
-			selectionKey = channel.register(selector, SelectionKey.OP_CONNECT, this);
-		} catch (IOException e) {
-			logger.error("Cannot open connection to " + address, e);
-		}
+	public void connect() throws IOException {
+		channel = SocketChannel.open();
+		channel.configureBlocking(false);
+		channel.connect(address);
+		selectionKey = channel.register(selector, SelectionKey.OP_CONNECT, this);
 	}
 
 	public void disconnect() {
 		readingCommands.clear();
-		readingBuffer.clear();
+		readingBuffer = null;
 		try {
 			selectionKey.cancel();
 			channel.close();
@@ -83,11 +75,9 @@ public class AsynchronousNode implements TokyoTyrantNode {
 		}
 	}
 
-	public void reconnect() {
+	public void reconnecting() {
 		logger.info("Reconnecting to " + address);
 		reconnectAttempt++;
-		disconnect();
-		connect();
 	}
 
 	void fixupOperations() {

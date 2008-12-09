@@ -4,19 +4,25 @@ import java.io.IOException;
 
 import tokyotyrant.protocol.Command;
 
-
 public interface TokyoTyrantNode {
-	void start();
-	
-	void stop();
-
 	void send(Command<?> command) throws IOException;
-	
+
 	boolean isActive();
-	
-	void connect();
-	
+
+	int getReconnectAttempt();
+
+	/**
+	 * Open connection.
+	 */
+	void connect() throws IOException;
+
+	/**
+	 * Disconnect connection.
+	 */
 	void disconnect();
-	
-	void reconnect();
+
+	/**
+	 * {@link Networking} notice the reconnection to this node.
+	 */
+	void reconnecting();
 }
