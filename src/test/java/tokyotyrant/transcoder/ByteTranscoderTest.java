@@ -11,11 +11,13 @@ public class ByteTranscoderTest extends TranscoderTest {
 	}
 	
 	@Test public void encode() {
-		assertArrayEquals(new byte[] {0x12}, dut.encode(0x12));
+		byte value = 0x12;
+		assertArrayEquals(new byte[] { value }, dut.encode(value));
 	}
 	
 	@Test public void decode() {
-		assertEquals(0x12, dut.decode(new byte[] {0x12}));
+		byte value = 0x12;
+		assertEquals(value, dut.decode(new byte[] { value }));
 	}
 
 	@Test(expected=IllegalArgumentException.class)

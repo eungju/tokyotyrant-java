@@ -37,7 +37,7 @@ public class SerializingTranscoder implements Transcoder {
 			body = stringTranscoder.encode(decoded);
 		} else if (decoded instanceof Boolean) {
 			typeFlag = TYPE_BOOLEAN;
-			body = byteTranscoder.encode(((Boolean)decoded ? 1 : 0));
+			body = byteTranscoder.encode(((byte) (decoded.equals(Boolean.FALSE) ? 0 : 1)));
 		} else if (decoded instanceof Integer) {
 			typeFlag = TYPE_INTEGER;
 			body = integerTranscoder.encode(decoded);
@@ -46,7 +46,7 @@ public class SerializingTranscoder implements Transcoder {
 			body = longTranscoder.encode(decoded);
 		} else if (decoded instanceof Date) {
 			typeFlag = TYPE_DATE;
-			body = longTranscoder.encode(((Date)decoded).getTime());
+			body = longTranscoder.encode(((Date) decoded).getTime());
 		} else if (decoded instanceof Byte) {
 			typeFlag = TYPE_BYTE;
 			body = byteTranscoder.encode(decoded);
@@ -80,7 +80,7 @@ public class SerializingTranscoder implements Transcoder {
 			decoded = stringTranscoder.decode(body);
 			break;
 		case TYPE_BOOLEAN:
-			decoded = (Byte)byteTranscoder.decode(body) == 0 ? false : true;
+			decoded = (Byte) byteTranscoder.decode(body) == 0 ? false : true;
 			break;
 		case TYPE_INTEGER:
 			decoded = integerTranscoder.decode(body);
@@ -89,7 +89,7 @@ public class SerializingTranscoder implements Transcoder {
 			decoded = longTranscoder.decode(body);
 			break;
 		case TYPE_DATE:
-			decoded = new Date((Long)longTranscoder.decode(body));
+			decoded = new Date((Long) longTranscoder.decode(body));
 			break;
 		case TYPE_BYTE:
 			decoded = byteTranscoder.decode(body);
