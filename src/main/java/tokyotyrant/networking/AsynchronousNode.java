@@ -19,11 +19,12 @@ import tokyotyrant.protocol.Command;
 public class AsynchronousNode implements TokyoTyrantNode {
 	private final Logger logger = LoggerFactory.getLogger(getClass());
 	private SocketAddress address;
-	private int reconnectAttempt = 1;
 
 	private Selector selector;
 	private SocketChannel channel;
 	private SelectionKey selectionKey;
+	private int reconnecting = 0;
+	
 	private BlockingQueue<Command<?>> writingCommands = new ArrayBlockingQueue<Command<?>>(16 * 1024);
 	private BlockingQueue<Command<?>> readingCommands = new ArrayBlockingQueue<Command<?>>(16 * 1024);
 	private ByteBuffer readingBuffer;
@@ -39,22 +40,12 @@ public class AsynchronousNode implements TokyoTyrantNode {
 		selector.wakeup();
 	}
 
-	void sendRequest(Command<?> command) throws IOException {
-		ByteBuffer buffer = command.encode();
-		int written = 0;
-		do {
-			int n = channel.write(buffer);
-			written += n;
-		} while (written != buffer.limit());
-		logger.debug("Sent message " + buffer);
-	}
-
 	public boolean isActive() {
-		return reconnectAttempt == 0 && channel != null && channel.isConnected();
+		return reconnecting == 0 && channel != null && channel.isConnected();
 	}
 	
 	public int getReconnectAttempt() {
-		return reconnectAttempt;
+		return reconnecting;
 	}
 
 	public void connect() throws IOException {
@@ -77,7 +68,7 @@ public class AsynchronousNode implements TokyoTyrantNode {
 
 	public void reconnecting() {
 		logger.info("Reconnecting to " + address);
-		reconnectAttempt++;
+		reconnecting++;
 	}
 
 	void fixupOperations() {
@@ -98,7 +89,7 @@ public class AsynchronousNode implements TokyoTyrantNode {
 	public void doConnect() throws IOException {
 		channel.finishConnect();
 		fixupOperations();
-		reconnectAttempt = 0;
+		reconnecting = 0;
 	}
 
 	private static final int FRAGMENT_CAPACITY = 2 * 1024;
@@ -116,7 +107,17 @@ public class AsynchronousNode implements TokyoTyrantNode {
 		}
 		fixupOperations();
 	}
-	
+
+	void sendRequest(Command<?> command) throws IOException {
+		ByteBuffer buffer = command.encode();
+		int written = 0;
+		do {
+			int n = channel.write(buffer);
+			written += n;
+		} while (written != buffer.limit());
+		logger.debug("Sent message " + buffer);
+	}
+
 	public void doRead() throws IOException {
 		Command<?> command = readingCommands.peek();
 		try {

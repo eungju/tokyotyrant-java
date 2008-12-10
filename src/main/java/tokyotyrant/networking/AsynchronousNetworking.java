@@ -85,6 +85,10 @@ public class AsynchronousNetworking implements Networking, Runnable {
 		log.debug("Selecting...");
 		int n = selector.select(reconnectQueue.getTimeToNextAttempt());
 		log.debug("{} keys are selected", n);
+		if (!running) {
+			log.info("Stopped. So will not handle IO. {} keys will be ignored", n);
+			return;
+		}
 		
 		Set<SelectionKey> selectedKeys = selector.selectedKeys();
 		Iterator<SelectionKey> i = selectedKeys.iterator();
