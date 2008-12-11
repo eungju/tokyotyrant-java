@@ -26,8 +26,9 @@ public class AsynchronousNode implements TokyoTyrantNode {
 	private int reconnecting = 0;
 	
 	private BlockingQueue<Command<?>> writingCommands = new ArrayBlockingQueue<Command<?>>(16 * 1024);
+	private ByteBuffer writingBuffer = null;
 	private BlockingQueue<Command<?>> readingCommands = new ArrayBlockingQueue<Command<?>>(16 * 1024);
-	private ByteBuffer readingBuffer;
+	private ByteBuffer readingBuffer = null;
 	
 	public AsynchronousNode(SocketAddress address, Selector selector) {
 		this.address = address;
@@ -96,26 +97,23 @@ public class AsynchronousNode implements TokyoTyrantNode {
 	
 	public void doWrite() throws IOException {
 		Command<?> command = writingCommands.peek();
+		if (writingBuffer == null) {
+			writingBuffer = command.encode();
+		}
 		try {
-			sendRequest(command);
-			writingCommands.remove();
-			command.reading();
-			readingCommands.add(command);
+			channel.write(writingBuffer);
+			if (!writingBuffer.hasRemaining()) {
+				writingBuffer = null;
+				Command<?> _removed = writingCommands.remove();
+				assert _removed == command;
+				command.reading();
+				readingCommands.add(command);
+			}
 		} catch (IOException exception) {
 			command.error(exception);
 			throw exception;
 		}
 		fixupOperations();
-	}
-
-	void sendRequest(Command<?> command) throws IOException {
-		ByteBuffer buffer = command.encode();
-		int written = 0;
-		do {
-			int n = channel.write(buffer);
-			written += n;
-		} while (written != buffer.limit());
-		logger.debug("Sent message " + buffer);
 	}
 
 	public void doRead() throws IOException {
@@ -146,7 +144,8 @@ public class AsynchronousNode implements TokyoTyrantNode {
 		if (command.decode(readingBuffer)) {
 			logger.debug("Received message " + readingBuffer);
 			command.complete();
-			readingCommands.remove();
+			Command<?> _removed = readingCommands.remove();
+			assert _removed == command;
 			
 			if (readingBuffer.hasRemaining()) {
 				ByteBuffer newBuffer = ByteBuffer.allocate(readingBuffer.remaining() + FRAGMENT_CAPACITY);
