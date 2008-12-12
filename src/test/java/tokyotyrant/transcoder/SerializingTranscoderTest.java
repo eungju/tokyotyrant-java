@@ -82,4 +82,19 @@ public class SerializingTranscoderTest extends TranscoderTest {
 		assertEquals(SerializingTranscoder.TYPE_SERIALIZABLE, encoded[0]);
 		assertEquals(decoded, dut.decode(encoded));
 	}
+
+	@Test public void shouldNotCompressWhenUnderThreshold() {
+		dut = new SerializingTranscoder(1024);
+		byte flag = dut.encode(new byte[1024])[0];
+		assertEquals(SerializingTranscoder.TYPE_BYTEARRAY, flag);
+	}
+
+	@Test public void shouldCompressionWhenExceedThreshold() {
+		dut = new SerializingTranscoder(1024);
+		byte[] decoded = new byte[1024 + 1];
+		byte[] encoded = dut.encode(decoded);
+		assertEquals(SerializingTranscoder.COMPRESSED, encoded[0] & SerializingTranscoder.COMPRESSED);
+		assertEquals(SerializingTranscoder.TYPE_BYTEARRAY, encoded[0] & ~SerializingTranscoder.COMPRESSED);
+		assertArrayEquals(decoded, (byte[]) dut.decode(encoded));
+	}
 }
