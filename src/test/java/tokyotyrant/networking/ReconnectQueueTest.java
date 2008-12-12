@@ -66,7 +66,7 @@ public class ReconnectQueueTest {
 			one(node).reconnecting();
 			one(node).getReconnectAttempt(); will(returnValue(1));
 			
-			one(node).connect();
+			one(node).connect(); will(returnValue(true));
 		}});
 		dut.push(node);
 		now += dut.backoff(1) + 1;
@@ -86,8 +86,8 @@ public class ReconnectQueueTest {
 			one(node2).reconnecting();
 			one(node2).getReconnectAttempt(); will(returnValue(2));
 
-			one(node1).connect(); will(throwException(new IOException("Connection refused")));
-			one(node2).connect();
+			one(node1).connect(); will(returnValue(false));
+			one(node2).connect(); will(returnValue(true));
 			
 			one(node1).disconnect();
 			one(node1).reconnecting();

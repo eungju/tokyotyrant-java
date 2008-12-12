@@ -1,6 +1,5 @@
 package tokyotyrant.networking;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -27,6 +26,7 @@ public class ReconnectQueue {
 	}
 	
 	public void push(TokyoTyrantNode node) {
+		assert !queue.containsValue(node);
 		node.disconnect();
 		node.reconnecting();
 		queue.put(findEmptyTimeSlot(now() + backoff(node)), node);
@@ -50,17 +50,15 @@ public class ReconnectQueue {
 	}
 	
 	public void reconnect() {
-		List<TokyoTyrantNode> notActivatedYet = new ArrayList<TokyoTyrantNode>();
+		List<TokyoTyrantNode> failedNodes = new ArrayList<TokyoTyrantNode>();
 		for (Iterator<TokyoTyrantNode> i = queue.headMap(now()).values().iterator(); i.hasNext(); ) {
 			TokyoTyrantNode node = i.next();
 			i.remove();
-			try {
-				node.connect();
-			} catch (IOException e) {
-				notActivatedYet.add(node);
+			if (!node.connect()) {
+				failedNodes.add(node);
 			}
 		}
-		for (TokyoTyrantNode each : notActivatedYet) {
+		for (TokyoTyrantNode each : failedNodes) {
 			push(each);
 		}
 	}

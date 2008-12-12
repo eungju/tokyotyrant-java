@@ -49,11 +49,17 @@ public class AsynchronousNode implements TokyoTyrantNode {
 		return reconnecting;
 	}
 
-	public void connect() throws IOException {
-		channel = SocketChannel.open();
-		channel.configureBlocking(false);
-		channel.connect(address);
-		selectionKey = channel.register(selector, SelectionKey.OP_CONNECT, this);
+	public boolean connect() {
+		try {
+			channel = SocketChannel.open();
+			channel.configureBlocking(false);
+			channel.connect(address);
+			selectionKey = channel.register(selector, SelectionKey.OP_CONNECT, this);
+			return true;
+		} catch (IOException e) {
+			logger.error("Error while opening connection to " + address, e);
+			return false;
+		}
 	}
 
 	public void disconnect() {

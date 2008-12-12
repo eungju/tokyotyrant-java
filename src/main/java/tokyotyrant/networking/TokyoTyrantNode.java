@@ -1,11 +1,9 @@
 package tokyotyrant.networking;
 
-import java.io.IOException;
-
 import tokyotyrant.protocol.Command;
 
 public interface TokyoTyrantNode {
-	void send(Command<?> command) throws IOException;
+	void send(Command<?> command);
 
 	boolean isActive();
 
@@ -14,7 +12,7 @@ public interface TokyoTyrantNode {
 	/**
 	 * Open connection.
 	 */
-	void connect() throws IOException;
+	boolean connect();
 
 	/**
 	 * Disconnect connection.
