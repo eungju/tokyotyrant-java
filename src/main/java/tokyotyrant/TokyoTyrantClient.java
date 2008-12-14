@@ -57,6 +57,10 @@ public class TokyoTyrantClient {
 	}
 
 	<T> Future<T> execute(Command<T> command) throws IOException {
+		return execute(command, valueTranscoder);
+	}
+
+	<T> Future<T> execute(Command<T> command, Transcoder valueTranscoder) throws IOException {
 		command.setKeyTranscoder(keyTranscoder);
 		command.setValueTranscoder(valueTranscoder);
 		CommandFuture<T> future = new CommandFuture<T>(command, globalTimeout);
@@ -68,20 +72,40 @@ public class TokyoTyrantClient {
 		return execute(new Put(key, value));
 	}
 
+	public Future<Boolean> put(Object key, Object value, Transcoder valueTranscoder) throws IOException {
+		return execute(new Put(key, value), valueTranscoder);
+	}
+
 	public Future<Boolean> putkeep(Object key, Object value) throws IOException {
 		return execute(new Putkeep(key, value));
+	}
+
+	public Future<Boolean> putkeep(Object key, Object value, Transcoder valueTranscoder) throws IOException {
+		return execute(new Putkeep(key, value), valueTranscoder);
 	}
 
 	public Future<Boolean> putcat(Object key, Object value) throws IOException {
 		return execute(new Putcat(key, value));
 	}
 
+	public Future<Boolean> putcat(Object key, Object value, Transcoder valueTranscoder) throws IOException {
+		return execute(new Putcat(key, value), valueTranscoder);
+	}
+
 	public Future<Boolean> putshl(Object key, Object value, int width) throws IOException {
 		return execute(new Putshl(key, value, width));
 	}
 
+	public Future<Boolean> putshl(Object key, Object value, int width, Transcoder valueTranscoder) throws IOException {
+		return execute(new Putshl(key, value, width), valueTranscoder);
+	}
+
 	public void putnr(Object key, Object value) throws IOException {
 		execute(new Putnr(key, value));
+	}
+
+	public void putnr(Object key, Object value, Transcoder valueTranscoder) throws IOException {
+		execute(new Putnr(key, value), valueTranscoder);
 	}
 
 	public Future<Boolean> out(Object key) throws IOException {
@@ -92,8 +116,16 @@ public class TokyoTyrantClient {
 		return execute(new Get(key));
 	}
 	
-	public Future<Map<Object, Object>> mget(Object... keys) throws IOException {
+	public Future<Object> get(Object key, Transcoder valueTranscoder) throws IOException {
+		return execute(new Get(key), valueTranscoder);
+	}
+
+	public Future<Map<Object, Object>> mget(Object[] keys) throws IOException {
 		return execute(new Mget(keys));
+	}
+
+	public Future<Map<Object, Object>> mget(Object[] keys, Transcoder valueTranscoder) throws IOException {
+		return execute(new Mget(keys), valueTranscoder);
 	}
 
 	public Future<Integer> vsiz(Object key) throws IOException {
@@ -122,6 +154,10 @@ public class TokyoTyrantClient {
 
 	public Future<Object> ext(String name, Object key, Object value, int opts) throws IOException {
 		return execute(new Ext(name, key, value, opts));
+	}
+
+	public Future<Object> ext(String name, Object key, Object value, int opts, Transcoder valueTranscoder) throws IOException {
+		return execute(new Ext(name, key, value, opts), valueTranscoder);
 	}
 
 	public Future<Boolean> sync() throws IOException {

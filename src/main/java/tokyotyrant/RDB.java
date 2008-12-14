@@ -227,6 +227,10 @@ public class RDB {
 		return execute(new Putkeep(key, value));
 	}
 
+	public boolean putkeep(Object key, Object value, Transcoder valueTranscoder) throws IOException {
+		return execute(new Putkeep(key, value), valueTranscoder);
+	}
+
 	/**
 	 * Concatenate a value at the end of the existing record.
 	 * If there is no corresponding record, a new record is created.
@@ -237,6 +241,10 @@ public class RDB {
 	 */
 	public boolean putcat(Object key, Object value) throws IOException {
 		return execute(new Putcat(key, value));
+	}
+
+	public boolean putcat(Object key, Object value, Transcoder valueTranscoder) throws IOException {
+		return execute(new Putcat(key, value), valueTranscoder);
 	}
 
 	/**
@@ -252,6 +260,10 @@ public class RDB {
 		return execute(new Putshl(key, value, width));
 	}
 
+	public boolean putshl(Object key, Object value, int width, Transcoder valueTranscoder) throws IOException {
+		return execute(new Putshl(key, value, width), valueTranscoder);
+	}
+
 	/**
 	 * Store a record without response from the server
 	 * If a record with the same key exists in the database, it is overwritten.
@@ -261,6 +273,10 @@ public class RDB {
 	 */
 	public void putnr(Object key, Object value) throws IOException {
 		execute(new Putnr(key, value));
+	}
+
+	public void putnr(Object key, Object value, Transcoder valueTranscoder) throws IOException {
+		execute(new Putnr(key, value), valueTranscoder);
 	}
 
 	/**
@@ -282,15 +298,23 @@ public class RDB {
 	public Object get(Object key) throws IOException {
 		return execute(new Get(key));
 	}
-	
+
+	public Object get(Object key, Transcoder valueTranscoder) throws IOException {
+		return execute(new Get(key), valueTranscoder);
+	}
+
 	/**
 	 * Retrieve records.
 	 * 
 	 * @param keys specifies an array containing the retrieval keys.
 	 * @return If successful, the return value is the map contains corresponding values, else, it is {@code null}. As a result of this method, keys existing in the database have the corresponding values and keys not existing in the database are removed.
 	 */
-	public Map<Object, Object> mget(Object... keys) throws IOException {
+	public Map<Object, Object> mget(Object[] keys) throws IOException {
 		return execute(new Mget(keys));
+	}
+	
+	public Map<Object, Object> mget(Object[] keys, Transcoder valueTranscoder) throws IOException {
+		return execute(new Mget(keys), valueTranscoder);
 	}
 
 	/**
@@ -370,6 +394,10 @@ public class RDB {
 	 */
 	public Object ext(String name, Object key, Object value, int opts) throws IOException {
 		return execute(new Ext(name, key, value, opts));
+	}
+
+	public Object ext(String name, Object key, Object value, int opts, Transcoder valueTranscoder) throws IOException {
+		return execute(new Ext(name, key, value, opts), valueTranscoder);
 	}
 
 	/**
