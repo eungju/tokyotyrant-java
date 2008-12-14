@@ -54,7 +54,7 @@ public class SerializingTranscoder implements Transcoder {
 			body = stringTranscoder.encode(decoded);
 		} else if (decoded instanceof Boolean) {
 			flag = TYPE_BOOLEAN;
-			body = byteTranscoder.encode(((byte) (decoded.equals(Boolean.FALSE) ? 0 : 1)));
+			body = encodeBoolean((Boolean) decoded);
 		} else if (decoded instanceof Integer) {
 			flag = TYPE_INTEGER;
 			body = integerTranscoder.encode(decoded);
@@ -63,7 +63,7 @@ public class SerializingTranscoder implements Transcoder {
 			body = longTranscoder.encode(decoded);
 		} else if (decoded instanceof Date) {
 			flag = TYPE_DATE;
-			body = longTranscoder.encode(((Date) decoded).getTime());
+			body = encodeDate((Date) decoded);
 		} else if (decoded instanceof Byte) {
 			flag = TYPE_BYTE;
 			body = byteTranscoder.encode(decoded);
@@ -107,7 +107,7 @@ public class SerializingTranscoder implements Transcoder {
 			decoded = stringTranscoder.decode(body);
 			break;
 		case TYPE_BOOLEAN:
-			decoded = (Byte) byteTranscoder.decode(body) == 0 ? false : true;
+			decoded = decodeBoolean(body);
 			break;
 		case TYPE_INTEGER:
 			decoded = integerTranscoder.decode(body);
@@ -116,7 +116,7 @@ public class SerializingTranscoder implements Transcoder {
 			decoded = longTranscoder.decode(body);
 			break;
 		case TYPE_DATE:
-			decoded = new Date((Long) longTranscoder.decode(body));
+			decoded = decodeDate(body);
 			break;
 		case TYPE_BYTE:
 			decoded = byteTranscoder.decode(body);
@@ -134,6 +134,22 @@ public class SerializingTranscoder implements Transcoder {
 			decoded = serializableTranscoder.decode(body);
 		}
 		return decoded;
+	}
+	
+	byte[] encodeBoolean(boolean value) {
+		return byteTranscoder.encode(((byte) (value ? 1 : 0)));		
+	}
+	
+	Boolean decodeBoolean(byte[] body) {
+		return (Byte) byteTranscoder.decode(body) == 0 ? false : true;
+	}
+	
+	byte[] encodeDate(Date value) {
+		return longTranscoder.encode((value).getTime());
+	}
+	
+	Date decodeDate(byte[] body) {
+		return new Date((Long) longTranscoder.decode(body));
 	}
 
 	byte[] compress(byte[] data) {
