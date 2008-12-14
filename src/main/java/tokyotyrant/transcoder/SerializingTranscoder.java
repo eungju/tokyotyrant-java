@@ -11,6 +11,11 @@ import java.util.zip.GZIPOutputStream;
 
 import org.apache.commons.io.IOUtils;
 
+/**
+ * [flag:1][body:*]
+ * flag: A 8-bit integer standing for the flag. MSB is compression mark. 6-0 bit is the type of the object.
+ * body: Arbitary data of the object.
+ */
 public class SerializingTranscoder implements Transcoder {
 	static final byte TYPE_STRING = 0;
 	static final byte TYPE_BOOLEAN = 1;

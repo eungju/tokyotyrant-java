@@ -33,12 +33,13 @@ import tokyotyrant.protocol.Stat;
 import tokyotyrant.protocol.Sync;
 import tokyotyrant.protocol.Vanish;
 import tokyotyrant.protocol.Vsiz;
+import tokyotyrant.transcoder.SerializingTranscoder;
 import tokyotyrant.transcoder.StringTranscoder;
 import tokyotyrant.transcoder.Transcoder;
 
 public class TokyoTyrantClient {
 	private Transcoder keyTranscoder = new StringTranscoder();
-    private Transcoder valueTranscoder = new StringTranscoder();
+    private Transcoder valueTranscoder = new SerializingTranscoder();
 	private Networking networking;
 	private long globalTimeout = 1000L;
     
