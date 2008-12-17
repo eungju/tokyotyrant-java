@@ -15,7 +15,6 @@ import org.slf4j.LoggerFactory;
 import tokyotyrant.helper.BufferHelper;
 import tokyotyrant.protocol.Command;
 
-
 public class AsynchronousNode implements TokyoTyrantNode {
 	private final Logger logger = LoggerFactory.getLogger(getClass());
 	private SocketAddress address;
@@ -63,8 +62,9 @@ public class AsynchronousNode implements TokyoTyrantNode {
 	}
 
 	public void disconnect() {
-		readingCommands.clear();
+		writingBuffer = null;
 		readingBuffer = null;
+		readingCommands.clear();
 		try {
 			selectionKey.cancel();
 			channel.close();
@@ -95,8 +95,8 @@ public class AsynchronousNode implements TokyoTyrantNode {
 
 	public void doConnect() throws IOException {
 		channel.finishConnect();
-		fixupOperations();
 		reconnecting = 0;
+		fixupOperations();
 	}
 
 	private static final int FRAGMENT_CAPACITY = 2 * 1024;

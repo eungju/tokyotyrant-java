@@ -4,7 +4,9 @@ import java.io.IOException;
 import java.net.SocketAddress;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
+import java.util.Arrays;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Set;
 
 import org.slf4j.Logger;
@@ -16,24 +18,18 @@ public class AsynchronousNetworking extends AbstractNetworking implements Runnab
 	private Thread ioThread;
 	private boolean running;
 
-	private AsynchronousNode[] nodes;
-
-	public AsynchronousNetworking(SocketAddress... addresses) throws IOException {
+	public AsynchronousNetworking() throws IOException {
+		super(new ReplicationNodeLocator());
 		selector = Selector.open();
 		ioThread = new Thread(this);
-		
-		if (addresses.length == 0) {
-			throw new IllegalArgumentException("Requires at least 1 server node");
-		}
-		
-		nodes = new AsynchronousNode[addresses.length];
+	}
+	
+	public void setAddresses(SocketAddress[] addresses) {
+		TokyoTyrantNode[] nodes = new TokyoTyrantNode[addresses.length];
 		for (int i = 0; i < addresses.length; i++) {
 			nodes[i] = new AsynchronousNode(addresses[i], selector);
 		}
-	}
-	
-	protected TokyoTyrantNode[] getNodes() {
-		return nodes;
+		nodeLocator.setNodes((List<TokyoTyrantNode>) Arrays.asList(nodes));
 	}
 
 	public void start() {

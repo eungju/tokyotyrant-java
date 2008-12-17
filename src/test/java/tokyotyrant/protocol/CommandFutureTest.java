@@ -32,6 +32,9 @@ public class CommandFutureTest {
 	@Test public void whenComplete() throws InterruptedException, ExecutionException {
 		DummyCommand command = new DummyCommand();
 		Future<Object> future = new CommandFuture<Object>(command);
+		assertFalse(command.isReading());
+		command.reading();
+		assertTrue(command.isReading());
 		assertFalse(future.isDone());
 		command.complete();
 		assertTrue(future.isDone());

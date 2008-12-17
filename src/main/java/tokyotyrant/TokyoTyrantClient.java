@@ -1,7 +1,7 @@
 package tokyotyrant;
 
 import java.io.IOException;
-import java.net.InetSocketAddress;
+import java.net.SocketAddress;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Future;
@@ -42,12 +42,20 @@ public class TokyoTyrantClient {
     private Transcoder valueTranscoder = new SerializingTranscoder();
 	private Networking networking;
 	private long globalTimeout = 1000L;
-    
-    public TokyoTyrantClient(String host, int port) throws IOException {
-    	networking = new AsynchronousNetworking(new InetSocketAddress(host, port));
-    	networking.start();
-	}
 	
+    public TokyoTyrantClient(SocketAddress[] addresses) throws IOException {
+    	this(addresses, new AsynchronousNetworking());
+    }
+	
+    public TokyoTyrantClient(SocketAddress[] addresses, Networking networking) throws IOException {
+		if (addresses.length == 0) {
+			throw new IllegalArgumentException("Requires at least 1 node");
+		}
+		this.networking = networking;
+		this.networking.setAddresses(addresses);
+		this.networking.start();
+	}
+
 	public void dispose() {
 		networking.stop();
 	}

@@ -1,6 +1,7 @@
 package tokyotyrant.tester;
 
 import java.io.IOException;
+import java.net.InetSocketAddress;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -12,7 +13,7 @@ public class TokyoTyrantClientShell extends Shell {
 	private TokyoTyrantClient client;
 
 	protected void openConnection() throws IOException {
-		client = new TokyoTyrantClient(host, port);
+		client = new TokyoTyrantClient(new InetSocketAddress[] { new InetSocketAddress(host, port) });
 	}
 
 	protected void closeConnection() {
