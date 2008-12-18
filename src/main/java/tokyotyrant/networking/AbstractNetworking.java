@@ -1,5 +1,7 @@
 package tokyotyrant.networking;
 
+import java.util.Iterator;
+
 import tokyotyrant.protocol.Command;
 
 public abstract class AbstractNetworking implements Networking {
@@ -24,7 +26,9 @@ public abstract class AbstractNetworking implements Networking {
 		if (selected.isActive()) {
 			return selected;
 		}
-		for (TokyoTyrantNode each : nodeLocator.getAll()) {
+		Iterator<TokyoTyrantNode> backups = nodeLocator.getSequence();
+		while (backups.hasNext()) {
+			TokyoTyrantNode each = backups.next();
 			if (each.isActive()) {
 				selected = each;
 				break;
