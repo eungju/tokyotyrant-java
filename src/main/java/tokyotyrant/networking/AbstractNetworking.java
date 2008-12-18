@@ -21,6 +21,10 @@ public abstract class AbstractNetworking implements Networking {
 		node.send(command);
 	}
 	
+	public NodeLocator getNodeLocator() {
+		return nodeLocator;
+	}
+	
 	protected ServerNode selectNode() {
 		ServerNode selected = nodeLocator.getPrimary();
 		if (selected.isActive()) {

@@ -134,6 +134,24 @@
 					</execution>
 				</executions>
 			</plugin>
+			<plugin>
+				<groupId>com.atlassian.maven.plugins</groupId>
+				<artifactId>maven-clover2-plugin</artifactId>
+				<version>${clover.version}</version>
+				<configuration>
+					<licenseLocation>${clover.licenseLocation}</licenseLocation>
+					<jdk>${maven.compiler.source}</jdk>
+					<encoding>${maven.compiler.encoding}</encoding>
+				</configuration>
+				<executions>
+					<execution>
+						<phase>pre-site</phase>
+						<goals>
+							<goal>instrument</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
 		</plugins>
 	</build>
 
@@ -180,6 +198,14 @@
 					<forceEncoding>${maven.compiler.encoding}</forceEncoding>
 				</configuration>
 			</plugin>
+			<plugin>
+				<groupId>com.atlassian.maven.plugins</groupId>
+				<artifactId>maven-clover2-plugin</artifactId>
+				<version>${clover.version}</version>
+				<configuration>
+					<licenseLocation>${clover.licenseLocation}</licenseLocation>
+				</configuration>
+			</plugin>
 		</plugins>
 	</reporting>	
 
@@ -187,6 +213,7 @@
 		<maven.compiler.encoding>utf-8</maven.compiler.encoding>
 		<maven.compiler.target>1.5</maven.compiler.target>
 		<maven.compiler.source>1.5</maven.compiler.source>
+		<clover.version>2.3.1</clover.version>
 	</properties>
 
 </project>

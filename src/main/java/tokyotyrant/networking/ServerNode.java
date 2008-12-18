@@ -1,8 +1,12 @@
 package tokyotyrant.networking;
 
+import java.net.SocketAddress;
+
 import tokyotyrant.protocol.Command;
 
 public interface ServerNode {
+	SocketAddress getSocketAddress();
+	
 	void send(Command<?> command);
 
 	boolean isActive();

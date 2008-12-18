@@ -81,10 +81,10 @@ public class RDBShell extends Shell {
 			result = db.setmst(tokens[1], Integer.parseInt(tokens[2]));
 		} else if ("rnum".equals(command)) {
 			result = db.rnum();
-		} else if ("stat".equals(command)) {
-			result = db.stat();
 		} else if ("size".equals(command)) {
 			result = db.size();
+		} else if ("stat".equals(command)) {
+			result = db.stat();
 		}
 		return result;
 	}

@@ -33,6 +33,10 @@ public class AsynchronousNode implements ServerNode {
 		this.address = address;
 		this.selector = selector;
 	}
+	
+	public SocketAddress getSocketAddress() {
+		return address;
+	}
 		
 	public void send(Command<?> command) {
 		writingCommands.add(command);

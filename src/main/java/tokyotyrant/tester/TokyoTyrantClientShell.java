@@ -2,8 +2,6 @@ package tokyotyrant.tester;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
-import java.util.ArrayList;
-import java.util.List;
 
 import org.apache.commons.lang.ArrayUtils;
 
@@ -43,23 +41,8 @@ public class TokyoTyrantClientShell extends Shell {
 			result = client.mget(keys).get();
 		} else if ("vsiz".equals(command)) {
 			result = client.vsiz(tokens[1]).get();
-		} else if ("iterinit".equals(command)) {
-			result = client.iterinit().get();
-		} else if ("iternext".equals(command)) {
-			result = client.iternext().get();
 		} else if ("list".equals(command)) {
-			List<Object> keys = null;
-			if (client.iterinit().get()) {
-				keys = new ArrayList<Object>();
-				while (true) {
-					Object key = client.iternext().get();
-					if (key == null) {
-						break;
-					}
-					keys.add(key);
-				}
-			}
-			result = keys;
+			result = client.fwmkeys("", Integer.MAX_VALUE).get();
 		} else if ("fwmkeys".equals(command)) {
 			result = client.fwmkeys(tokens[1], Integer.parseInt(tokens[2])).get();
 		} else if ("addint".equals(command)) {
@@ -72,18 +55,12 @@ public class TokyoTyrantClientShell extends Shell {
 			result = client.sync().get();
 		} else if ("vanish".equals(command)) {
 			result = client.vanish().get();
-		} else if ("copy".equals(command)) {
-			result = client.copy(tokens[1]).get();
-		} else if ("restore".equals(command)) {
-			result = client.restore(tokens[1], Long.parseLong(tokens[2])).get();
-		} else if ("setmst".equals(command)) {
-			result = client.setmst(tokens[1], Integer.parseInt(tokens[2])).get();
 		} else if ("rnum".equals(command)) {
 			result = client.rnum().get();
-		} else if ("stat".equals(command)) {
-			result = client.stat().get();
 		} else if ("size".equals(command)) {
 			result = client.size().get();
+		} else if ("stat".equals(command)) {
+			result = client.stat();
 		}
 		return result;
 	}
