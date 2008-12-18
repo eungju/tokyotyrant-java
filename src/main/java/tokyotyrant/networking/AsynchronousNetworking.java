@@ -19,7 +19,7 @@ public class AsynchronousNetworking extends AbstractNetworking implements Runnab
 	private boolean running;
 
 	public AsynchronousNetworking() throws IOException {
-		super(new FailOverNodeLocator());
+		super(new ActiveStandbyNodeLocator());
 		selector = Selector.open();
 		ioThread = new Thread(this);
 	}

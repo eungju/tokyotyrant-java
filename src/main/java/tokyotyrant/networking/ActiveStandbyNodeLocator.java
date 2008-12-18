@@ -8,7 +8,7 @@ import java.util.List;
  * First node is the primary node. All other nodes are backup node.
  * When the primary node is down, try backup nodes in specified order.
  */
-public class FailOverNodeLocator implements NodeLocator {
+public class ActiveStandbyNodeLocator implements NodeLocator {
 	private List<TokyoTyrantNode> nodes;
 
 	public void setNodes(List<TokyoTyrantNode> nodes) {

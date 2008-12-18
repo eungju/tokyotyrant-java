@@ -13,14 +13,14 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 
 @RunWith(JMock.class)
-public class FailOverNodeLocatorTest {
+public class ActiveStandbyNodeLocatorTest {
 	private Mockery mockery = new JUnit4Mockery();
-	private FailOverNodeLocator dut;
+	private ActiveStandbyNodeLocator dut;
 	private TokyoTyrantNode node0;
 	private TokyoTyrantNode node1;
 	
 	@Before public void beforeEach() {
-		dut = new FailOverNodeLocator();
+		dut = new ActiveStandbyNodeLocator();
 		node0 = mockery.mock(TokyoTyrantNode.class, "node0");
 		node1 = mockery.mock(TokyoTyrantNode.class, "node1");
 		dut.setNodes(Arrays.asList(node0, node1));
