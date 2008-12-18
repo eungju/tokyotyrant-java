@@ -461,21 +461,21 @@ public class RDB {
 	}
 
 	/**
-	 * Get the status string of the database server.
-	 *  
-	 * @return The return value is the status items of the database.
-	 */
-	public Map<String, String> stat() throws IOException {
-		return execute(new Stat());
-	}
-
-	/**
 	 * Get the size of the database.
 	 *
 	 * @return The return value is the size of the database or 0 if the object does not connect to any database server.
 	 */
 	public long size() throws IOException {
 		return execute(new Size());
+	}
+
+	/**
+	 * Get the status string of the database server.
+	 *  
+	 * @return The return value is the status items of the database.
+	 */
+	public Map<String, String> stat() throws IOException {
+		return execute(new Stat());
 	}
 	
 	public static class Synchronized extends RDB {

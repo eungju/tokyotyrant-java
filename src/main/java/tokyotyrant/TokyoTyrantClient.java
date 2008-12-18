@@ -192,11 +192,11 @@ public class TokyoTyrantClient {
 		return execute(new Rnum());
 	}
 
-	public Future<Map<String, String>> stat() throws IOException {
-		return execute(new Stat());
-	}
-
 	public Future<Long> size() throws IOException {
 		return execute(new Size());
+	}
+
+	public Future<Map<String, String>> stat() throws IOException {
+		return execute(new Stat());
 	}
 }
