@@ -27,7 +27,7 @@ public class ReconnectQueueTest {
 	}
 	
 	@Test public void push() {
-		final TokyoTyrantNode node = mockery.mock(TokyoTyrantNode.class);
+		final ServerNode node = mockery.mock(ServerNode.class);
 		mockery.checking(new Expectations() {{
 			one(node).disconnect();
 			one(node).reconnecting();
@@ -39,8 +39,8 @@ public class ReconnectQueueTest {
 	}
 	
 	@Test public void pushShouldNotMissNode() throws IOException {
-		final TokyoTyrantNode node1 = mockery.mock(TokyoTyrantNode.class, "Node1");
-		final TokyoTyrantNode node2 = mockery.mock(TokyoTyrantNode.class, "Node2");
+		final ServerNode node1 = mockery.mock(ServerNode.class, "Node1");
+		final ServerNode node2 = mockery.mock(ServerNode.class, "Node2");
 		mockery.checking(new Expectations() {{
 			one(node1).disconnect();
 			one(node1).reconnecting();
@@ -60,7 +60,7 @@ public class ReconnectQueueTest {
 	}
 	
 	@Test public void reconnectCandidateNodes() throws IOException {
-		final TokyoTyrantNode node = mockery.mock(TokyoTyrantNode.class);
+		final ServerNode node = mockery.mock(ServerNode.class);
 		mockery.checking(new Expectations() {{
 			one(node).disconnect();
 			one(node).reconnecting();
@@ -75,8 +75,8 @@ public class ReconnectQueueTest {
 	}
 
 	@Test public void reconnectFailedNodeAgain() throws IOException {
-		final TokyoTyrantNode node1 = mockery.mock(TokyoTyrantNode.class, "Node1");
-		final TokyoTyrantNode node2 = mockery.mock(TokyoTyrantNode.class, "Node2");
+		final ServerNode node1 = mockery.mock(ServerNode.class, "Node1");
+		final ServerNode node2 = mockery.mock(ServerNode.class, "Node2");
 		mockery.checking(new Expectations() {{
 			one(node1).disconnect();
 			one(node1).reconnecting();
@@ -101,7 +101,7 @@ public class ReconnectQueueTest {
 	}
 
 	@Test public void shouldBackoffExponentialy() {
-		final TokyoTyrantNode node = mockery.mock(TokyoTyrantNode.class);
+		final ServerNode node = mockery.mock(ServerNode.class);
 		mockery.checking(new Expectations() {{
 			one(node).getReconnectAttempt(); will(returnValue(0));
 			one(node).getReconnectAttempt(); will(returnValue(1));
@@ -113,7 +113,7 @@ public class ReconnectQueueTest {
 	}
 
 	@Test public void shouldNotBackoffLongerThanMaximum() {
-		final TokyoTyrantNode node = mockery.mock(TokyoTyrantNode.class);
+		final ServerNode node = mockery.mock(ServerNode.class);
 		mockery.checking(new Expectations() {{
 			one(node).getReconnectAttempt(); will(returnValue(31));
 		}});

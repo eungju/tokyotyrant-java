@@ -15,7 +15,7 @@ import org.slf4j.LoggerFactory;
 import tokyotyrant.helper.BufferHelper;
 import tokyotyrant.protocol.Command;
 
-public class AsynchronousNode implements TokyoTyrantNode {
+public class AsynchronousNode implements ServerNode {
 	private final Logger logger = LoggerFactory.getLogger(getClass());
 	private SocketAddress address;
 

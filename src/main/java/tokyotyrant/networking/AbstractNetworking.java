@@ -17,18 +17,18 @@ public abstract class AbstractNetworking implements Networking {
 		send(selectNode(), command);
 	}
 	
-	public void send(TokyoTyrantNode node, Command<?> command) {
+	public void send(ServerNode node, Command<?> command) {
 		node.send(command);
 	}
 	
-	protected TokyoTyrantNode selectNode() {
-		TokyoTyrantNode selected = nodeLocator.getPrimary();
+	protected ServerNode selectNode() {
+		ServerNode selected = nodeLocator.getPrimary();
 		if (selected.isActive()) {
 			return selected;
 		}
-		Iterator<TokyoTyrantNode> backups = nodeLocator.getSequence();
+		Iterator<ServerNode> backups = nodeLocator.getSequence();
 		while (backups.hasNext()) {
-			TokyoTyrantNode each = backups.next();
+			ServerNode each = backups.next();
 			if (each.isActive()) {
 				selected = each;
 				break;
@@ -38,7 +38,7 @@ public abstract class AbstractNetworking implements Networking {
 	}
 	
 	protected void connectAllNodes() {
-		for (TokyoTyrantNode each : nodeLocator.getAll()) {
+		for (ServerNode each : nodeLocator.getAll()) {
 			if (!each.connect()) {
 				reconnectQueue.push(each);
 			}
@@ -46,7 +46,7 @@ public abstract class AbstractNetworking implements Networking {
 	}
 	
 	protected void disconnectAllNodes() {
-		for (TokyoTyrantNode each : nodeLocator.getAll()) {
+		for (ServerNode each : nodeLocator.getAll()) {
 			each.disconnect();
 		}
 	}

@@ -32,7 +32,7 @@ public class AbstractNetworkingTest {
 	}
 	
 	@Test public void selectPrimaryIfItIsActive() {
-		final TokyoTyrantNode node0 = mockery.mock(TokyoTyrantNode.class, "node0");
+		final ServerNode node0 = mockery.mock(ServerNode.class, "node0");
 		mockery.checking(new Expectations() {{
 			one(nodeLocator).getPrimary(); will(returnValue(node0));
 			one(node0).isActive(); will(returnValue(true));
@@ -41,8 +41,8 @@ public class AbstractNetworkingTest {
 	}
 
 	@Test public void selectBackupIfThePrimaryIsNotActive() {
-		final TokyoTyrantNode node0 = mockery.mock(TokyoTyrantNode.class, "node0");
-		final TokyoTyrantNode node1 = mockery.mock(TokyoTyrantNode.class, "node1");
+		final ServerNode node0 = mockery.mock(ServerNode.class, "node0");
+		final ServerNode node1 = mockery.mock(ServerNode.class, "node1");
 		mockery.checking(new Expectations() {{
 			one(nodeLocator).getPrimary(); will(returnValue(node0));
 			one(node0).isActive(); will(returnValue(false));
@@ -53,8 +53,8 @@ public class AbstractNetworkingTest {
 	}
 
 	@Test public void selectPrimaryIfAllBackupsAreNotActive() {
-		final TokyoTyrantNode node0 = mockery.mock(TokyoTyrantNode.class, "node0");
-		final TokyoTyrantNode node1 = mockery.mock(TokyoTyrantNode.class, "node1");
+		final ServerNode node0 = mockery.mock(ServerNode.class, "node0");
+		final ServerNode node1 = mockery.mock(ServerNode.class, "node1");
 		mockery.checking(new Expectations() {{
 			one(nodeLocator).getPrimary(); will(returnValue(node0));
 			one(node0).isActive(); will(returnValue(false));

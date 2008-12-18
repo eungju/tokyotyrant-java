@@ -2,7 +2,7 @@ package tokyotyrant.networking;
 
 import tokyotyrant.protocol.Command;
 
-public interface TokyoTyrantNode {
+public interface ServerNode {
 	void send(Command<?> command);
 
 	boolean isActive();

@@ -11,13 +11,13 @@ public class ReconnectQueue {
 	// maximum amount of time to wait between reconnect attempts
 	static final int MAX_BACKOFF = 60 * 1000;
 	
-	private final SortedMap<Long, TokyoTyrantNode> queue = new TreeMap<Long, TokyoTyrantNode>();
+	private final SortedMap<Long, ServerNode> queue = new TreeMap<Long, ServerNode>();
 
 	long now() {
 		return System.currentTimeMillis();
 	}
 	
-	int backoff(TokyoTyrantNode node) {
+	int backoff(ServerNode node) {
 		return backoff(Math.min(node.getReconnectAttempt(), 16));
 	}
 	
@@ -25,7 +25,7 @@ public class ReconnectQueue {
 		return Math.min(INITIAL_BACKOFF * (1 << attempts), MAX_BACKOFF);
 	}
 	
-	public void push(TokyoTyrantNode node) {
+	public void push(ServerNode node) {
 		assert !queue.containsValue(node);
 		node.disconnect();
 		node.reconnecting();
@@ -50,15 +50,15 @@ public class ReconnectQueue {
 	}
 	
 	public void reconnect() {
-		List<TokyoTyrantNode> failedNodes = new ArrayList<TokyoTyrantNode>();
-		for (Iterator<TokyoTyrantNode> i = queue.headMap(now()).values().iterator(); i.hasNext(); ) {
-			TokyoTyrantNode node = i.next();
+		List<ServerNode> failedNodes = new ArrayList<ServerNode>();
+		for (Iterator<ServerNode> i = queue.headMap(now()).values().iterator(); i.hasNext(); ) {
+			ServerNode node = i.next();
 			i.remove();
 			if (!node.connect()) {
 				failedNodes.add(node);
 			}
 		}
-		for (TokyoTyrantNode each : failedNodes) {
+		for (ServerNode each : failedNodes) {
 			push(each);
 		}
 	}

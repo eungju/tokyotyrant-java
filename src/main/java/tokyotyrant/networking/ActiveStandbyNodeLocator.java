@@ -9,22 +9,22 @@ import java.util.List;
  * When the primary node is down, try backup nodes in specified order.
  */
 public class ActiveStandbyNodeLocator implements NodeLocator {
-	private List<TokyoTyrantNode> nodes;
+	private List<ServerNode> nodes;
 
-	public void setNodes(List<TokyoTyrantNode> nodes) {
+	public void setNodes(List<ServerNode> nodes) {
 		this.nodes = Collections.unmodifiableList(nodes);
 	}
 	
-	public List<TokyoTyrantNode> getAll() {
+	public List<ServerNode> getAll() {
 		return nodes;
 	}
 
-	public TokyoTyrantNode getPrimary() {
+	public ServerNode getPrimary() {
 		return nodes.get(0);
 	}
 
-	public Iterator<TokyoTyrantNode> getSequence() {
-		Iterator<TokyoTyrantNode> i = nodes.iterator();
+	public Iterator<ServerNode> getSequence() {
+		Iterator<ServerNode> i = nodes.iterator();
 		i.next();
 		return i;
 	}

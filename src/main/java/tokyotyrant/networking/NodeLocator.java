@@ -7,20 +7,20 @@ import java.util.List;
  * All nodes should have same data.
  */
 public interface NodeLocator {
-	void setNodes(List<TokyoTyrantNode> nodes);	
+	void setNodes(List<ServerNode> nodes);	
 	
 	/**
 	 * All nodes
 	 */
-	List<TokyoTyrantNode> getAll();
+	List<ServerNode> getAll();
 	
 	/**
 	 * Primary node for the key
 	 */
-	TokyoTyrantNode getPrimary();
+	ServerNode getPrimary();
 
 	/**
 	 * Backup nodes for the key.
 	 */
-	Iterator<TokyoTyrantNode> getSequence();
+	Iterator<ServerNode> getSequence();
 }

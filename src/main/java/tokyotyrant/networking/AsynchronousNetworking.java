@@ -25,11 +25,11 @@ public class AsynchronousNetworking extends AbstractNetworking implements Runnab
 	}
 	
 	public void setAddresses(SocketAddress[] addresses) {
-		TokyoTyrantNode[] nodes = new TokyoTyrantNode[addresses.length];
+		ServerNode[] nodes = new ServerNode[addresses.length];
 		for (int i = 0; i < addresses.length; i++) {
 			nodes[i] = new AsynchronousNode(addresses[i], selector);
 		}
-		nodeLocator.setNodes((List<TokyoTyrantNode>) Arrays.asList(nodes));
+		nodeLocator.setNodes((List<ServerNode>) Arrays.asList(nodes));
 	}
 
 	public void start() {

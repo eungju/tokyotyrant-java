@@ -16,13 +16,13 @@ import org.junit.runner.RunWith;
 public class ActiveStandbyNodeLocatorTest {
 	private Mockery mockery = new JUnit4Mockery();
 	private ActiveStandbyNodeLocator dut;
-	private TokyoTyrantNode node0;
-	private TokyoTyrantNode node1;
+	private ServerNode node0;
+	private ServerNode node1;
 	
 	@Before public void beforeEach() {
 		dut = new ActiveStandbyNodeLocator();
-		node0 = mockery.mock(TokyoTyrantNode.class, "node0");
-		node1 = mockery.mock(TokyoTyrantNode.class, "node1");
+		node0 = mockery.mock(ServerNode.class, "node0");
+		node1 = mockery.mock(ServerNode.class, "node1");
 		dut.setNodes(Arrays.asList(node0, node1));
 	}
 	
@@ -35,14 +35,14 @@ public class ActiveStandbyNodeLocatorTest {
 	}
 
 	@Test public void getSequence() {
-		Iterator<TokyoTyrantNode> i = dut.getSequence();
+		Iterator<ServerNode> i = dut.getSequence();
 		assertEquals(node1, i.next());
 		assertFalse(i.hasNext());
 	}
 
 	@Test(expected=UnsupportedOperationException.class)
 	public void sequenceIsImmutable() {
-		Iterator<TokyoTyrantNode> i = dut.getSequence();
+		Iterator<ServerNode> i = dut.getSequence();
 		i.remove();
 	}
 }
