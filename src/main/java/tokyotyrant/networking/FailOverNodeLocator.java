@@ -4,7 +4,11 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 
-public class ReplicationNodeLocator implements NodeLocator {
+/**
+ * First node is the primary node. All other nodes are backup node.
+ * When the primary node is down, try backup nodes in specified order.
+ */
+public class FailOverNodeLocator implements NodeLocator {
 	private List<TokyoTyrantNode> nodes;
 
 	public void setNodes(List<TokyoTyrantNode> nodes) {
@@ -15,11 +19,11 @@ public class ReplicationNodeLocator implements NodeLocator {
 		return nodes;
 	}
 
-	public TokyoTyrantNode getPrimary(Object key) {
+	public TokyoTyrantNode getPrimary() {
 		return nodes.get(0);
 	}
 
-	public Iterator<TokyoTyrantNode> getSequence(Object key) {
+	public Iterator<TokyoTyrantNode> getSequence() {
 		Iterator<TokyoTyrantNode> i = nodes.iterator();
 		i.next();
 		return i;

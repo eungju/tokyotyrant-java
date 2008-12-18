@@ -12,12 +12,15 @@ public abstract class AbstractNetworking implements Networking {
 	}
 	
 	public void send(Command<?> command) {
-		//FIXME: Use real key
-		selectNode("FAKE_KEY").send(command);
+		send(selectNode(), command);
 	}
 	
-	protected TokyoTyrantNode selectNode(Object key) {
-		TokyoTyrantNode selected = nodeLocator.getPrimary(key);
+	public void send(TokyoTyrantNode node, Command<?> command) {
+		node.send(command);
+	}
+	
+	protected TokyoTyrantNode selectNode() {
+		TokyoTyrantNode selected = nodeLocator.getPrimary();
 		if (selected.isActive()) {
 			return selected;
 		}
