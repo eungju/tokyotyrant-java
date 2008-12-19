@@ -62,11 +62,11 @@ public class TokyoTyrantClient {
 		this.globalTimeout = timeout;
 	}
 
-	<T> Future<T> execute(Command<T> command) {
+	protected <T> CommandFuture<T> execute(Command<T> command) {
 		return execute(command, valueTranscoder);
 	}
 
-	<T> Future<T> execute(Command<T> command, Transcoder valueTranscoder) {
+	protected <T> CommandFuture<T> execute(Command<T> command, Transcoder valueTranscoder) {
 		command.setKeyTranscoder(keyTranscoder);
 		command.setValueTranscoder(valueTranscoder);
 		CommandFuture<T> future = new CommandFuture<T>(command, globalTimeout);
@@ -74,12 +74,22 @@ public class TokyoTyrantClient {
 		return future;
 	}
 
-	<T> Future<T> execute(ServerNode node, Command<T> command) {
+	protected <T> CommandFuture<T> execute(ServerNode node, Command<T> command) {
 		command.setKeyTranscoder(keyTranscoder);
 		command.setValueTranscoder(valueTranscoder);
 		CommandFuture<T> future = new CommandFuture<T>(command, globalTimeout);
 		networking.send(node, command);
 		return future;
+	}
+	
+	protected <T> T await(CommandFuture<T> future) throws RuntimeException {
+		try {
+			return future.get();
+		} catch (InterruptedException e) {
+			throw new RuntimeException("Interrupted", e);
+		} catch (ExecutionException e) {
+			throw new RuntimeException("Exception while executing", e);
+		}
 	}
 
 	public Future<Boolean> put(Object key, Object value) {
@@ -183,16 +193,10 @@ public class TokyoTyrantClient {
 	}
 
 	public Map<SocketAddress, Map<String, String>> stat() {
-		try {
-			Map<SocketAddress, Map<String, String>> result = new HashMap<SocketAddress, Map<String, String>>();
-			for (ServerNode each : networking.getNodeLocator().getAll()) {
-				result.put(each.getSocketAddress(), execute(new Stat()).get());
-			}
-			return result;
-		} catch (ExecutionException e) {
-			throw new RuntimeException("Error while executing a command", e);
-		} catch (InterruptedException e) {
-			throw new RuntimeException("Interrupted", e);
+		Map<SocketAddress, Map<String, String>> result = new HashMap<SocketAddress, Map<String, String>>();
+		for (ServerNode each : networking.getNodeLocator().getAll()) {
+			result.put(each.getSocketAddress(), await(execute(new Stat())));
 		}
+		return result;
 	}
 }
