@@ -13,14 +13,14 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 
 @RunWith(JMock.class)
-public class ActiveStandbyNodeLocatorTest {
+public class RoundRobinNodeLocatorTest {
 	private Mockery mockery = new JUnit4Mockery();
-	private ActiveStandbyNodeLocator dut;
+	private RoundRobinNodeLocator dut;
 	private ServerNode node0;
 	private ServerNode node1;
 	
 	@Before public void beforeEach() {
-		dut = new ActiveStandbyNodeLocator();
+		dut = new RoundRobinNodeLocator();
 		node0 = mockery.mock(ServerNode.class, "node0");
 		node1 = mockery.mock(ServerNode.class, "node1");
 		dut.setNodes(Arrays.asList(node0, node1));
@@ -31,10 +31,14 @@ public class ActiveStandbyNodeLocatorTest {
 	}
 	
 	@Test public void getSequence() {
-		Iterator<ServerNode> i = dut.getSequence();
-		assertEquals(node0, i.next());
-		assertEquals(node1, i.next());
-		assertFalse(i.hasNext());
+		Iterator<ServerNode> i1 = dut.getSequence();
+		Iterator<ServerNode> i2 = dut.getSequence();
+		assertEquals(node0, i1.next());
+		assertEquals(node1, i2.next());
+		assertEquals(node1, i1.next());
+		assertEquals(node0, i2.next());
+		assertFalse(i1.hasNext());
+		assertFalse(i2.hasNext());
 	}
 
 	@Test(expected=UnsupportedOperationException.class)

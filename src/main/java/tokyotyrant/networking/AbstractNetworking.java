@@ -26,11 +26,11 @@ public abstract class AbstractNetworking implements Networking {
 	}
 	
 	protected ServerNode selectNode() {
-		ServerNode selected = nodeLocator.getPrimary();
+		Iterator<ServerNode> backups = nodeLocator.getSequence();
+		ServerNode selected = backups.next();
 		if (selected.isActive()) {
 			return selected;
 		}
-		Iterator<ServerNode> backups = nodeLocator.getSequence();
 		while (backups.hasNext()) {
 			ServerNode each = backups.next();
 			if (each.isActive()) {

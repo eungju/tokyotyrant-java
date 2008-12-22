@@ -1,5 +1,6 @@
 package tokyotyrant.networking;
 
+import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 
@@ -12,15 +13,10 @@ public interface NodeLocator {
 	/**
 	 * All nodes
 	 */
-	List<ServerNode> getAll();
+	Collection<ServerNode> getAll();
 	
 	/**
-	 * Primary node for the key
-	 */
-	ServerNode getPrimary();
-
-	/**
-	 * Backup nodes for the key.
+	 * Nodes for the key. First node is primary. Rest are backup.
 	 */
 	Iterator<ServerNode> getSequence();
 }

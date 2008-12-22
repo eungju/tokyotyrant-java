@@ -6,7 +6,6 @@ import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
 import java.util.Arrays;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Set;
 
 import org.slf4j.Logger;
@@ -29,7 +28,7 @@ public class AsynchronousNetworking extends AbstractNetworking implements Runnab
 		for (int i = 0; i < addresses.length; i++) {
 			nodes[i] = new AsynchronousNode(addresses[i], selector);
 		}
-		nodeLocator.setNodes((List<ServerNode>) Arrays.asList(nodes));
+		nodeLocator.setNodes(Arrays.asList(nodes));
 	}
 
 	public void start() {
