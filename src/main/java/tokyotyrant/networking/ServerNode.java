@@ -1,11 +1,11 @@
 package tokyotyrant.networking;
 
-import java.net.SocketAddress;
+import java.net.URI;
 
 import tokyotyrant.protocol.Command;
 
 public interface ServerNode {
-	SocketAddress getSocketAddress();
+	URI getAddress();
 	
 	void send(Command<?> command);
 

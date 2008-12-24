@@ -1,7 +1,6 @@
 package tokyotyrant.tester;
 
-import java.io.IOException;
-import java.net.InetSocketAddress;
+import java.net.URI;
 
 import org.apache.commons.lang.ArrayUtils;
 
@@ -10,8 +9,8 @@ import tokyotyrant.TokyoTyrantClient;
 public class TokyoTyrantClientShell extends Shell {
 	private TokyoTyrantClient client;
 
-	protected void openConnection() throws IOException {
-		client = new TokyoTyrantClient(new InetSocketAddress[] { new InetSocketAddress(host, port) });
+	protected void openConnection() throws Exception {
+		client = new TokyoTyrantClient(new URI[] { URI.create("tcp://" + host + ":" + port) });
 	}
 
 	protected void closeConnection() {
@@ -65,7 +64,7 @@ public class TokyoTyrantClientShell extends Shell {
 		return result;
 	}
 	
-	public static void main(String[] args) throws IOException {
+	public static void main(String[] args) throws Exception {
 		TokyoTyrantClientShell shell = new TokyoTyrantClientShell();
 		System.exit(shell.run(args));
 	}

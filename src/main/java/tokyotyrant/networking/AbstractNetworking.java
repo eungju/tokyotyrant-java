@@ -1,10 +1,12 @@
 package tokyotyrant.networking;
 
+import java.net.URI;
 import java.util.Iterator;
 
 import tokyotyrant.protocol.Command;
 
 public abstract class AbstractNetworking implements Networking {
+	protected URI[] addresses;
 	protected NodeLocator nodeLocator;
 	protected ReconnectQueue reconnectQueue;
 	
@@ -13,6 +15,10 @@ public abstract class AbstractNetworking implements Networking {
 		this.reconnectQueue = new ReconnectQueue();
 	}
 	
+	public void setAddresses(URI[] addresses) {
+		this.addresses = addresses;
+	}
+
 	public void send(Command<?> command) {
 		send(selectNode(), command);
 	}

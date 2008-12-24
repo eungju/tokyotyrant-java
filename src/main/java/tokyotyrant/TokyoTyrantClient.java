@@ -1,12 +1,13 @@
 package tokyotyrant;
 
-import java.io.IOException;
-import java.net.SocketAddress;
+import java.net.URI;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 import tokyotyrant.networking.AsynchronousNetworking;
 import tokyotyrant.networking.Networking;
@@ -41,11 +42,11 @@ public class TokyoTyrantClient {
 	private Networking networking;
 	private long globalTimeout = 1000L;
 	
-    public TokyoTyrantClient(SocketAddress[] addresses) throws IOException {
+    public TokyoTyrantClient(URI[] addresses) throws Exception {
     	this(addresses, new AsynchronousNetworking());
     }
 	
-    public TokyoTyrantClient(SocketAddress[] addresses, Networking networking) throws IOException {
+    public TokyoTyrantClient(URI[] addresses, Networking networking) throws Exception {
 		if (addresses.length == 0) {
 			throw new IllegalArgumentException("Requires at least 1 node");
 		}
@@ -82,9 +83,21 @@ public class TokyoTyrantClient {
 		return future;
 	}
 	
-	protected <T> T await(CommandFuture<T> future) throws RuntimeException {
+	public <T> T await(Future<T> future) throws RuntimeException {
 		try {
 			return future.get();
+		} catch (InterruptedException e) {
+			throw new RuntimeException("Interrupted", e);
+		} catch (ExecutionException e) {
+			throw new RuntimeException("Exception while executing", e);
+		}
+	}
+
+	public <T> T await(Future<T> future, long timeout, TimeUnit unit) throws RuntimeException {
+		try {
+			return future.get(timeout, unit);
+		} catch (TimeoutException e) {
+			throw new RuntimeException("Timeout", e);
 		} catch (InterruptedException e) {
 			throw new RuntimeException("Interrupted", e);
 		} catch (ExecutionException e) {
@@ -192,10 +205,14 @@ public class TokyoTyrantClient {
 		return execute(new Size());
 	}
 
-	public Map<SocketAddress, Map<String, String>> stat() {
-		Map<SocketAddress, Map<String, String>> result = new HashMap<SocketAddress, Map<String, String>>();
+	public Map<URI, Map<String, String>> stat() {
+		Map<ServerNode, Future<Map<String, String>>> futures = new HashMap<ServerNode, Future<Map<String, String>>>();
 		for (ServerNode each : networking.getNodeLocator().getAll()) {
-			result.put(each.getSocketAddress(), await(execute(new Stat())));
+			futures.put(each, execute(new Stat()));
+		}
+		Map<URI, Map<String, String>> result = new HashMap<URI, Map<String, String>>();
+		for (ServerNode each : networking.getNodeLocator().getAll()) {
+			result.put(each.getAddress(), await(futures.get(each)));
 		}
 		return result;
 	}

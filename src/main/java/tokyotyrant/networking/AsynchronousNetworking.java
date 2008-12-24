@@ -1,7 +1,6 @@
 package tokyotyrant.networking;
 
 import java.io.IOException;
-import java.net.SocketAddress;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
 import java.util.Arrays;
@@ -17,25 +16,23 @@ public class AsynchronousNetworking extends AbstractNetworking implements Runnab
 	private Thread ioThread;
 	private boolean running;
 
-	public AsynchronousNetworking() throws IOException {
+	public AsynchronousNetworking() {
 		super(new ActiveStandbyNodeLocator());
-		selector = Selector.open();
-		ioThread = new Thread(this);
 	}
-	
-	public void setAddresses(SocketAddress[] addresses) {
+
+	public void start() throws Exception {
+		selector = Selector.open();
 		ServerNode[] nodes = new ServerNode[addresses.length];
 		for (int i = 0; i < addresses.length; i++) {
 			nodes[i] = new AsynchronousNode(addresses[i], selector);
 		}
 		nodeLocator.setNodes(Arrays.asList(nodes));
-	}
-
-	public void start() {
-		running = true;
-		ioThread.start();
-
 		connectAllNodes();
+
+		//start IO
+		running = true;
+		ioThread = new Thread(this);
+		ioThread.start();
 	}
 	
 	public void stop() {

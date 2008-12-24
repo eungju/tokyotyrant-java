@@ -32,7 +32,7 @@ public abstract class Shell {
 		}
 	}
 	
-	public int run(String[] args) throws NumberFormatException, IOException {
+	public int run(String[] args) throws Exception {
 		options(args);
 		openConnection();
 		while (true) {
@@ -53,7 +53,7 @@ public abstract class Shell {
 		return 0;
 	}
 
-	protected abstract void openConnection() throws IOException;
+	protected abstract void openConnection() throws Exception;
 
 	protected abstract void closeConnection();
 

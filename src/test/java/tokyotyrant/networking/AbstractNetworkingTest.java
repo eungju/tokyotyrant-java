@@ -2,7 +2,7 @@ package tokyotyrant.networking;
 
 import static org.junit.Assert.*;
 
-import java.net.SocketAddress;
+import java.net.URI;
 import java.util.Arrays;
 
 import org.jmock.Expectations;
@@ -22,7 +22,7 @@ public class AbstractNetworkingTest {
 	@Before public void beforeEach() {
 		nodeLocator = mockery.mock(NodeLocator.class);
 		dut = new AbstractNetworking(nodeLocator) {
-			public void setAddresses(SocketAddress[] addresses) {
+			public void setAddresses(URI[] addresses) {
 			}
 			public void start() {
 			}

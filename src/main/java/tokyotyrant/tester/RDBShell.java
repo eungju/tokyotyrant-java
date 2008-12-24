@@ -89,7 +89,7 @@ public class RDBShell extends Shell {
 		return result;
 	}
 	
-	public static void main(String[] args) throws IOException {
+	public static void main(String[] args) throws Exception {
 		RDBShell shell = new RDBShell();
 		System.exit(shell.run(args));
 	}

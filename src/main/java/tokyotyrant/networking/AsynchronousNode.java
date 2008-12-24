@@ -1,7 +1,9 @@
 package tokyotyrant.networking;
 
 import java.io.IOException;
+import java.net.InetSocketAddress;
 import java.net.SocketAddress;
+import java.net.URI;
 import java.nio.ByteBuffer;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
@@ -17,7 +19,8 @@ import tokyotyrant.protocol.Command;
 
 public class AsynchronousNode implements ServerNode {
 	private final Logger logger = LoggerFactory.getLogger(getClass());
-	private SocketAddress address;
+	private URI address;
+	private boolean readOnly;
 
 	private Selector selector;
 	private SocketChannel channel;
@@ -29,13 +32,21 @@ public class AsynchronousNode implements ServerNode {
 	private BlockingQueue<Command<?>> readingCommands = new ArrayBlockingQueue<Command<?>>(16 * 1024);
 	private ByteBuffer readingBuffer = null;
 	
-	public AsynchronousNode(SocketAddress address, Selector selector) {
+	public AsynchronousNode(URI address, Selector selector) {
+		if (!"tcp".equals(address.getScheme())) {
+			throw new IllegalArgumentException("Only support TCP binary protocol");
+		}
 		this.address = address;
 		this.selector = selector;
+		readOnly = this.address.getQuery().indexOf("readOnly=true") >= 0;
 	}
 	
-	public SocketAddress getSocketAddress() {
+	public URI getAddress() {
 		return address;
+	}
+	
+	public boolean isReadOnly() {
+		return readOnly;
 	}
 		
 	public void send(Command<?> command) {
@@ -51,12 +62,17 @@ public class AsynchronousNode implements ServerNode {
 	public int getReconnectAttempt() {
 		return reconnecting;
 	}
+	
+	SocketAddress getSocketAddress(URI uri) {
+		return new InetSocketAddress(address.getHost(), address.getPort());
+	}
 
 	public boolean connect() {
+		logger.info("Connect " + address);
 		try {
 			channel = SocketChannel.open();
 			channel.configureBlocking(false);
-			channel.connect(address);
+			channel.connect(getSocketAddress(address));
 			selectionKey = channel.register(selector, SelectionKey.OP_CONNECT, this);
 			return true;
 		} catch (IOException e) {
@@ -66,6 +82,7 @@ public class AsynchronousNode implements ServerNode {
 	}
 
 	public void disconnect() {
+		logger.info("Diconnect " + address);
 		writingBuffer = null;
 		readingBuffer = null;
 		readingCommands.clear();
@@ -78,7 +95,7 @@ public class AsynchronousNode implements ServerNode {
 	}
 
 	public void reconnecting() {
-		logger.info("Reconnecting to " + address);
+		logger.info("Reconnecting " + address);
 		reconnecting++;
 	}
 
