@@ -9,6 +9,7 @@ import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
+import tokyotyrant.networking.ActiveStandbyNodeLocator;
 import tokyotyrant.networking.AsynchronousNetworking;
 import tokyotyrant.networking.Networking;
 import tokyotyrant.networking.ServerNode;
@@ -43,7 +44,7 @@ public class TokyoTyrantClient {
 	private long globalTimeout = 1000L;
 	
     public TokyoTyrantClient(URI[] addresses) throws Exception {
-    	this(addresses, new AsynchronousNetworking());
+    	this(addresses, new AsynchronousNetworking(new ActiveStandbyNodeLocator()));
     }
 	
     public TokyoTyrantClient(URI[] addresses, Networking networking) throws Exception {

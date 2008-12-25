@@ -16,8 +16,8 @@ public class AsynchronousNetworking extends AbstractNetworking implements Runnab
 	private Thread ioThread;
 	private boolean running;
 
-	public AsynchronousNetworking() {
-		super(new ActiveStandbyNodeLocator());
+	public AsynchronousNetworking(NodeLocator nodeLocator) {
+		super(nodeLocator);
 	}
 
 	public void start() throws Exception {
