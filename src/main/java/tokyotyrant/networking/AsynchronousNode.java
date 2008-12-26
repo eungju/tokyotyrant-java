@@ -94,14 +94,15 @@ public class AsynchronousNode implements ServerNode {
 
 	public void disconnect() {
 		logger.info("Diconnect " + address);
-		writingBuffer = null;
-		readingBuffer = null;
-		readingCommands.clear();
 		try {
 			selectionKey.cancel();
 			channel.close();
 		} catch (IOException e) {
 			logger.error("Error while closing connection to " + address, e);
+		} finally {
+			writingBuffer = null;
+			readingBuffer = null;
+			readingCommands.clear();
 		}
 	}
 
