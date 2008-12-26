@@ -5,7 +5,7 @@ import java.net.URI;
 import tokyotyrant.protocol.Command;
 
 public interface Networking {
-	void setAddresses(URI[] addresses);
+	void initialize(URI[] addresses);
 	
 	void start() throws Exception;
 	

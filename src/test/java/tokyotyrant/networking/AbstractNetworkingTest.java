@@ -22,7 +22,7 @@ public class AbstractNetworkingTest {
 	@Before public void beforeEach() {
 		nodeLocator = mockery.mock(NodeLocator.class);
 		dut = new AbstractNetworking(nodeLocator) {
-			public void setAddresses(URI[] addresses) {
+			public void initialize(URI[] addresses) {
 			}
 			public void start() {
 			}

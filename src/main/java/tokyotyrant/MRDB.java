@@ -56,7 +56,7 @@ public class MRDB {
 			throw new IllegalArgumentException("Requires at least 1 node");
 		}
 		this.networking = networking;
-		this.networking.setAddresses(addresses);
+		this.networking.initialize(addresses);
 		this.networking.start();
 	}
 

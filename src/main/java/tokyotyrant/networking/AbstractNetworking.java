@@ -15,7 +15,7 @@ public abstract class AbstractNetworking implements Networking {
 		this.reconnectQueue = new ReconnectQueue();
 	}
 	
-	public void setAddresses(URI[] addresses) {
+	public void initialize(URI[] addresses) {
 		this.addresses = addresses;
 	}
 
