@@ -5,6 +5,8 @@ import java.net.URI;
 import tokyotyrant.protocol.Command;
 
 public interface ServerNode {
+	void initialize(URI address);
+	
 	URI getAddress();
 	
 	void send(Command<?> command);

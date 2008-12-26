@@ -39,6 +39,7 @@ public abstract class Shell {
 				stdout.println("(" + (e - s) + "ms)" + "\t" + result);
 			} catch (Exception e) {
 				e.printStackTrace(stderr);
+				stderr.flush();
 			}
 		}
 		closeConnection();

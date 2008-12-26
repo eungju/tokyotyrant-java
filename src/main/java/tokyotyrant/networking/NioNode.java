@@ -35,16 +35,16 @@ public class NioNode implements ServerNode {
 	private BlockingQueue<Command<?>> readingCommands = new ArrayBlockingQueue<Command<?>>(16 * 1024);
 	private ByteBuffer readingBuffer = null;
 	
-	public NioNode(URI address, Selector selector) {
-		if (!"tcp".equals(address.getScheme())) {
-			throw new IllegalArgumentException("Only support TCP binary protocol");
-		}
-		this.address = address;
+	public NioNode(Selector selector) {
 		this.selector = selector;
-		initialize();
 	}
 	
-	void initialize() {
+	public void initialize(URI address) {
+		if (!"tcp".equals(address.getScheme())) {
+			throw new IllegalArgumentException("Only support Tokyo Tyrant protocol");
+		}
+		this.address = address;
+		
 		socketAddress = new InetSocketAddress(address.getHost(), address.getPort());
 		parameters = new HashMap<String, String>();
 		if (address.getQuery() != null) {

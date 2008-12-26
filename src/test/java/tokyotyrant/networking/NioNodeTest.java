@@ -8,7 +8,10 @@ import org.junit.Test;
 
 public class NioNodeTest {
 	@Test public void readOnlyOption() {
-		assertFalse(new NioNode(URI.create("tcp://localhost:1978"), null).isReadOnly());
-		assertTrue(new NioNode(URI.create("tcp://localhost:1978/?readOnly=true"), null).isReadOnly());
+		NioNode dut = new NioNode(null);
+		dut.initialize(URI.create("tcp://localhost:1978"));
+		assertFalse(dut.isReadOnly());
+		dut.initialize(URI.create("tcp://localhost:1978/?readOnly=true"));
+		assertTrue(dut.isReadOnly());
 	}
 }

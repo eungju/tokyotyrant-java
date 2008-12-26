@@ -1,7 +1,5 @@
 package tokyotyrant.networking;
 
-import static org.junit.Assert.*;
-
 import java.net.URI;
 import java.util.Arrays;
 
@@ -9,15 +7,24 @@ import org.jmock.Expectations;
 import org.jmock.Mockery;
 import org.jmock.integration.junit4.JMock;
 import org.jmock.integration.junit4.JUnit4Mockery;
+import org.jmock.lib.legacy.ClassImposteriser;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
+import tokyotyrant.protocol.PingCommand;
+
 @RunWith(JMock.class)
 public class AbstractNetworkingTest {
-	private Mockery mockery = new JUnit4Mockery();
+	private Mockery mockery = new JUnit4Mockery() {{
+		this.setImposteriser(ClassImposteriser.INSTANCE);
+	}};
 	private AbstractNetworking dut;
 	private NodeLocator nodeLocator;
+	private NodeSelector nodeSelector;
+	private ReconnectQueue reconnectQueue;
+	private ServerNode node0;
+	private ServerNode node1;
 
 	@Before public void beforeEach() {
 		nodeLocator = mockery.mock(NodeLocator.class);
@@ -29,36 +36,56 @@ public class AbstractNetworkingTest {
 			public void stop() {
 			}
 		};
+		nodeSelector = mockery.mock(NodeSelector.class);
+		dut.nodeSelector = nodeSelector;
+		reconnectQueue = mockery.mock(ReconnectQueue.class);
+		dut.reconnectQueue = reconnectQueue;
+		node0 = mockery.mock(ServerNode.class, "node0");
+		node1 = mockery.mock(ServerNode.class, "node1");
 	}
 	
-	@Test public void selectPrimaryIfItIsActive() {
-		final ServerNode node0 = mockery.mock(ServerNode.class, "node0");
+	@Test public void connectAllNodes() {
 		mockery.checking(new Expectations() {{
-			one(nodeLocator).getSequence(); will(returnValue(Arrays.asList(node0).iterator()));
-			one(node0).isActive(); will(returnValue(true));
+			one(nodeLocator).getAll(); will(returnValue(Arrays.asList(node0, node1)));
+			one(node0).connect(); will(returnValue(true));
+			one(node1).connect(); will(returnValue(true));
 		}});
-		assertEquals(node0, dut.selectNode());
+		dut.connectAllNodes();
 	}
 
-	@Test public void selectBackupIfThePrimaryIsNotActive() {
-		final ServerNode node0 = mockery.mock(ServerNode.class, "node0");
-		final ServerNode node1 = mockery.mock(ServerNode.class, "node1");
+	@Test public void connectAllNodesAndReconnectFailedNodeLater() {
 		mockery.checking(new Expectations() {{
-			one(nodeLocator).getSequence(); will(returnValue(Arrays.asList(node0, node1).iterator()));
-			one(node0).isActive(); will(returnValue(false));
-			one(node1).isActive(); will(returnValue(true));
+			one(nodeLocator).getAll(); will(returnValue(Arrays.asList(node0, node1)));
+			one(node0).connect(); will(returnValue(false));
+			one(reconnectQueue).push(node0);
+			one(node1).connect(); will(returnValue(true));
 		}});
-		assertEquals(node1, dut.selectNode());
+		dut.connectAllNodes();
 	}
 
-	@Test public void selectPrimaryIfAllBackupsAreNotActive() {
-		final ServerNode node0 = mockery.mock(ServerNode.class, "node0");
-		final ServerNode node1 = mockery.mock(ServerNode.class, "node1");
+	@Test public void disconnectAllNodes() {
 		mockery.checking(new Expectations() {{
-			one(nodeLocator).getSequence(); will(returnValue(Arrays.asList(node0, node1).iterator()));
-			one(node0).isActive(); will(returnValue(false));
-			one(node1).isActive(); will(returnValue(false));
+			one(nodeLocator).getAll(); will(returnValue(Arrays.asList(node0, node1)));
+			one(node0).disconnect();
+			one(node1).disconnect();
 		}});
-		assertEquals(node0, dut.selectNode());
+		dut.disconnectAllNodes();
+	}
+	
+	@Test public void sendCommandToRecommendedNode() {
+		final PingCommand command = new PingCommand(1);
+		mockery.checking(new Expectations() {{
+			one(nodeSelector).select(); will(returnValue(node0));
+			one(node0).send(command);
+		}});
+		dut.send(command);
+	}
+
+	@Test public void sendCommandToSpecifiedNode() {
+		final PingCommand command = new PingCommand(1);
+		mockery.checking(new Expectations() {{
+			one(node0).send(command);
+		}});
+		dut.send(node0, command);
 	}
 }

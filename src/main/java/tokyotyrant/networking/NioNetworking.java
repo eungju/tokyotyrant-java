@@ -23,7 +23,8 @@ public class NioNetworking extends AbstractNetworking implements Runnable {
 		selector = Selector.open();
 		NioNode[] nodes = new NioNode[addresses.length];
 		for (int i = 0; i < addresses.length; i++) {
-			nodes[i] = new NioNode(addresses[i], selector);
+			nodes[i] = new NioNode(selector);
+			nodes[i].initialize(addresses[i]);
 		}
 		nodeLocator.initialize(nodes);
 		connectAllNodes();
