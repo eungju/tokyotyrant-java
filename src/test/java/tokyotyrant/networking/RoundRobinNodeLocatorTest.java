@@ -23,7 +23,7 @@ public class RoundRobinNodeLocatorTest {
 		dut = new RoundRobinNodeLocator();
 		node0 = mockery.mock(ServerNode.class, "node0");
 		node1 = mockery.mock(ServerNode.class, "node1");
-		dut.setNodes(Arrays.asList(node0, node1));
+		dut.setNodes(new ServerNode[] { node0, node1 });
 	}
 	
 	@Test public void getAll() {

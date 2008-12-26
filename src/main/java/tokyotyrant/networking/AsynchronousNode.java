@@ -20,7 +20,8 @@ import tokyotyrant.protocol.Command;
 public class AsynchronousNode implements ServerNode {
 	private final Logger logger = LoggerFactory.getLogger(getClass());
 	private URI address;
-	private boolean readOnly;
+	private SocketAddress socketAddress;
+	private boolean readOnly = false;
 
 	private Selector selector;
 	private SocketChannel channel;
@@ -38,7 +39,14 @@ public class AsynchronousNode implements ServerNode {
 		}
 		this.address = address;
 		this.selector = selector;
-		readOnly = this.address.getQuery().indexOf("readOnly=true") >= 0;
+		initialize();
+	}
+	
+	void initialize() {
+		socketAddress = new InetSocketAddress(address.getHost(), address.getPort());
+		if (address.getQuery() != null) {
+			readOnly = address.getQuery().indexOf("readOnly=true") >= 0;
+		}
 	}
 	
 	public URI getAddress() {
@@ -63,16 +71,12 @@ public class AsynchronousNode implements ServerNode {
 		return reconnecting;
 	}
 	
-	SocketAddress getSocketAddress(URI uri) {
-		return new InetSocketAddress(address.getHost(), address.getPort());
-	}
-
 	public boolean connect() {
 		logger.info("Connect " + address);
 		try {
 			channel = SocketChannel.open();
 			channel.configureBlocking(false);
-			channel.connect(getSocketAddress(address));
+			channel.connect(socketAddress);
 			selectionKey = channel.register(selector, SelectionKey.OP_CONNECT, this);
 			return true;
 		} catch (IOException e) {
@@ -114,7 +118,7 @@ public class AsynchronousNode implements ServerNode {
 		selectionKey.interestOps(ops);
 	}
 
-	public void doConnect() throws IOException {
+	public void connected() throws IOException {
 		channel.finishConnect();
 		reconnecting = 0;
 		fixupOperations();

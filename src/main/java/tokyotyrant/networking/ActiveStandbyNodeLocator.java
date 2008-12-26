@@ -1,5 +1,6 @@
 package tokyotyrant.networking;
 
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Iterator;
@@ -12,8 +13,8 @@ import java.util.List;
 public class ActiveStandbyNodeLocator implements NodeLocator {
 	private List<ServerNode> nodes;
 
-	public void setNodes(List<ServerNode> nodes) {
-		this.nodes = Collections.unmodifiableList(nodes);
+	public void setNodes(ServerNode[] nodes) {
+		this.nodes = Collections.unmodifiableList(Arrays.asList(nodes));
 	}
 	
 	public Collection<ServerNode> getAll() {

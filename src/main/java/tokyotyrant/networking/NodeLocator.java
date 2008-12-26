@@ -2,13 +2,12 @@ package tokyotyrant.networking;
 
 import java.util.Collection;
 import java.util.Iterator;
-import java.util.List;
 
 /**
  * All nodes should have same data.
  */
 public interface NodeLocator {
-	void setNodes(List<ServerNode> nodes);	
+	void setNodes(ServerNode[] nodes);	
 	
 	/**
 	 * All nodes

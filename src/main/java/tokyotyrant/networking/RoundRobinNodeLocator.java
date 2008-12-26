@@ -1,5 +1,6 @@
 package tokyotyrant.networking;
 
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Iterator;
@@ -9,8 +10,8 @@ public class RoundRobinNodeLocator implements NodeLocator {
 	private List<ServerNode> nodes;
 	private int primaryIndex = 0;
 	
-	public void setNodes(List<ServerNode> nodes) {
-		this.nodes = Collections.unmodifiableList(nodes);
+	public void setNodes(ServerNode[] nodes) {
+		this.nodes = Collections.unmodifiableList(Arrays.asList(nodes));
 	}
 	
 	public Collection<ServerNode> getAll() {

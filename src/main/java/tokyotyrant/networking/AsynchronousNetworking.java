@@ -3,7 +3,6 @@ package tokyotyrant.networking;
 import java.io.IOException;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
-import java.util.Arrays;
 import java.util.Iterator;
 import java.util.Set;
 
@@ -22,11 +21,11 @@ public class AsynchronousNetworking extends AbstractNetworking implements Runnab
 
 	public void start() throws Exception {
 		selector = Selector.open();
-		ServerNode[] nodes = new ServerNode[addresses.length];
+		AsynchronousNode[] nodes = new AsynchronousNode[addresses.length];
 		for (int i = 0; i < addresses.length; i++) {
 			nodes[i] = new AsynchronousNode(addresses[i], selector);
 		}
-		nodeLocator.setNodes(Arrays.asList(nodes));
+		nodeLocator.setNodes(nodes);
 		connectAllNodes();
 
 		//start IO
@@ -81,7 +80,7 @@ public class AsynchronousNetworking extends AbstractNetworking implements Runnab
 		try {
 			if (key.isConnectable()) {
 				logger.debug("Ready to connect to {}", node);
-				node.doConnect();
+				node.connected();
 			} else {
 				if (key.isReadable()) {
 					logger.debug("Ready to read from {}", node);
