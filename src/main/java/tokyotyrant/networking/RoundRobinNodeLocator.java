@@ -10,7 +10,7 @@ public class RoundRobinNodeLocator implements NodeLocator {
 	private List<ServerNode> nodes;
 	private int primaryIndex = 0;
 	
-	public void setNodes(ServerNode[] nodes) {
+	public void initialize(ServerNode[] nodes) {
 		this.nodes = Collections.unmodifiableList(Arrays.asList(nodes));
 	}
 	

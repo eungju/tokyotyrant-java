@@ -13,7 +13,7 @@ import java.util.List;
 public class ActiveStandbyNodeLocator implements NodeLocator {
 	private List<ServerNode> nodes;
 
-	public void setNodes(ServerNode[] nodes) {
+	public void initialize(ServerNode[] nodes) {
 		this.nodes = Collections.unmodifiableList(Arrays.asList(nodes));
 	}
 	

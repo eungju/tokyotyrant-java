@@ -7,7 +7,10 @@ import java.util.Iterator;
  * All nodes should have same data.
  */
 public interface NodeLocator {
-	void setNodes(ServerNode[] nodes);	
+	/**
+	 * Initialize with given nodes.
+	 */
+	void initialize(ServerNode[] nodes);	
 	
 	/**
 	 * All nodes
