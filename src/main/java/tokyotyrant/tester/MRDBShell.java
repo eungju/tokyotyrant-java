@@ -4,13 +4,22 @@ import java.net.URI;
 
 import org.apache.commons.lang.ArrayUtils;
 
-import tokyotyrant.TokyoTyrantClient;
+import tokyotyrant.MRDB;
 
-public class TokyoTyrantClientShell extends Shell {
-	private TokyoTyrantClient client;
+public class MRDBShell extends Shell {
+	private MRDB client;
+	private URI[] addresses;
+	
+	protected void options(String[] args) {
+		addresses = new URI[args.length];
+		int i = 0;
+		for (String each : args) {
+			addresses[i++] = URI.create(each);
+		}
+	}
 
 	protected void openConnection() throws Exception {
-		client = new TokyoTyrantClient(new URI[] { URI.create("tcp://" + host + ":" + port) });
+		client = new MRDB(addresses);
 	}
 
 	protected void closeConnection() {
@@ -65,7 +74,7 @@ public class TokyoTyrantClientShell extends Shell {
 	}
 	
 	public static void main(String[] args) throws Exception {
-		TokyoTyrantClientShell shell = new TokyoTyrantClientShell();
+		MRDBShell shell = new MRDBShell();
 		System.exit(shell.run(args));
 	}
 }

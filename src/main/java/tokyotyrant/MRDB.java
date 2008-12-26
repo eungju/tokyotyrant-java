@@ -10,7 +10,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
 import tokyotyrant.networking.ActiveStandbyNodeLocator;
-import tokyotyrant.networking.AsynchronousNetworking;
+import tokyotyrant.networking.NioNetworking;
 import tokyotyrant.networking.Networking;
 import tokyotyrant.networking.ServerNode;
 import tokyotyrant.protocol.Adddouble;
@@ -37,17 +37,21 @@ import tokyotyrant.transcoder.SerializingTranscoder;
 import tokyotyrant.transcoder.StringTranscoder;
 import tokyotyrant.transcoder.Transcoder;
 
-public class TokyoTyrantClient {
+/**
+ * Multiple Rs DB. Replicated, Reliable, Responsive, Remote, etc.
+ * API is similar to {@link RDB}, but {@link MRDB} returns {@link Future}.
+ */
+public class MRDB {
 	private Transcoder keyTranscoder = new StringTranscoder();
     private Transcoder valueTranscoder = new SerializingTranscoder();
-	private Networking networking;
 	private long globalTimeout = 1000L;
+	private Networking networking;
 	
-    public TokyoTyrantClient(URI[] addresses) throws Exception {
-    	this(addresses, new AsynchronousNetworking(new ActiveStandbyNodeLocator()));
+    public MRDB(URI[] addresses) throws Exception {
+    	this(addresses, new NioNetworking(new ActiveStandbyNodeLocator()));
     }
 	
-    public TokyoTyrantClient(URI[] addresses, Networking networking) throws Exception {
+    public MRDB(URI[] addresses, Networking networking) throws Exception {
 		if (addresses.length == 0) {
 			throw new IllegalArgumentException("Requires at least 1 node");
 		}

@@ -9,21 +9,21 @@ import java.util.Set;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class AsynchronousNetworking extends AbstractNetworking implements Runnable {
+public class NioNetworking extends AbstractNetworking implements Runnable {
 	private final Logger logger = LoggerFactory.getLogger(getClass());  
 	private Selector selector;
 	private Thread ioThread;
 	private boolean running;
 
-	public AsynchronousNetworking(NodeLocator nodeLocator) {
+	public NioNetworking(NodeLocator nodeLocator) {
 		super(nodeLocator);
 	}
 
 	public void start() throws Exception {
 		selector = Selector.open();
-		AsynchronousNode[] nodes = new AsynchronousNode[addresses.length];
+		NioNode[] nodes = new NioNode[addresses.length];
 		for (int i = 0; i < addresses.length; i++) {
-			nodes[i] = new AsynchronousNode(addresses[i], selector);
+			nodes[i] = new NioNode(addresses[i], selector);
 		}
 		nodeLocator.setNodes(nodes);
 		connectAllNodes();
@@ -76,7 +76,7 @@ public class AsynchronousNetworking extends AbstractNetworking implements Runnab
 	}
 	
 	void handleChannelIO(SelectionKey key) {
-		AsynchronousNode node = (AsynchronousNode)key.attachment();
+		NioNode node = (NioNode)key.attachment();
 		try {
 			if (key.isConnectable()) {
 				logger.debug("Ready to connect to {}", node);

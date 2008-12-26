@@ -10,9 +10,6 @@ public abstract class Shell {
 	protected PrintWriter stdout;
 	protected PrintWriter stderr;
 	
-	protected String host;
-	protected int port = 1978;
-	
 	public Shell() {
 		stdin = new BufferedReader(new InputStreamReader(System.in));
 		stdout = new PrintWriter(System.out);
@@ -25,12 +22,7 @@ public abstract class Shell {
 		return stdin.readLine();
 	}
 	
-	protected void options(String[] args) {
-		host = args[0];
-		if (args.length > 1) {
-			port = Integer.parseInt(args[1]);
-		}
-	}
+	protected abstract void options(String[] args);
 	
 	public int run(String[] args) throws Exception {
 		options(args);

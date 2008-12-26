@@ -11,7 +11,16 @@ import tokyotyrant.RDB;
 
 public class RDBShell extends Shell {
 	private RDB db;
-	
+	private String host;
+	private int port;
+
+	protected void options(String[] args) {
+		host = args[0];
+		if (args.length > 1) {
+			port = Integer.parseInt(args[1]);
+		}
+	}
+
 	protected void openConnection() throws IOException {
 		db = new RDB();
 		db.open(new InetSocketAddress(host, port));

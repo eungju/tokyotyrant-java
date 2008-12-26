@@ -19,7 +19,7 @@ import org.slf4j.LoggerFactory;
 import tokyotyrant.helper.BufferHelper;
 import tokyotyrant.protocol.Command;
 
-public class AsynchronousNode implements ServerNode {
+public class NioNode implements ServerNode {
 	private final Logger logger = LoggerFactory.getLogger(getClass());
 	private URI address;
 	private SocketAddress socketAddress;
@@ -35,7 +35,7 @@ public class AsynchronousNode implements ServerNode {
 	private BlockingQueue<Command<?>> readingCommands = new ArrayBlockingQueue<Command<?>>(16 * 1024);
 	private ByteBuffer readingBuffer = null;
 	
-	public AsynchronousNode(URI address, Selector selector) {
+	public NioNode(URI address, Selector selector) {
 		if (!"tcp".equals(address.getScheme())) {
 			throw new IllegalArgumentException("Only support TCP binary protocol");
 		}
@@ -199,6 +199,6 @@ public class AsynchronousNode implements ServerNode {
 	}
 	
 	public String toString() {
-		return "AsynchronousNode[" + address.toString() + "]";
+		return getClass().getName() + "[" + address.toString() + "]";
 	}
 }
