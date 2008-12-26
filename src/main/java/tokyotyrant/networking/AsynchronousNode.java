@@ -8,6 +8,8 @@ import java.nio.ByteBuffer;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
 import java.nio.channels.SocketChannel;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 
@@ -21,7 +23,7 @@ public class AsynchronousNode implements ServerNode {
 	private final Logger logger = LoggerFactory.getLogger(getClass());
 	private URI address;
 	private SocketAddress socketAddress;
-	private boolean readOnly = false;
+	private Map<String, String> parameters;
 
 	private Selector selector;
 	private SocketChannel channel;
@@ -44,8 +46,13 @@ public class AsynchronousNode implements ServerNode {
 	
 	void initialize() {
 		socketAddress = new InetSocketAddress(address.getHost(), address.getPort());
+		parameters = new HashMap<String, String>();
 		if (address.getQuery() != null) {
-			readOnly = address.getQuery().indexOf("readOnly=true") >= 0;
+			String qs = address.getQuery();
+			for (String each : qs.split("&")) {
+				String[] keyAndValue = each.split("=");
+				parameters.put(keyAndValue[0], keyAndValue[1]);
+			}
 		}
 	}
 	
@@ -54,7 +61,7 @@ public class AsynchronousNode implements ServerNode {
 	}
 	
 	public boolean isReadOnly() {
-		return readOnly;
+		return parameters.containsKey("readOnly") && "true".equals(parameters.get("readOnly"));
 	}
 		
 	public void send(Command<?> command) {
