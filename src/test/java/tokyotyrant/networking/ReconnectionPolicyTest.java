@@ -13,32 +13,32 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 
 @RunWith(JMock.class)
-public class ReconnectQueueTest {
+public class ReconnectionPolicyTest {
 	private Mockery mockery = new JUnit4Mockery();
-	private ReconnectQueue dut;
+	private ReconnectionPolicy dut;
 	private long now = System.currentTimeMillis();
 
 	@Before public void beforeEach() {
-		dut = new ReconnectQueue() {
+		dut = new ReconnectionPolicy() {
 			long now() {
 				return now;
 			}
 		};
 	}
 	
-	@Test public void push() {
+	@Test public void reconnect() {
 		final ServerNode node = mockery.mock(ServerNode.class);
 		mockery.checking(new Expectations() {{
 			one(node).disconnect();
 			one(node).reconnecting();
 			one(node).getReconnectAttempt(); will(returnValue(1));
 		}});
-		dut.push(node);
+		dut.reconnect(node);
 		now += 10;
 		assertEquals(dut.backoff(1) - 10, dut.getTimeToNextAttempt());
 	}
 	
-	@Test public void pushShouldNotMissNode() throws IOException {
+	@Test public void reconnectShouldNotMissNode() throws IOException {
 		final ServerNode node1 = mockery.mock(ServerNode.class, "Node1");
 		final ServerNode node2 = mockery.mock(ServerNode.class, "Node2");
 		mockery.checking(new Expectations() {{
@@ -50,8 +50,8 @@ public class ReconnectQueueTest {
 			one(node2).reconnecting();
 			one(node2).getReconnectAttempt(); will(returnValue(1));
 		}});
-		dut.push(node1);
-		dut.push(node2);
+		dut.reconnect(node1);
+		dut.reconnect(node2);
 		assertEquals(2, dut.countDelayed());
 	}
 
@@ -59,7 +59,7 @@ public class ReconnectQueueTest {
 		assertEquals(0, dut.getTimeToNextAttempt());
 	}
 	
-	@Test public void reconnectCandidateNodes() throws IOException {
+	@Test public void reconnectDelayedNodes() throws IOException {
 		final ServerNode node = mockery.mock(ServerNode.class);
 		mockery.checking(new Expectations() {{
 			one(node).disconnect();
@@ -68,9 +68,9 @@ public class ReconnectQueueTest {
 			
 			one(node).connect(); will(returnValue(true));
 		}});
-		dut.push(node);
+		dut.reconnect(node);
 		now += dut.backoff(1) + 1;
-		dut.reconnect();
+		dut.reconnectDelayed();
 		assertEquals(0, dut.countDelayed());
 	}
 
@@ -93,10 +93,10 @@ public class ReconnectQueueTest {
 			one(node1).reconnecting();
 			one(node1).getReconnectAttempt(); will(returnValue(1));
 		}});
-		dut.push(node1);
-		dut.push(node2);
+		dut.reconnect(node1);
+		dut.reconnect(node2);
 		now += dut.backoff(2) + 1;
-		dut.reconnect();
+		dut.reconnectDelayed();
 		assertEquals(1, dut.countDelayed());
 	}
 
@@ -117,6 +117,6 @@ public class ReconnectQueueTest {
 		mockery.checking(new Expectations() {{
 			one(node).getReconnectAttempt(); will(returnValue(31));
 		}});
-		assertEquals(ReconnectQueue.MAX_BACKOFF, dut.backoff(node));
+		assertEquals(ReconnectionPolicy.MAX_BACKOFF, dut.backoff(node));
 	}
 }

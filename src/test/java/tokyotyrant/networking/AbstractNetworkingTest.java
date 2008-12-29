@@ -22,7 +22,7 @@ public class AbstractNetworkingTest {
 	private AbstractNetworking dut;
 	private NodeLocator nodeLocator;
 	private NodeSelector nodeSelector;
-	private ReconnectQueue reconnectQueue;
+	private ReconnectionPolicy reconnectionPolicy;
 	private ServerNode node0;
 	private ServerNode node1;
 
@@ -38,8 +38,8 @@ public class AbstractNetworkingTest {
 		};
 		nodeSelector = mockery.mock(NodeSelector.class);
 		dut.nodeSelector = nodeSelector;
-		reconnectQueue = mockery.mock(ReconnectQueue.class);
-		dut.reconnectQueue = reconnectQueue;
+		reconnectionPolicy = mockery.mock(ReconnectionPolicy.class);
+		dut.reconnectionPolicy = reconnectionPolicy;
 		node0 = mockery.mock(ServerNode.class, "node0");
 		node1 = mockery.mock(ServerNode.class, "node1");
 	}
@@ -57,7 +57,7 @@ public class AbstractNetworkingTest {
 		mockery.checking(new Expectations() {{
 			one(nodeLocator).getAll(); will(returnValue(Arrays.asList(node0, node1)));
 			one(node0).connect(); will(returnValue(false));
-			one(reconnectQueue).push(node0);
+			one(reconnectionPolicy).reconnect(node0);
 			one(node1).connect(); will(returnValue(true));
 		}});
 		dut.connectAllNodes();

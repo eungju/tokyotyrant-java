@@ -8,7 +8,7 @@ public abstract class AbstractNetworking implements Networking {
 	protected URI[] addresses;
 	protected NodeLocator nodeLocator;
 	protected NodeSelector nodeSelector;
-	protected ReconnectQueue reconnectQueue = new ReconnectQueue();
+	protected ReconnectionPolicy reconnectionPolicy = new ReconnectionPolicy();
 	
 	protected AbstractNetworking(NodeLocator nodeLocator) {
 		this.nodeLocator = nodeLocator;
@@ -34,7 +34,7 @@ public abstract class AbstractNetworking implements Networking {
 	protected void connectAllNodes() {
 		for (ServerNode each : nodeLocator.getAll()) {
 			if (!each.connect()) {
-				reconnectQueue.push(each);
+				reconnectionPolicy.reconnect(each);
 			}
 		}
 	}

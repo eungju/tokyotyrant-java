@@ -58,7 +58,7 @@ public class NioNetworking extends AbstractNetworking implements Runnable {
 	
 	void handleIO() throws IOException {
 		logger.debug("Selecting...");
-		int n = selector.select(reconnectQueue.getTimeToNextAttempt());
+		int n = selector.select(reconnectionPolicy.getTimeToNextAttempt());
 		logger.debug("{} keys are selected", n);
 		if (!running) {
 			logger.info("Stopped. So will not handle IO. {} keys will be ignored", n);
@@ -73,7 +73,7 @@ public class NioNetworking extends AbstractNetworking implements Runnable {
 			handleChannelIO(key);
 		}
 		
-		reconnectQueue.reconnect();
+		reconnectionPolicy.reconnectDelayed();
 	}
 	
 	void handleChannelIO(SelectionKey key) {
@@ -94,7 +94,7 @@ public class NioNetworking extends AbstractNetworking implements Runnable {
 			}
 		} catch (Exception e) {
 			logger.error("Error while handling IO on " + node, e);
-			reconnectQueue.push(node);
+			reconnectionPolicy.reconnect(node);
 		}
 	}
 }

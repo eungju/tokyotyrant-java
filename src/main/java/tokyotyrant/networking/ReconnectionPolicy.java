@@ -6,7 +6,7 @@ import java.util.List;
 import java.util.SortedMap;
 import java.util.TreeMap;
 
-public class ReconnectQueue {
+public class ReconnectionPolicy {
 	static final int INITIAL_BACKOFF = 100;
 	// maximum amount of time to wait between reconnect attempts
 	static final int MAX_BACKOFF = 60 * 1000;
@@ -25,7 +25,7 @@ public class ReconnectQueue {
 		return Math.min(INITIAL_BACKOFF * (1 << attempts), MAX_BACKOFF);
 	}
 	
-	public void push(ServerNode node) {
+	public void reconnect(ServerNode node) {
 		assert !queue.containsValue(node);
 		node.disconnect();
 		node.reconnecting();
@@ -49,7 +49,7 @@ public class ReconnectQueue {
 		return Math.max(queue.firstKey() - now(), 1);
 	}
 	
-	public void reconnect() {
+	public void reconnectDelayed() {
 		List<ServerNode> failedNodes = new ArrayList<ServerNode>();
 		for (Iterator<ServerNode> i = queue.headMap(now()).values().iterator(); i.hasNext(); ) {
 			ServerNode node = i.next();
@@ -59,7 +59,7 @@ public class ReconnectQueue {
 			}
 		}
 		for (ServerNode each : failedNodes) {
-			push(each);
+			reconnect(each);
 		}
 	}
 	
