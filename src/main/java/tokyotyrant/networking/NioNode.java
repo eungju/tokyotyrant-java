@@ -9,6 +9,7 @@ import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
 import java.nio.channels.SocketChannel;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
@@ -102,7 +103,12 @@ public class NioNode implements ServerNode {
 		} finally {
 			writingBuffer = null;
 			readingBuffer = null;
-			readingCommands.clear();
+			for (Iterator<Command<?>> i = readingCommands.iterator(); i.hasNext(); ) {
+				Command<?> each = i.next();
+				each.cancel();
+				i.remove();
+			}
+			assert readingCommands.isEmpty();
 		}
 	}
 
