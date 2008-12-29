@@ -67,6 +67,22 @@ public class MRDB {
 	public void setGlobalTimeout(long timeout) {
 		this.globalTimeout = timeout;
 	}
+	
+	/**
+	 * Set the {@link Transcoder} to be used to transcode keys.
+	 * Not required: @{link StringTranscoder} is the default.
+	 */
+	public void setKeyTranscoder(Transcoder transcoder) {
+		this.keyTranscoder = transcoder;
+	}
+	
+	/**
+	 * Set the {@link Transcoder} to be used to transcode values.
+	 * Not required: @{link StringTranscoder} is the default.
+	 */
+	public void setValueTranscoder(Transcoder transcoder) {
+		this.valueTranscoder = transcoder;
+	}
 
 	protected <T> CommandFuture<T> execute(Command<T> command) {
 		return execute(command, valueTranscoder);
