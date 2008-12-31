@@ -138,69 +138,81 @@ public class NioNode implements ServerNode {
 		fixupOperations();
 	}
 
-	private static final int FRAGMENT_CAPACITY = 2 * 1024;
+	private static final int FRAGMENT_CAPACITY = 4 * 1024;
 	
 	public void doWrite() throws IOException {
-		Command<?> command = writingCommands.peek();
-		if (writingBuffer == null) {
-			writingBuffer = command.encode();
-		}
-		try {
-			channel.write(writingBuffer);
-			if (!writingBuffer.hasRemaining()) {
-				writingBuffer = null;
-				Command<?> _removed = writingCommands.remove();
-				assert _removed == command;
-				command.reading();
-				readingCommands.add(command);
+		while (!writingCommands.isEmpty()) {
+			Command<?> command = writingCommands.peek();
+			if (writingBuffer == null) {
+				writingBuffer = command.encode();
 			}
-		} catch (IOException exception) {
-			command.error(exception);
-			throw exception;
+			try {
+				int n = channel.write(writingBuffer);
+				if (!writingBuffer.hasRemaining()) {
+					writingBuffer = null;
+					Command<?> _removed = writingCommands.remove();
+					assert _removed == command;
+					command.reading();
+					readingCommands.add(command);
+				}
+				if (n == 0) {
+					break;
+				}
+			} catch (IOException exception) {
+				command.error(exception);
+				throw exception;
+			} finally {
+				fixupOperations();
+			}
 		}
-		fixupOperations();
 	}
 
 	public void doRead() throws IOException {
-		Command<?> command = readingCommands.peek();
-		try {
-			ByteBuffer fragment = ByteBuffer.allocate(FRAGMENT_CAPACITY);
-			if (channel.read(fragment) == -1) {
-				throw new IOException("Channel " + channel + " is closed");
-			}
-			fragment.flip();
-			logger.debug("Received fragment {}", fragment);
-			received(fragment, command);
-		} catch (IOException exception) {
-			command.error(exception);
-			throw exception;
-		}
-		fixupOperations();
-	}
-	
-	void received(ByteBuffer fragment, Command<?> command) {
 		if (readingBuffer == null) {
 			readingBuffer = ByteBuffer.allocate(FRAGMENT_CAPACITY);
 		}
 		
-		readingBuffer = BufferHelper.accumulateBuffer(readingBuffer, fragment);
-		int pos = readingBuffer.position();
-		readingBuffer.flip();
-		if (command.decode(readingBuffer)) {
-			logger.debug("Received message " + readingBuffer);
-			command.complete();
-			Command<?> _removed = readingCommands.remove();
-			assert _removed == command;
-			
-			if (readingBuffer.hasRemaining()) {
-				ByteBuffer newBuffer = ByteBuffer.allocate(readingBuffer.remaining() + FRAGMENT_CAPACITY);
-				newBuffer.put(readingBuffer);
-				readingBuffer = newBuffer;
-			} else {
-				readingBuffer = null;
+		while (true) {
+			ByteBuffer fragment = ByteBuffer.allocate(FRAGMENT_CAPACITY);
+			int n = channel.read(fragment);
+			if (n == 0) {
+				break;
+			} else if (n == -1) {
+				throw new IOException("Channel " + channel + " is closed");
 			}
-		} else {
-			readingBuffer.position(pos);
+			logger.debug("Received fragment " + fragment);
+			fragment.flip();
+			readingBuffer = BufferHelper.accumulateBuffer(readingBuffer, fragment);
+		}
+
+		readingBuffer.flip();
+		while (!readingCommands.isEmpty() && readingBuffer != null) {
+			Command<?> command = readingCommands.peek();
+			try {
+				int pos = readingBuffer.position();
+				//logger.debug("Try to decode " + readingBuffer);
+				//logger.debug(ArrayUtils.toString(readingBuffer.array()));
+				if (command.decode(readingBuffer)) {
+					logger.debug("Received message " + readingBuffer);
+					command.complete();
+					Command<?> _removed = readingCommands.remove();
+					assert _removed == command;
+				} else {
+					readingBuffer.position(pos);
+					ByteBuffer newReadingBuffer = ByteBuffer.allocate(readingBuffer.remaining());
+					newReadingBuffer.put(readingBuffer);
+					readingBuffer = newReadingBuffer;
+					break;
+				}
+				if (!readingBuffer.hasRemaining()) {
+					readingBuffer = null;
+				}
+			} catch (Exception exception) {
+				command.error(exception);
+				throw new IOException("Error while reading response of command " + command, exception);
+			} finally {
+				fixupOperations();
+			}
 		}
 	}
 	
