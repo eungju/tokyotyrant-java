@@ -29,7 +29,7 @@ public class BufferHelperTest {
 		accumulatedBuffer.flip();
 		assertEquals(1, accumulatedBuffer.getInt());
 		assertEquals(2, accumulatedBuffer.getInt());
-		assertEquals(buffer.capacity() + 4, accumulatedBuffer.capacity());
+		assertEquals(buffer.capacity() + addition.capacity() * 2, accumulatedBuffer.capacity());
 		assertNotSame(buffer, accumulatedBuffer);
 	}
 }
