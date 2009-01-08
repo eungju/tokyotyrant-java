@@ -160,29 +160,26 @@ public class RDB {
 	 * 
 	 * @param command the command to send request.
 	 */
-	void sendRequest(Command<?> command) throws IOException {
+	protected void sendRequest(Command<?> command) throws IOException {
 		ByteBuffer buffer = command.encode();
 		//In blocking-mode, a write operation will return only after writing all of the requested bytes.
 		outputStream.write(buffer.array(), 0, buffer.limit());
 		logger.debug("Sent request " + buffer);
 	}
 	
+	static final int INITIAL_BUFFER_CAPACITY = 4 * 1024;
+
 	/**
 	 * Receive response.
 	 * 
 	 * @param command the command to receive response.
 	 */
-	void receiveResponse(Command<?> command) throws IOException {
-		final int fragmentCapacity = 2048;
-		ByteBuffer buffer = ByteBuffer.allocate(fragmentCapacity);
-		ByteBuffer fragment = ByteBuffer.allocate(fragmentCapacity);
+	protected void receiveResponse(Command<?> command) throws IOException {
+		ByteBuffer buffer = ByteBuffer.allocate(INITIAL_BUFFER_CAPACITY);
+		ByteBuffer fragment = ByteBuffer.allocate(INITIAL_BUFFER_CAPACITY);
 		
-		int oldPos = 0;
-		buffer.flip();
-		while (!command.decode(buffer)) {
-			logger.debug("Trying to read fragment");
-			fragment.clear();
-			int n = inputStream.read(fragment.array(), 0, fragment.capacity());
+		while (true) {
+			int n = inputStream.read(fragment.array(), fragment.position(), fragment.capacity());
 			if (n == -1) {
 				throw new IOException("Connection closed unexpectedly");
 			}
@@ -190,14 +187,17 @@ public class RDB {
 			fragment.limit(n);
 			logger.debug("Received fragment " + fragment);
 			
+			buffer = BufferHelper.accumulateBuffer(buffer, fragment);
+			int oldPos = buffer.position();
+			buffer.flip();
+			if (command.decode(buffer)) {
+				break;
+			}
 			buffer.position(oldPos);
 			buffer.limit(buffer.capacity());
-			buffer = BufferHelper.accumulateBuffer(buffer, fragment);
-			oldPos = buffer.position();
-			buffer.flip();
 		}
 		logger.debug("Received response " + buffer);
-	}
+	}	
 
 	/**
 	 * Store a record.
@@ -476,13 +476,5 @@ public class RDB {
 	 */
 	public Map<String, String> stat() throws IOException {
 		return execute(new Stat());
-	}
-	
-	public static class Synchronized extends RDB {
-		protected <T> T execute(Command<T> command) throws IOException {
-			synchronized (this) {
-				return super.execute(command);
-			}
-		}
 	}
 }
