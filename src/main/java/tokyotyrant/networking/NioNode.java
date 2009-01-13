@@ -140,7 +140,7 @@ public class NioNode implements ServerNode {
 
 	private static final int FRAGMENT_CAPACITY = 4 * 1024;
 	
-	public void doWrite() throws IOException {
+	public void doWrite() throws Exception {
 		while (!writingCommands.isEmpty()) {
 			Command<?> command = writingCommands.peek();
 			if (writingBuffer == null) {
@@ -167,7 +167,7 @@ public class NioNode implements ServerNode {
 		}
 	}
 
-	public void doRead() throws IOException {
+	public void doRead() throws Exception {
 		if (readingBuffer == null) {
 			readingBuffer = ByteBuffer.allocate(FRAGMENT_CAPACITY);
 		}
@@ -209,7 +209,7 @@ public class NioNode implements ServerNode {
 				}
 			} catch (Exception exception) {
 				command.error(exception);
-				throw new IOException("Error while reading response of command " + command, exception);
+				throw new Exception("Error while reading response of command " + command, exception);
 			} finally {
 				fixupOperations();
 			}
