@@ -36,7 +36,11 @@ public class BufferHelper {
 
 	public static ByteBuffer accumulateBuffer(ByteBuffer buffer, ByteBuffer addition) {
 		if (buffer.remaining() < addition.remaining()) {
-			ByteBuffer newBuffer = ByteBuffer.allocate(buffer.capacity() + addition.capacity() * 2);
+			int capacity = buffer.capacity() * 2;
+			while (capacity < (buffer.remaining() + addition.remaining())) {
+				capacity *= 2;
+			}
+			ByteBuffer newBuffer = ByteBuffer.allocate(capacity);
 			buffer.flip();
 			newBuffer.put(buffer);
 			buffer = newBuffer;
