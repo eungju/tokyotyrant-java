@@ -80,16 +80,16 @@ public class NioNetworking extends AbstractNetworking implements Runnable {
 		NioNode node = (NioNode)key.attachment();
 		try {
 			if (key.isConnectable()) {
-				logger.debug("Ready to connect to {}", node);
-				node.connected();
+				logger.debug("Ready to connect {}", node);
+				node.handleConnect();
 			} else {
 				if (key.isReadable()) {
-					logger.debug("Ready to read from {}", node);
-					node.doRead();
+					logger.debug("Ready to read {}", node);
+					node.handleRead();
 				}
 				if (key.isWritable()) {
-					logger.debug("Ready to write to {}", node);
-					node.doWrite();
+					logger.debug("Ready to write {}", node);
+					node.handleWrite();
 				}
 			}
 		} catch (Exception e) {

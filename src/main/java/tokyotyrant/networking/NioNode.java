@@ -132,7 +132,7 @@ public class NioNode implements ServerNode {
 		selectionKey.interestOps(ops);
 	}
 
-	public void connected() throws IOException {
+	public void handleConnect() throws IOException {
 		channel.finishConnect();
 		reconnecting = 0;
 		fixupOperations();
@@ -140,7 +140,7 @@ public class NioNode implements ServerNode {
 
 	private static final int FRAGMENT_CAPACITY = 4 * 1024;
 	
-	public void doWrite() throws Exception {
+	public void handleWrite() throws Exception {
 		while (!writingCommands.isEmpty()) {
 			Command<?> command = writingCommands.peek();
 			if (writingBuffer == null) {
@@ -167,7 +167,7 @@ public class NioNode implements ServerNode {
 		}
 	}
 
-	public void doRead() throws Exception {
+	public void handleRead() throws Exception {
 		if (readingBuffer == null) {
 			readingBuffer = ByteBuffer.allocate(FRAGMENT_CAPACITY);
 		}
@@ -199,7 +199,7 @@ public class NioNode implements ServerNode {
 					assert _removed == command;
 				} else {
 					readingBuffer.position(pos);
-					ByteBuffer newReadingBuffer = ByteBuffer.allocate(readingBuffer.remaining());
+					ByteBuffer newReadingBuffer = ByteBuffer.allocate(readingBuffer.capacity());
 					newReadingBuffer.put(readingBuffer);
 					readingBuffer = newReadingBuffer;
 					break;
