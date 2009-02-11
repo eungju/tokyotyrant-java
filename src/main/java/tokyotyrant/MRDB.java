@@ -105,6 +105,11 @@ public class MRDB {
 		return future;
 	}
 	
+	/**
+	 * Await the future gracefully.
+	 * 
+	 * @param future the future to wait
+	 */
 	public <T> T await(Future<T> future) throws RuntimeException {
 		try {
 			return future.get();
@@ -115,6 +120,13 @@ public class MRDB {
 		}
 	}
 
+	/**
+	 * Await the future gracefully with timeout.
+	 * 
+	 * @param future the future to wait
+	 * @param timeout the maximum time to wait
+	 * @param unit the time unit of the timeout argument
+	 */
 	public <T> T await(Future<T> future, long timeout, TimeUnit unit) throws RuntimeException {
 		try {
 			return future.get(timeout, unit);
