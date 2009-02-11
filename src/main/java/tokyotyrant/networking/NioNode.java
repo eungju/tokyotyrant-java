@@ -94,7 +94,7 @@ public class NioNode implements ServerNode {
 	}
 
 	public void disconnect() {
-		logger.info("Diconnect " + address);
+		logger.info("Disconnect " + address);
 		try {
 			selectionKey.cancel();
 			channel.close();

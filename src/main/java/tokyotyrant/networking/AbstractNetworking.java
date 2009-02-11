@@ -10,9 +10,9 @@ public abstract class AbstractNetworking implements Networking {
 	protected NodeSelector nodeSelector;
 	protected ReconnectionPolicy reconnectionPolicy = new ReconnectionPolicy();
 	
-	protected AbstractNetworking(NodeLocator nodeLocator) {
+	protected AbstractNetworking(NodeLocator nodeLocator, NodeSelector nodeSelector) {
 		this.nodeLocator = nodeLocator;
-		this.nodeSelector = new NodeSelector(this.nodeLocator);
+		this.nodeSelector = nodeSelector;
 	}
 
 	public void initialize(URI[] addresses) {
@@ -20,7 +20,7 @@ public abstract class AbstractNetworking implements Networking {
 	}
 
 	public void send(Command<?> command) {
-		send(nodeSelector.select(), command);
+		send(nodeSelector.select(nodeLocator.getSequence()), command);
 	}
 	
 	public void send(ServerNode node, Command<?> command) {

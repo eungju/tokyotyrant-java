@@ -12,6 +12,7 @@ import java.util.concurrent.TimeoutException;
 import tokyotyrant.networking.ActiveStandbyNodeLocator;
 import tokyotyrant.networking.NioNetworking;
 import tokyotyrant.networking.Networking;
+import tokyotyrant.networking.NodeSelector;
 import tokyotyrant.networking.ServerNode;
 import tokyotyrant.protocol.Adddouble;
 import tokyotyrant.protocol.Addint;
@@ -48,7 +49,7 @@ public class MRDB {
 	private Networking networking;
 	
     public MRDB(URI[] addresses) throws Exception {
-    	this(addresses, new NioNetworking(new ActiveStandbyNodeLocator()));
+    	this(addresses, new NioNetworking(new ActiveStandbyNodeLocator(), new NodeSelector()));
     }
 	
     public MRDB(URI[] addresses, Networking networking) throws Exception {

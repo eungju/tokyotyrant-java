@@ -2,6 +2,7 @@ package tokyotyrant.networking;
 
 import java.net.URI;
 import java.util.Arrays;
+import java.util.Iterator;
 
 import org.jmock.Expectations;
 import org.jmock.Mockery;
@@ -28,7 +29,7 @@ public class AbstractNetworkingTest {
 
 	@Before public void beforeEach() {
 		nodeLocator = mockery.mock(NodeLocator.class);
-		dut = new AbstractNetworking(nodeLocator) {
+		dut = new AbstractNetworking(nodeLocator, nodeSelector) {
 			public void initialize(URI[] addresses) {
 			}
 			public void start() {
@@ -72,10 +73,12 @@ public class AbstractNetworkingTest {
 		dut.disconnectAllNodes();
 	}
 	
+	@SuppressWarnings("unchecked")
 	@Test public void sendCommandToRecommendedNode() {
 		final PingCommand command = new PingCommand(1);
 		mockery.checking(new Expectations() {{
-			one(nodeSelector).select(); will(returnValue(node0));
+			one(nodeLocator).getSequence();
+			one(nodeSelector).select(with(any(Iterator.class))); will(returnValue(node0));
 			one(node0).send(command);
 		}});
 		dut.send(command);

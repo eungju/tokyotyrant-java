@@ -3,20 +3,13 @@ package tokyotyrant.networking;
 import java.util.Iterator;
 
 public class NodeSelector {
-	private NodeLocator nodeLocator;
-	
-	public NodeSelector(NodeLocator nodeLocator) {
-		this.nodeLocator = nodeLocator;
-	}
-
-	public ServerNode select() {
-		Iterator<ServerNode> backups = nodeLocator.getSequence();
-		ServerNode selected = backups.next();
+	public ServerNode select(Iterator<ServerNode> sequence) {
+		ServerNode selected = sequence.next();
 		if (selected.isActive()) {
 			return selected;
 		}
-		while (backups.hasNext()) {
-			ServerNode each = backups.next();
+		while (sequence.hasNext()) {
+			ServerNode each = sequence.next();
 			if (each.isActive()) {
 				selected = each;
 				break;

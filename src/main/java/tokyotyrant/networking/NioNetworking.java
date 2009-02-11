@@ -15,8 +15,8 @@ public class NioNetworking extends AbstractNetworking implements Runnable {
 	private Thread ioThread;
 	private boolean running;
 
-	public NioNetworking(NodeLocator nodeLocator) {
-		super(nodeLocator);
+	public NioNetworking(NodeLocator nodeLocator, NodeSelector nodeSelector) {
+		super(nodeLocator, nodeSelector);
 	}
 
 	public void start() throws Exception {
