@@ -48,20 +48,23 @@ public class MRDB {
 	private long globalTimeout = 1000L;
 	private Networking networking;
 	
-    public MRDB(URI[] addresses) throws Exception {
-    	this(addresses, new NioNetworking(new ActiveStandbyNodeLocator(), new NodeSelector()));
+    public MRDB() throws Exception {
+    	this(new NioNetworking(new ActiveStandbyNodeLocator(), new NodeSelector()));
     }
 	
-    public MRDB(URI[] addresses, Networking networking) throws Exception {
+    public MRDB(Networking networking) throws Exception {
+		this.networking = networking;
+	}
+    
+    public void open(URI[] addresses) throws Exception {
 		if (addresses.length == 0) {
 			throw new IllegalArgumentException("Requires at least 1 node");
 		}
-		this.networking = networking;
-		this.networking.initialize(addresses);
-		this.networking.start();
-	}
+		networking.initialize(addresses);
+		networking.start();
+    }
 
-	public void dispose() {
+	public void close() {
 		networking.stop();
 	}
 	

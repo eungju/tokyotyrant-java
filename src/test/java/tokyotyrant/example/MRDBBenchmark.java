@@ -14,7 +14,8 @@ import tokyotyrant.transcoder.SerializingTranscoder;
 @Ignore
 public class MRDBBenchmark {
 	@Test public void get() throws Exception {
-		MRDB db = new MRDB(new URI[] { URI.create("tcp://localhost:1978") });
+		MRDB db = new MRDB();
+		db.open(new URI[] { URI.create("tcp://localhost:1978") });
 		db.setGlobalTimeout(Long.MAX_VALUE);
 		db.setValueTranscoder(new SerializingTranscoder());
 		byte[] value = new byte[128];
@@ -30,6 +31,6 @@ public class MRDBBenchmark {
 			System.out.println(i);
 			assertArrayEquals(value, (byte[]) futures[i].get());
 		}
-		db.dispose();
+		db.close();
 	}
 }

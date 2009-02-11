@@ -10,8 +10,11 @@ public class MRDBExample {
 	public static void main(String[] args) throws Exception {
 		Object value;
 
-		// open the connections
-		MRDB db = new MRDB(new URI[] { new URI("tcp://localhost:1978") });
+		// create the object
+		MRDB db = new MRDB();
+
+		// connect to the servers
+		db.open(new URI[] { new URI("tcp://localhost:1978") });
 
 		// store records
 		if (!db.await(db.put("foo", "hop"))
@@ -39,6 +42,6 @@ public class MRDBExample {
 		System.out.println(d);
 
 		// close the connections
-		db.dispose();
+		db.close();
 	}
 }

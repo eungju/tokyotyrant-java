@@ -7,7 +7,7 @@ import org.apache.commons.lang.ArrayUtils;
 import tokyotyrant.MRDB;
 
 public class MRDBShell extends Shell {
-	private MRDB client;
+	private MRDB db;
 	private URI[] addresses;
 	
 	protected void options(String[] args) {
@@ -19,11 +19,12 @@ public class MRDBShell extends Shell {
 	}
 
 	protected void openConnection() throws Exception {
-		client = new MRDB(addresses);
+		db = new MRDB();
+		db.open(addresses);
 	}
 
 	protected void closeConnection() {
-		client.dispose();
+		db.close();
 	}
 	
 	public Object repl(String input) throws Exception {
@@ -31,44 +32,44 @@ public class MRDBShell extends Shell {
 		String command = tokens[0];
 		Object result = null;
 		if ("put".equals(command)) {
-			result = client.put(tokens[1], tokens[2]).get();
+			result = db.put(tokens[1], tokens[2]).get();
 		} else if ("putkeep".equals(command)) {
-			result = client.putkeep(tokens[1], tokens[2]).get();
+			result = db.putkeep(tokens[1], tokens[2]).get();
 		} else if ("putcat".equals(command)) {
-			result = client.putcat(tokens[1], tokens[2]).get();
+			result = db.putcat(tokens[1], tokens[2]).get();
 		} else if ("putshl".equals(command)) {
-			result = client.putshl(tokens[1], tokens[2], Integer.parseInt(tokens[3])).get();
+			result = db.putshl(tokens[1], tokens[2], Integer.parseInt(tokens[3])).get();
 		} else if ("putnr".equals(command)) {
-			client.putnr(tokens[1], tokens[2]);
+			db.putnr(tokens[1], tokens[2]);
 		} else if ("out".equals(command)) {
-			result = client.out(tokens[1]).get();
+			result = db.out(tokens[1]).get();
 		} else if ("get".equals(command)) {
-			result = tokens[1] + "\t" + client.get(tokens[1]).get();
+			result = tokens[1] + "\t" + db.get(tokens[1]).get();
 		} else if ("mget".equals(command)) {
 			Object[] keys = ArrayUtils.subarray(tokens, 1, tokens.length);
-			result = client.mget(keys).get();
+			result = db.mget(keys).get();
 		} else if ("vsiz".equals(command)) {
-			result = client.vsiz(tokens[1]).get();
+			result = db.vsiz(tokens[1]).get();
 		} else if ("list".equals(command)) {
-			result = client.fwmkeys("", Integer.MAX_VALUE).get();
+			result = db.fwmkeys("", Integer.MAX_VALUE).get();
 		} else if ("fwmkeys".equals(command)) {
-			result = client.fwmkeys(tokens[1], Integer.parseInt(tokens[2])).get();
+			result = db.fwmkeys(tokens[1], Integer.parseInt(tokens[2])).get();
 		} else if ("addint".equals(command)) {
-			result = client.addint(tokens[1], Integer.parseInt(tokens[2])).get();
+			result = db.addint(tokens[1], Integer.parseInt(tokens[2])).get();
 		} else if ("adddouble".equals(command)) {
-			result = client.adddouble(tokens[1], Double.parseDouble(tokens[2])).get();
+			result = db.adddouble(tokens[1], Double.parseDouble(tokens[2])).get();
 		} else if ("ext".equals(command)) {
-			result = client.ext(tokens[1], tokens[2], tokens[3], Integer.parseInt(tokens[4])).get();
+			result = db.ext(tokens[1], tokens[2], tokens[3], Integer.parseInt(tokens[4])).get();
 		} else if ("sync".equals(command)) {
-			result = client.sync().get();
+			result = db.sync().get();
 		} else if ("vanish".equals(command)) {
-			result = client.vanish().get();
+			result = db.vanish().get();
 		} else if ("rnum".equals(command)) {
-			result = client.rnum().get();
+			result = db.rnum().get();
 		} else if ("size".equals(command)) {
-			result = client.size().get();
+			result = db.size().get();
 		} else if ("stat".equals(command)) {
-			result = client.stat();
+			result = db.stat();
 		}
 		return result;
 	}

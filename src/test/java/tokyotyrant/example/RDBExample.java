@@ -13,20 +13,20 @@ public class RDBExample {
 		Object value;
 
 		// create the object
-		RDB rdb = new RDB();
+		RDB db = new RDB();
 
 		// connect to the server
-		rdb.open(new InetSocketAddress("localhost", 1978));
+		db.open(new InetSocketAddress("localhost", 1978));
 
 		// store records
-		if (!rdb.put("foo", "hop")
-				|| !rdb.put("bar", "step")
-				|| !rdb.put("baz", "jump")) {
+		if (!db.put("foo", "hop")
+				|| !db.put("bar", "step")
+				|| !db.put("baz", "jump")) {
 			System.err.println("put error");
 		}
 
 		// retrieve records
-		value = rdb.get("foo");
+		value = db.get("foo");
 		if (value != null) {
 			System.out.println(value);
 		} else {
@@ -34,25 +34,25 @@ public class RDBExample {
 		}
 
 		// traverse records
-		rdb.iterinit();
-		while ((key = rdb.iternext()) != null) {
-			value = rdb.get(key);
+		db.iterinit();
+		while ((key = db.iternext()) != null) {
+			value = db.get(key);
 			if (value != null) {
 				System.out.println(key + ":" + value);
 			}
 		}
 		
 		// add int
-		rdb.put("int", 3, new IntegerTranscoder());
-		int i = rdb.addint("int", 4);
+		db.put("int", 3, new IntegerTranscoder());
+		int i = db.addint("int", 4);
 		System.out.println(i);
 
 		// add double
-		rdb.put("d", 3.0D, new DoubleTranscoder());
-		double d = rdb.adddouble("d", 4.0D);
+		db.put("d", 3.0D, new DoubleTranscoder());
+		double d = db.adddouble("d", 4.0D);
 		System.out.println(d);
 
 		// close the connection
-		rdb.close();
+		db.close();
 	}
 }
