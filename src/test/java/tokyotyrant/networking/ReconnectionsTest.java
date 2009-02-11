@@ -13,13 +13,13 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 
 @RunWith(JMock.class)
-public class ReconnectionPolicyTest {
+public class ReconnectionsTest {
 	private Mockery mockery = new JUnit4Mockery();
-	private ReconnectionPolicy dut;
+	private Reconnections dut;
 	private long now = System.currentTimeMillis();
 
 	@Before public void beforeEach() {
-		dut = new ReconnectionPolicy() {
+		dut = new Reconnections() {
 			long now() {
 				return now;
 			}
@@ -117,6 +117,6 @@ public class ReconnectionPolicyTest {
 		mockery.checking(new Expectations() {{
 			one(node).getReconnectAttempt(); will(returnValue(31));
 		}});
-		assertEquals(ReconnectionPolicy.MAX_BACKOFF, dut.backoff(node));
+		assertEquals(Reconnections.MAX_BACKOFF, dut.backoff(node));
 	}
 }

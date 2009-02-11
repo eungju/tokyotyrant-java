@@ -6,7 +6,7 @@ import java.util.List;
 import java.util.SortedMap;
 import java.util.TreeMap;
 
-public class ReconnectionPolicy {
+public class Reconnections {
 	static final int INITIAL_BACKOFF = 100;
 	// maximum amount of time to wait between reconnect attempts
 	static final int MAX_BACKOFF = 60 * 1000;
@@ -65,5 +65,9 @@ public class ReconnectionPolicy {
 	
 	public int countDelayed() {
 		return queue.size();
+	}
+	
+	public void clear() {
+		queue.clear();
 	}
 }
