@@ -1,14 +1,12 @@
 package tokyotyrant.networking;
 
 import java.io.IOException;
-import java.net.InetSocketAddress;
 import java.net.SocketAddress;
 import java.net.URI;
 import java.nio.ByteBuffer;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
 import java.nio.channels.SocketChannel;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.concurrent.ArrayBlockingQueue;
@@ -18,6 +16,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import tokyotyrant.helper.BufferHelper;
+import tokyotyrant.helper.UriHelper;
 import tokyotyrant.protocol.Command;
 
 public class NioNode implements ServerNode {
@@ -46,15 +45,8 @@ public class NioNode implements ServerNode {
 		}
 		this.address = address;
 		
-		socketAddress = new InetSocketAddress(address.getHost(), address.getPort());
-		parameters = new HashMap<String, String>();
-		if (address.getQuery() != null) {
-			String qs = address.getQuery();
-			for (String each : qs.split("&")) {
-				String[] keyAndValue = each.split("=");
-				parameters.put(keyAndValue[0], keyAndValue[1]);
-			}
-		}
+		socketAddress = UriHelper.getSocketAddress(address);
+		parameters = UriHelper.getParameters(address);
 	}
 	
 	public URI getAddress() {

@@ -1,21 +1,21 @@
 package tokyotyrant.example;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertArrayEquals;
 
-import java.net.URI;
 import java.util.concurrent.Future;
 
 import org.junit.Ignore;
 import org.junit.Test;
 
 import tokyotyrant.MRDB;
+import tokyotyrant.helper.UriHelper;
 import tokyotyrant.transcoder.SerializingTranscoder;
 
 @Ignore
 public class MRDBBenchmark {
 	@Test public void get() throws Exception {
 		MRDB db = new MRDB();
-		db.open(new URI[] { URI.create("tcp://localhost:1978") });
+		db.open(UriHelper.getUris("tcp://localhost:1978"));
 		db.setGlobalTimeout(Long.MAX_VALUE);
 		db.setValueTranscoder(new SerializingTranscoder());
 		byte[] value = new byte[128];
