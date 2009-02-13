@@ -3,6 +3,8 @@ package tokyotyrant.protocol;
 import java.nio.ByteBuffer;
 import java.util.concurrent.CountDownLatch;
 
+import org.apache.commons.lang.builder.ToStringBuilder;
+
 import tokyotyrant.transcoder.Transcoder;
 
 public abstract class Command<T> {
@@ -31,6 +33,10 @@ public abstract class Command<T> {
 	
 	public boolean isSuccess() {
 		return code == ESUCCESS;
+	}
+	
+	public String toString() {
+		return ToStringBuilder.reflectionToString(this);
 	}
 
 	public CountDownLatch getLatch() {

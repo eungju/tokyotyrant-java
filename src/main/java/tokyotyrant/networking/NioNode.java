@@ -24,6 +24,7 @@ public class NioNode implements ServerNode {
 	private URI address;
 	private SocketAddress socketAddress;
 	private Map<String, String> parameters;
+	private int bufferCapacity = 4 * 1024;
 
 	private Selector selector;
 	private SocketChannel channel;
@@ -33,7 +34,7 @@ public class NioNode implements ServerNode {
 	private BlockingQueue<Command<?>> writingCommands = new ArrayBlockingQueue<Command<?>>(16 * 1024);
 	private ByteBuffer writingBuffer = null;
 	private BlockingQueue<Command<?>> readingCommands = new ArrayBlockingQueue<Command<?>>(16 * 1024);
-	private ByteBuffer readingBuffer = null;
+	private ByteBuffer readingBuffer = ByteBuffer.allocate(bufferCapacity);
 	
 	public NioNode(Selector selector) {
 		this.selector = selector;
@@ -94,7 +95,7 @@ public class NioNode implements ServerNode {
 			logger.error("Error while closing connection to " + address, e);
 		} finally {
 			writingBuffer = null;
-			readingBuffer = null;
+			readingBuffer.clear();
 			for (Iterator<Command<?>> i = readingCommands.iterator(); i.hasNext(); ) {
 				Command<?> each = i.next();
 				each.cancel();
@@ -130,8 +131,6 @@ public class NioNode implements ServerNode {
 		fixupOperations();
 	}
 
-	private static final int FRAGMENT_CAPACITY = 4 * 1024;
-	
 	public void handleWrite() throws Exception {
 		while (!writingCommands.isEmpty()) {
 			Command<?> command = writingCommands.peek();
@@ -160,44 +159,45 @@ public class NioNode implements ServerNode {
 	}
 
 	public void handleRead() throws Exception {
-		if (readingBuffer == null) {
-			readingBuffer = ByteBuffer.allocate(FRAGMENT_CAPACITY);
-		}
-		
+		//fill the reading buffer
 		while (true) {
-			ByteBuffer fragment = ByteBuffer.allocate(FRAGMENT_CAPACITY);
-			int n = channel.read(fragment);
+			int n = channel.read(readingBuffer);
 			if (n == 0) {
 				break;
 			} else if (n == -1) {
 				throw new IOException("Channel " + channel + " is closed");
 			}
-			logger.debug("Received fragment " + fragment);
-			fragment.flip();
-			readingBuffer = BufferHelper.accumulateBuffer(readingBuffer, fragment);
+			logger.debug("{} bytes received", n);
+
+			//expand if necessary
+			if (readingBuffer.remaining() < bufferCapacity) {
+				readingBuffer = BufferHelper.expand(readingBuffer);
+			}
 		}
 
+		//decode all commands in reading buffer
 		readingBuffer.flip();
-		while (!readingCommands.isEmpty() && readingBuffer != null) {
+		while (!readingCommands.isEmpty()) {
 			Command<?> command = readingCommands.peek();
 			try {
 				int pos = readingBuffer.position();
-				//logger.debug("Try to decode " + readingBuffer);
-				//logger.debug(ArrayUtils.toString(readingBuffer.array()));
+				logger.debug("Try to decode {}", readingBuffer);
 				if (command.decode(readingBuffer)) {
-					logger.debug("Received message " + readingBuffer);
+					logger.debug("Received response of {}", command);
 					command.complete();
 					Command<?> _removed = readingCommands.remove();
 					assert _removed == command;
 				} else {
-					readingBuffer.position(pos);
-					ByteBuffer newReadingBuffer = ByteBuffer.allocate(readingBuffer.capacity());
-					newReadingBuffer.put(readingBuffer);
-					readingBuffer = newReadingBuffer;
+					//TODO: need to shrink aggressively?
+					if (readingBuffer.hasRemaining()) {
+						readingBuffer.position(pos);
+						ByteBuffer newReadingBuffer = ByteBuffer.allocate(readingBuffer.capacity());
+						newReadingBuffer.put(readingBuffer);
+						readingBuffer = newReadingBuffer;
+					} else {
+						readingBuffer.clear();
+					}
 					break;
-				}
-				if (!readingBuffer.hasRemaining()) {
-					readingBuffer = null;
 				}
 			} catch (Exception exception) {
 				command.error(exception);

@@ -216,4 +216,12 @@
 		<clover.version>2.3.1</clover.version>
 	</properties>
 
+	<distributionManagement>
+		<repository>
+			<id>nhncorp-2</id>
+			<name>NHN Corp. Internal Repository 2</name>
+			<url>dav:http://repo.nhncorp.com/maven2</url>
+		</repository>
+	</distributionManagement>
+
 </project>

@@ -56,6 +56,7 @@ public class RDB {
 	private final Logger logger = LoggerFactory.getLogger(getClass());
 	private Transcoder keyTranscoder = new StringTranscoder();
 	private Transcoder valueTranscoder = new StringTranscoder();
+	int bufferCapacity = 4 * 1024;
 	private Socket socket;
 	InputStream inputStream;
 	OutputStream outputStream;
@@ -166,8 +167,6 @@ public class RDB {
 		outputStream.write(buffer.array(), 0, buffer.limit());
 		logger.debug("Sent request " + buffer);
 	}
-	
-	static final int INITIAL_BUFFER_CAPACITY = 4 * 1024;
 
 	/**
 	 * Receive response.
@@ -175,28 +174,32 @@ public class RDB {
 	 * @param command the command to receive response.
 	 */
 	protected void receiveResponse(Command<?> command) throws IOException {
-		ByteBuffer buffer = ByteBuffer.allocate(INITIAL_BUFFER_CAPACITY);
-		ByteBuffer fragment = ByteBuffer.allocate(INITIAL_BUFFER_CAPACITY);
-		
+		ByteBuffer buffer = ByteBuffer.allocate(bufferCapacity);
 		while (true) {
-			int n = inputStream.read(fragment.array(), fragment.position(), fragment.capacity());
+			//fill buffer
+			int n = inputStream.read(buffer.array(), buffer.position(), buffer.remaining());
 			if (n == -1) {
 				throw new IOException("Connection closed unexpectedly");
 			}
-			fragment.position(0);
-			fragment.limit(n);
-			logger.debug("Received fragment " + fragment);
+			buffer.position(buffer.position() + n);
+			logger.debug("Received {} bytes", n);
 			
-			buffer = BufferHelper.accumulateBuffer(buffer, fragment);
+			//try to decode
 			int oldPos = buffer.position();
 			buffer.flip();
+			logger.debug("Try to decode {}", buffer);
 			if (command.decode(buffer)) {
+				logger.debug("Received response of {}", command);
 				break;
 			}
 			buffer.position(oldPos);
 			buffer.limit(buffer.capacity());
+			
+			//expand if necessary
+			if (buffer.remaining() < bufferCapacity) {
+				buffer = BufferHelper.expand(buffer);
+			}
 		}
-		logger.debug("Received response " + buffer);
 	}	
 
 	/**

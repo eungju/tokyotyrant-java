@@ -34,19 +34,11 @@ public class BufferHelper {
         return in.remaining() - prefixLength >= dataLength;
 	}
 
-	public static ByteBuffer accumulateBuffer(ByteBuffer buffer, ByteBuffer addition) {
-		if (buffer.remaining() < addition.remaining()) {
-			int capacity = buffer.capacity() * 2;
-			while (capacity < (buffer.remaining() + addition.remaining())) {
-				capacity *= 2;
-			}
-			ByteBuffer newBuffer = ByteBuffer.allocate(capacity);
-			buffer.flip();
-			newBuffer.put(buffer);
-			buffer = newBuffer;
-		}
-		buffer.put(addition);
-		return buffer;
+	public static ByteBuffer expand(ByteBuffer buffer) {
+		ByteBuffer expanded = ByteBuffer.allocate(buffer.capacity() * 2);
+		buffer.flip();
+		expanded.put(buffer);
+		return expanded;
 	}
 	
 	private BufferHelper() {

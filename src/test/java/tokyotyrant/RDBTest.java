@@ -44,8 +44,8 @@ public class RDBTest {
 
 		mockery.checking(new Expectations() {{
 			one(outputStream).write(with(any(byte[].class)), with(equal(0)), with(equal(buffer.limit())));
-			one(inputStream).read(with(any(byte[].class)), with(equal(0)), with(equal(RDB.INITIAL_BUFFER_CAPACITY))); will(returnValue(0));
-			one(inputStream).read(with(any(byte[].class)), with(equal(0)), with(equal(RDB.INITIAL_BUFFER_CAPACITY))); will(returnValue(1));
+			one(inputStream).read(with(any(byte[].class)), with(equal(0)), with(equal(dut.bufferCapacity))); will(returnValue(0));
+			one(inputStream).read(with(any(byte[].class)), with(equal(0)), with(equal(dut.bufferCapacity))); will(returnValue(1));
 		}});
 		
 		assertTrue(dut.execute(command));
