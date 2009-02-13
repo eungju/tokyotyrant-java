@@ -26,15 +26,15 @@ public class NioNode implements ServerNode {
 	private Map<String, String> parameters;
 	private int bufferCapacity = 4 * 1024;
 
-	private Selector selector;
-	private SocketChannel channel;
-	private SelectionKey selectionKey;
-	private int reconnecting = 0;
+	Selector selector;
+	SocketChannel channel;
+	SelectionKey selectionKey;
+	int reconnecting = 0;
 	
-	private BlockingQueue<Command<?>> writingCommands = new ArrayBlockingQueue<Command<?>>(16 * 1024);
-	private ByteBuffer writingBuffer = null;
-	private BlockingQueue<Command<?>> readingCommands = new ArrayBlockingQueue<Command<?>>(16 * 1024);
-	private ByteBuffer readingBuffer = ByteBuffer.allocate(bufferCapacity);
+	BlockingQueue<Command<?>> writingCommands = new ArrayBlockingQueue<Command<?>>(16 * 1024);
+	ByteBuffer writingBuffer = null;
+	BlockingQueue<Command<?>> readingCommands = new ArrayBlockingQueue<Command<?>>(16 * 1024);
+	ByteBuffer readingBuffer = ByteBuffer.allocate(bufferCapacity);
 	
 	public NioNode(Selector selector) {
 		this.selector = selector;
@@ -126,7 +126,9 @@ public class NioNode implements ServerNode {
 	}
 
 	public void handleConnect() throws IOException {
-		channel.finishConnect();
+		if (!channel.finishConnect()) {
+			throw new IllegalStateException("Connection is not established");
+		}
 		reconnecting = 0;
 		fixupOperations();
 	}
