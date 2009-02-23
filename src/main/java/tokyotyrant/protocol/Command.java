@@ -10,14 +10,15 @@ import tokyotyrant.transcoder.Transcoder;
 public abstract class Command<T> {
 	public static final byte ESUCCESS = 0x00;
 	public static final byte EUNKNOWN = (byte) 0xff;
-	protected Transcoder keyTranscoder;
-	protected Transcoder valueTranscoder;
 	protected byte[] magic;
 	protected byte code = EUNKNOWN;
 	
-	private CountDownLatch latch = new CountDownLatch(1);
-	private CommandState state = CommandState.WRITING;
-	private Exception errorException = null; 
+	protected Transcoder keyTranscoder;
+	protected Transcoder valueTranscoder;
+
+	private transient CountDownLatch latch = new CountDownLatch(1);
+	private transient CommandState state = CommandState.WRITING;
+	private transient Exception errorException = null; 
 	
 	public Command(byte commandId) {
 		magic = new byte[] {(byte) 0xC8, commandId};

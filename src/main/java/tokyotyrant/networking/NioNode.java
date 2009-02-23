@@ -3,7 +3,6 @@ package tokyotyrant.networking;
 import java.io.IOException;
 import java.net.SocketAddress;
 import java.net.URI;
-import java.nio.ByteBuffer;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
 import java.nio.channels.SocketChannel;
@@ -15,7 +14,6 @@ import java.util.concurrent.BlockingQueue;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import tokyotyrant.helper.BufferHelper;
 import tokyotyrant.helper.UriHelper;
 import tokyotyrant.protocol.Command;
 
@@ -24,7 +22,7 @@ public class NioNode implements ServerNode {
 	private URI address;
 	private SocketAddress socketAddress;
 	private Map<String, String> parameters;
-	private int bufferCapacity = 4 * 1024;
+	private int bufferCapacity = 8 * 1024;
 
 	Selector selector;
 	SocketChannel channel;
@@ -32,9 +30,10 @@ public class NioNode implements ServerNode {
 	int reconnecting = 0;
 	
 	BlockingQueue<Command<?>> writingCommands = new ArrayBlockingQueue<Command<?>>(16 * 1024);
-	ByteBuffer writingBuffer = null;
+	OutgoingBuffer outgoingBuffer = new OutgoingBuffer(bufferCapacity);
+
 	BlockingQueue<Command<?>> readingCommands = new ArrayBlockingQueue<Command<?>>(16 * 1024);
-	ByteBuffer readingBuffer = ByteBuffer.allocate(bufferCapacity);
+	IncomingBuffer incomingBuffer = new IncomingBuffer(bufferCapacity);
 	
 	public NioNode(Selector selector) {
 		this.selector = selector;
@@ -60,8 +59,8 @@ public class NioNode implements ServerNode {
 		
 	public void send(Command<?> command) {
 		writingCommands.add(command);
-		fixupOperations();
 		selector.wakeup();
+		fixupOperations();
 	}
 
 	public boolean isActive() {
@@ -94,8 +93,8 @@ public class NioNode implements ServerNode {
 		} catch (IOException e) {
 			logger.error("Error while closing connection to " + address, e);
 		} finally {
-			writingBuffer = null;
-			readingBuffer.clear();
+			outgoingBuffer.clear();
+			incomingBuffer.clear();
 			for (Iterator<Command<?>> i = readingCommands.iterator(); i.hasNext(); ) {
 				Command<?> each = i.next();
 				each.cancel();
@@ -116,7 +115,7 @@ public class NioNode implements ServerNode {
 			if (!readingCommands.isEmpty()) {
 				ops |= SelectionKey.OP_READ;
 			}
-			if (!writingCommands.isEmpty()) {
+			if (!outgoingBuffer.isEmpty() || !writingCommands.isEmpty()) {
 				ops |= SelectionKey.OP_WRITE;
 			}
 		} else {
@@ -132,78 +131,50 @@ public class NioNode implements ServerNode {
 		reconnecting = 0;
 		fixupOperations();
 	}
-
-	public void handleWrite() throws Exception {
-		while (!writingCommands.isEmpty()) {
-			Command<?> command = writingCommands.peek();
-			if (writingBuffer == null) {
-				writingBuffer = command.encode();
-			}
-			try {
-				int n = channel.write(writingBuffer);
-				if (!writingBuffer.hasRemaining()) {
-					writingBuffer = null;
+	
+	public void handleWrite() throws IOException {
+		//fill the buffer
+		if (outgoingBuffer.isEmpty()) {
+			while (!writingCommands.isEmpty() && outgoingBuffer.isHungry()) {
+				Command<?> command = writingCommands.peek();
+				try {
+					outgoingBuffer.fill(command);
 					Command<?> _removed = writingCommands.remove();
 					assert _removed == command;
 					command.reading();
 					readingCommands.add(command);
+				} catch (Exception exception) {
+					command.error(exception);
+					throw new IOException("Cannot write " + command, exception);
+				} finally {
+					fixupOperations();
 				}
-				if (n == 0) {
-					break;
-				}
-			} catch (IOException exception) {
-				command.error(exception);
-				throw exception;
-			} finally {
-				fixupOperations();
 			}
 		}
+		
+		//consume the buffer
+		outgoingBuffer.consume(channel);
 	}
 
-	public void handleRead() throws Exception {
-		//fill the reading buffer
-		while (true) {
-			int n = channel.read(readingBuffer);
-			if (n == 0) {
-				break;
-			} else if (n == -1) {
-				throw new IOException("Channel " + channel + " is closed");
-			}
-			logger.debug("{} bytes received", n);
+	public void handleRead() throws IOException {
+		//fill the buffer
+		incomingBuffer.fill(channel);
 
-			//expand if necessary
-			if (readingBuffer.remaining() < bufferCapacity) {
-				readingBuffer = BufferHelper.expand(readingBuffer);
-			}
-		}
-
-		//decode all commands in reading buffer
-		readingBuffer.flip();
+		//consume the buffer
 		while (!readingCommands.isEmpty()) {
 			Command<?> command = readingCommands.peek();
 			try {
-				int pos = readingBuffer.position();
-				logger.debug("Try to decode {}", readingBuffer);
-				if (command.decode(readingBuffer)) {
+				if (incomingBuffer.consume(command)) {
 					logger.debug("Received response of {}", command);
 					command.complete();
 					Command<?> _removed = readingCommands.remove();
 					assert _removed == command;
 				} else {
-					//TODO: need to shrink aggressively?
-					if (readingBuffer.hasRemaining()) {
-						readingBuffer.position(pos);
-						ByteBuffer newReadingBuffer = ByteBuffer.allocate(readingBuffer.capacity());
-						newReadingBuffer.put(readingBuffer);
-						readingBuffer = newReadingBuffer;
-					} else {
-						readingBuffer.clear();
-					}
 					break;
 				}
 			} catch (Exception exception) {
 				command.error(exception);
-				throw new Exception("Error while reading response of command " + command, exception);
+				throw new IOException("Cannot read " + command, exception);
 			} finally {
 				fixupOperations();
 			}

@@ -5,6 +5,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.Socket;
 import java.net.SocketAddress;
+import java.net.URI;
 import java.nio.ByteBuffer;
 import java.util.List;
 import java.util.Map;
@@ -13,6 +14,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import tokyotyrant.helper.BufferHelper;
+import tokyotyrant.helper.UriHelper;
 import tokyotyrant.protocol.Adddouble;
 import tokyotyrant.protocol.Addint;
 import tokyotyrant.protocol.Command;
@@ -60,6 +62,18 @@ public class RDB {
 	private Socket socket;
 	InputStream inputStream;
 	OutputStream outputStream;
+
+	/**
+	 * Open a remote database connection.
+	 * 
+	 * @param uri specifies the uri of the server.
+	 */
+	public void open(URI uri) throws IOException {
+		SocketAddress address = UriHelper.getSocketAddress(uri);
+		Map<String, String> parameters = UriHelper.getParameters(uri);
+		int timeout = parameters.containsKey("timeout") ? Integer.parseInt(parameters.get("timeout")) : 0;
+		open(address, timeout);
+	}
 
 	/**
 	 * Open a remote database connection.

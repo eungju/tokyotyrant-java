@@ -35,12 +35,16 @@ public class BufferHelper {
 	}
 
 	public static ByteBuffer expand(ByteBuffer buffer) {
-		ByteBuffer expanded = ByteBuffer.allocate(buffer.capacity() * 2);
+		return expand(buffer, buffer.capacity());
+	}
+
+	public static ByteBuffer expand(ByteBuffer buffer, int capacity) {
+		ByteBuffer expanded = ByteBuffer.allocate(buffer.capacity() + capacity);
 		buffer.flip();
 		expanded.put(buffer);
 		return expanded;
 	}
-	
+
 	private BufferHelper() {
 	}
 }

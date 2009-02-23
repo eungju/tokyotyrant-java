@@ -1,11 +1,8 @@
 package tokyotyrant.networking;
 
 import static org.junit.Assert.*;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
 
 import java.net.URI;
-import java.nio.ByteBuffer;
 import java.nio.channels.SocketChannel;
 
 import org.jmock.Expectations;
@@ -16,9 +13,6 @@ import org.jmock.lib.legacy.ClassImposteriser;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-
-import tokyotyrant.protocol.Command;
-import tokyotyrant.protocol.Vanish;
 
 @RunWith(JMock.class)
 public class NioNodeTest {
@@ -51,47 +45,5 @@ public class NioNodeTest {
 			one(channel).finishConnect(); will(returnValue(true));
 		}});
 		dut.handleConnect();
-	}
-	
-	@Test public void handleWriteShouldFillTheBufferWhenTheBufferIsEmpty() throws Exception {
-		Command<?> command = new Vanish();
-		final ByteBuffer request = command.encode();
-
-		mockery.checking(new Expectations() {{
-			one(channel).write(request); will(returnValue(0));
-		}});
-		dut.writingCommands.add(new Vanish());
-		dut.writingBuffer = null;
-		dut.handleWrite();
-	}
-
-	@Test public void handleWriteShouldNotFillTheBufferWhenTheBufferIsNotEmpty() throws Exception {
-		Command<?> command = new Vanish();
-		final ByteBuffer request = command.encode();
-		request.get();
-		
-		mockery.checking(new Expectations() {{
-			one(channel).write(request); will(returnValue(0));
-		}});
-		dut.writingCommands.add(command);
-		dut.writingBuffer = request;
-		dut.handleWrite();
-	}
-
-	@Test public void handleWrite() throws Exception {
-		Command<?> command = new Vanish();
-		final ByteBuffer request = command.encode();
-		request.get(new byte[request.capacity()]);
-		
-		mockery.checking(new Expectations() {{
-			one(channel).write(request); will(returnValue(0));
-		}});
-		dut.writingCommands.add(command);
-		dut.writingBuffer = request;
-		dut.handleWrite();
-		assertNull(dut.writingBuffer);
-		assertEquals(0, dut.writingCommands.size());
-		assertTrue(command.isReading());
-		assertEquals(1, dut.readingCommands.size());
 	}
 }
