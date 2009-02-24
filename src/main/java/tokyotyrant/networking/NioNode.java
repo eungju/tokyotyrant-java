@@ -29,8 +29,6 @@ public class NioNode implements ServerNode {
 	SelectionKey selectionKey;
 	int reconnecting = 0;
 	
-	BlockingQueue<Command<?>> inputQueue = new ArrayBlockingQueue<Command<?>>(16 * 1024);
-
 	BlockingQueue<Command<?>> writingCommands = new ArrayBlockingQueue<Command<?>>(16 * 1024);
 	OutgoingBuffer outgoingBuffer = new OutgoingBuffer(bufferCapacity);
 
@@ -60,7 +58,7 @@ public class NioNode implements ServerNode {
 	}
 		
 	public void send(Command<?> command) {
-		inputQueue.add(command);
+		writingCommands.add(command);
 		selector.wakeup();
 	}
 
@@ -125,10 +123,6 @@ public class NioNode implements ServerNode {
 		selectionKey.interestOps(ops);
 	}
 	
-	public void handleInvocations() {
-		inputQueue.drainTo(writingCommands, writingCommands.remainingCapacity());
-	}
-
 	public void handleConnect() throws IOException {
 		if (!channel.finishConnect()) {
 			throw new IllegalStateException("Connection is not established");

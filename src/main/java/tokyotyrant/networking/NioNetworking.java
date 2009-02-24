@@ -84,7 +84,6 @@ public class NioNetworking extends AbstractNetworking implements Runnable {
 				continue;
 			}
 			NioNode node = (NioNode) each;
-			node.handleInvocations();
 			node.fixupOperations();
 		}
 	}
