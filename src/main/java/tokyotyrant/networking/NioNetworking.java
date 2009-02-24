@@ -31,7 +31,7 @@ public class NioNetworking extends AbstractNetworking implements Runnable {
 
 		//start IO
 		running = true;
-		ioThread = new Thread(this);
+		ioThread = new Thread(this, this.getClass().getName());
 		ioThread.start();
 	}
 	
@@ -57,6 +57,8 @@ public class NioNetworking extends AbstractNetworking implements Runnable {
 	}
 	
 	void handleIO() throws IOException {
+		handleInput();
+		
 		logger.debug("Selecting...");
 		int n = selector.select(reconnections.getTimeToNextAttempt());
 		logger.debug("{} keys are selected", n);
@@ -74,6 +76,17 @@ public class NioNetworking extends AbstractNetworking implements Runnable {
 		}
 		
 		reconnections.reconnectDelayed();
+	}
+	
+	void handleInput() {
+		for (ServerNode each : nodeLocator.getAll()) {
+			if (!each.isActive()) {
+				continue;
+			}
+			NioNode node = (NioNode) each;
+			node.handleInput();
+			node.fixupOperations();
+		}
 	}
 	
 	void handleChannelIO(SelectionKey key) {
@@ -96,5 +109,6 @@ public class NioNetworking extends AbstractNetworking implements Runnable {
 			logger.error("Error while handling IO on " + node, e);
 			reconnections.reconnect(node);
 		}
+		node.fixupOperations();
 	}
 }

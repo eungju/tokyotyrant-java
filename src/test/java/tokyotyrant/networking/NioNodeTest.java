@@ -25,7 +25,7 @@ public class NioNodeTest {
 	@Before public void beforeEach() {
 		channel = mockery.mock(SocketChannel.class);
 		dut = new NioNode(null) {
-			void fixupOperations() {}
+			public void fixupOperations() {}
 		};
 		dut.channel = channel;
 	}

@@ -29,6 +29,8 @@ public class NioNode implements ServerNode {
 	SelectionKey selectionKey;
 	int reconnecting = 0;
 	
+	BlockingQueue<Command<?>> inputQueue = new ArrayBlockingQueue<Command<?>>(16 * 1024);
+
 	BlockingQueue<Command<?>> writingCommands = new ArrayBlockingQueue<Command<?>>(16 * 1024);
 	OutgoingBuffer outgoingBuffer = new OutgoingBuffer(bufferCapacity);
 
@@ -58,9 +60,8 @@ public class NioNode implements ServerNode {
 	}
 		
 	public void send(Command<?> command) {
-		writingCommands.add(command);
+		inputQueue.add(command);
 		selector.wakeup();
-		fixupOperations();
 	}
 
 	public boolean isActive() {
@@ -109,7 +110,7 @@ public class NioNode implements ServerNode {
 		reconnecting++;
 	}
 
-	void fixupOperations() {
+	public void fixupOperations() {
 		int ops = 0;
 		if (channel.isConnected()) {
 			if (!readingCommands.isEmpty()) {
@@ -123,13 +124,16 @@ public class NioNode implements ServerNode {
 		}
 		selectionKey.interestOps(ops);
 	}
+	
+	public void handleInput() {
+		inputQueue.drainTo(writingCommands, writingCommands.remainingCapacity());
+	}
 
 	public void handleConnect() throws IOException {
 		if (!channel.finishConnect()) {
 			throw new IllegalStateException("Connection is not established");
 		}
 		reconnecting = 0;
-		fixupOperations();
 	}
 	
 	public void handleWrite() throws IOException {
@@ -146,8 +150,6 @@ public class NioNode implements ServerNode {
 				} catch (Exception exception) {
 					command.error(exception);
 					throw new IOException("Cannot write " + command, exception);
-				} finally {
-					fixupOperations();
 				}
 			}
 		}
@@ -175,8 +177,6 @@ public class NioNode implements ServerNode {
 			} catch (Exception exception) {
 				command.error(exception);
 				throw new IOException("Cannot read " + command, exception);
-			} finally {
-				fixupOperations();
 			}
 		}
 	}
