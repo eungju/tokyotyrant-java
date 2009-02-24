@@ -125,7 +125,7 @@ public class NioNode implements ServerNode {
 		selectionKey.interestOps(ops);
 	}
 	
-	public void handleInput() {
+	public void handleInvocations() {
 		inputQueue.drainTo(writingCommands, writingCommands.remainingCapacity());
 	}
 

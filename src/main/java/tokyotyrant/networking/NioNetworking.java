@@ -57,7 +57,7 @@ public class NioNetworking extends AbstractNetworking implements Runnable {
 	}
 	
 	void handleIO() throws IOException {
-		handleInput();
+		handleInvocations();
 		
 		logger.debug("Selecting...");
 		int n = selector.select(reconnections.getTimeToNextAttempt());
@@ -78,13 +78,13 @@ public class NioNetworking extends AbstractNetworking implements Runnable {
 		reconnections.reconnectDelayed();
 	}
 	
-	void handleInput() {
+	void handleInvocations() {
 		for (ServerNode each : nodeLocator.getAll()) {
 			if (!each.isActive()) {
 				continue;
 			}
 			NioNode node = (NioNode) each;
-			node.handleInput();
+			node.handleInvocations();
 			node.fixupOperations();
 		}
 	}
