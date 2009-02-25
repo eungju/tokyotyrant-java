@@ -109,6 +109,10 @@ public class NioNode implements ServerNode {
 	}
 
 	public void fixupOperations() {
+		if (selectionKey == null || !selectionKey.isValid()) {
+			return;
+		}
+		
 		int ops = 0;
 		if (channel.isConnected()) {
 			if (!readingCommands.isEmpty()) {
