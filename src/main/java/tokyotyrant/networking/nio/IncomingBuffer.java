@@ -1,4 +1,4 @@
-package tokyotyrant.networking;
+package tokyotyrant.networking.nio;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;

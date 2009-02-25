@@ -10,10 +10,10 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
 import tokyotyrant.networking.ActiveStandbyNodeLocator;
-import tokyotyrant.networking.NioNetworking;
 import tokyotyrant.networking.Networking;
 import tokyotyrant.networking.NodeSelector;
 import tokyotyrant.networking.ServerNode;
+import tokyotyrant.networking.nio.NioNetworking;
 import tokyotyrant.protocol.Adddouble;
 import tokyotyrant.protocol.Addint;
 import tokyotyrant.protocol.Command;

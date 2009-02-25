@@ -1,4 +1,4 @@
-package tokyotyrant.networking;
+package tokyotyrant.networking.nio;
 
 import static org.junit.Assert.*;
 

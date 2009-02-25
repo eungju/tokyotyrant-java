@@ -1,4 +1,4 @@
-package tokyotyrant.networking;
+package tokyotyrant.networking.nio;
 
 import java.io.IOException;
 import java.net.SocketAddress;
@@ -15,6 +15,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import tokyotyrant.helper.UriHelper;
+import tokyotyrant.networking.ServerNode;
 import tokyotyrant.protocol.Command;
 
 public class NioNode implements ServerNode {

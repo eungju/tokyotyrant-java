@@ -1,4 +1,4 @@
-package tokyotyrant.networking;
+package tokyotyrant.networking.nio;
 
 import java.io.IOException;
 import java.nio.channels.SelectionKey;
@@ -8,6 +8,11 @@ import java.util.Set;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import tokyotyrant.networking.AbstractNetworking;
+import tokyotyrant.networking.NodeLocator;
+import tokyotyrant.networking.NodeSelector;
+import tokyotyrant.networking.ServerNode;
 
 public class NioNetworking extends AbstractNetworking implements Runnable {
 	private final Logger logger = LoggerFactory.getLogger(getClass());  
