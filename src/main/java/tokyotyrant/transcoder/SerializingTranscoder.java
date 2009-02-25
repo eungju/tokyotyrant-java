@@ -3,13 +3,13 @@ package tokyotyrant.transcoder;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.util.Date;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
-
-import org.apache.commons.io.IOUtils;
 
 /**
  * [flag:1][body:*]
@@ -167,8 +167,8 @@ public class SerializingTranscoder implements Transcoder {
 		} catch (IOException e) {
 			throw new RuntimeException("Unable to compress data", e);
 		} finally {
-			IOUtils.closeQuietly(gzip);
-			IOUtils.closeQuietly(buffer);
+			closeQuietly(gzip);
+			closeQuietly(buffer);
 		}
 		return buffer.toByteArray();
 	}
@@ -179,13 +179,41 @@ public class SerializingTranscoder implements Transcoder {
 		try {
 			buffer = new ByteArrayOutputStream();
 			gzip = new GZIPInputStream(new ByteArrayInputStream(data));
-			IOUtils.copy(gzip, buffer);
+			copy(gzip, buffer);
 		} catch (IOException e) {
 			throw new RuntimeException("Unable to decompress data", e);
 		} finally {
-			IOUtils.closeQuietly(gzip);
-			IOUtils.closeQuietly(buffer);
+			closeQuietly(gzip);
+			closeQuietly(buffer);
 		}
 		return buffer.toByteArray();
 	}
+	
+	private static void copy(InputStream input, OutputStream output) throws IOException {
+        byte[] buffer = new byte[4 * 1024];
+        int n = 0;
+        while (-1 != (n = input.read(buffer))) {
+            output.write(buffer, 0, n);
+        }
+	}
+
+	private static void closeQuietly(InputStream input) {
+        try {
+            if (input != null) {
+                input.close();
+            }
+        } catch (IOException ioe) {
+            // ignore
+        }
+    }
+
+	private static void closeQuietly(OutputStream output) {
+        try {
+            if (output != null) {
+                output.close();
+            }
+        } catch (IOException ioe) {
+            // ignore
+        }
+    }
 }

@@ -45,6 +45,22 @@ public abstract class Shell {
 		closeConnection();
 		return 0;
 	}
+	
+	protected String command(String input) {
+		return input.split("\\s")[0];
+	}
+	
+	protected String[] arguments(String input) {
+		String[] tokens = input.split("\\s");
+		String[] args = null;
+		if (tokens.length > 0) {
+			args = new String[tokens.length - 1];
+			System.arraycopy(tokens, 1, args, 0, args.length);
+		} else {
+			args = new String[0]; 
+		}
+		return args;
+	}
 
 	protected abstract void openConnection() throws Exception;
 

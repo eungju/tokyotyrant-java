@@ -1,6 +1,7 @@
 package tokyotyrant.transcoder;
 
-import org.apache.commons.lang.ArrayUtils;
+import java.util.Arrays;
+
 import org.junit.Test;
 
 public class TranscoderTest {
@@ -8,7 +9,7 @@ public class TranscoderTest {
 	
 	@Test(expected=NullPointerException.class)
 	public void shouldNotEncodeNull() {
-		System.err.println(ArrayUtils.toString(dut.encode(null)));
+		System.err.println(Arrays.toString(dut.encode(null)));
 	}
 	
 	@Test(expected=NullPointerException.class)

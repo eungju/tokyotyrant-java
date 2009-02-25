@@ -3,8 +3,6 @@ package tokyotyrant.protocol;
 import java.nio.ByteBuffer;
 import java.util.concurrent.CountDownLatch;
 
-import org.apache.commons.lang.builder.ToStringBuilder;
-
 import tokyotyrant.transcoder.Transcoder;
 
 public abstract class Command<T> {
@@ -16,9 +14,9 @@ public abstract class Command<T> {
 	protected Transcoder keyTranscoder;
 	protected Transcoder valueTranscoder;
 
-	private transient CountDownLatch latch = new CountDownLatch(1);
-	private transient CommandState state = CommandState.WRITING;
-	private transient Exception errorException = null; 
+	private CountDownLatch latch = new CountDownLatch(1);
+	private CommandState state = CommandState.WRITING;
+	private Exception errorException = null; 
 	
 	public Command(byte commandId) {
 		magic = new byte[] {(byte) 0xC8, commandId};
@@ -36,10 +34,6 @@ public abstract class Command<T> {
 		return code == ESUCCESS;
 	}
 	
-	public String toString() {
-		return ToStringBuilder.reflectionToString(this);
-	}
-
 	public CountDownLatch getLatch() {
 		return latch;
 	}

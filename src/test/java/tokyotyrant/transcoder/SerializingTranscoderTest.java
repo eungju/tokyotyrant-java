@@ -3,6 +3,7 @@ package tokyotyrant.transcoder;
 import static org.junit.Assert.*;
 
 import java.io.Serializable;
+import java.net.URI;
 import java.util.Date;
 
 import org.junit.Before;
@@ -77,7 +78,7 @@ public class SerializingTranscoderTest extends TranscoderTest {
 	}
 
 	@Test public void transcodeSerializable() {
-		Serializable decoded = new SerializableTranscoderTest.SerializableObject();
+		Serializable decoded = URI.create("http://hello");
 		byte[] encoded = dut.encode(decoded);
 		assertEquals(SerializingTranscoder.TYPE_SERIALIZABLE, encoded[0]);
 		assertEquals(decoded, dut.decode(encoded));

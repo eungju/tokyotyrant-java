@@ -1,6 +1,6 @@
 package tokyotyrant.transcoder;
 
-import org.apache.commons.lang.ArrayUtils;
+import java.util.Arrays;
 
 public class ByteTranscoder implements Transcoder {
 	public byte[] encode(Object decoded) {
@@ -9,7 +9,7 @@ public class ByteTranscoder implements Transcoder {
 
 	public Object decode(byte[] encoded) {
 		if (encoded.length != Byte.SIZE / 8) {
-			throw new IllegalArgumentException("Unable to decode " + ArrayUtils.toString(encoded));
+			throw new IllegalArgumentException("Unable to decode " + Arrays.toString(encoded));
 		}
 		return encoded[0];
 	}

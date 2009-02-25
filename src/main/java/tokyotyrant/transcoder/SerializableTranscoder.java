@@ -5,8 +5,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
-
-import org.apache.commons.lang.ArrayUtils;
+import java.util.Arrays;
 
 public class SerializableTranscoder implements Transcoder {
 	public byte[] encode(Object decoded) {
@@ -35,9 +34,9 @@ public class SerializableTranscoder implements Transcoder {
 			bis.close();
 			return decoded;
 		} catch (IOException e) {
-			throw new IllegalArgumentException("Unable to decode " + ArrayUtils.toString(encoded), e);
+			throw new IllegalArgumentException("Unable to decode " + Arrays.toString(encoded), e);
 		} catch (ClassNotFoundException e) {
-			throw new IllegalArgumentException("Unable to decode " + ArrayUtils.toString(encoded), e);
+			throw new IllegalArgumentException("Unable to decode " + Arrays.toString(encoded), e);
 		}
 	}
 }

@@ -2,8 +2,6 @@ package tokyotyrant.tester;
 
 import java.net.URI;
 
-import org.apache.commons.lang.ArrayUtils;
-
 import tokyotyrant.MRDB;
 
 public class MRDBShell extends Shell {
@@ -28,38 +26,38 @@ public class MRDBShell extends Shell {
 	}
 	
 	public Object repl(String input) throws Exception {
-		String[] tokens = input.split("\\s");
-		String command = tokens[0];
+		String command = command(input);
+		String[] args = arguments(input);
 		Object result = null;
 		if ("put".equals(command)) {
-			result = db.put(tokens[1], tokens[2]).get();
+			result = db.put(args[0], args[1]).get();
 		} else if ("putkeep".equals(command)) {
-			result = db.putkeep(tokens[1], tokens[2]).get();
+			result = db.putkeep(args[0], args[1]).get();
 		} else if ("putcat".equals(command)) {
-			result = db.putcat(tokens[1], tokens[2]).get();
+			result = db.putcat(args[0], args[1]).get();
 		} else if ("putshl".equals(command)) {
-			result = db.putshl(tokens[1], tokens[2], Integer.parseInt(tokens[3])).get();
+			result = db.putshl(args[0], args[1], Integer.parseInt(args[2])).get();
 		} else if ("putnr".equals(command)) {
-			db.putnr(tokens[1], tokens[2]);
+			db.putnr(args[0], args[1]);
 		} else if ("out".equals(command)) {
-			result = db.out(tokens[1]).get();
+			result = db.out(args[0]).get();
 		} else if ("get".equals(command)) {
-			result = tokens[1] + "\t" + db.get(tokens[1]).get();
+			result = args[0] + "\t" + db.get(args[0]).get();
 		} else if ("mget".equals(command)) {
-			Object[] keys = ArrayUtils.subarray(tokens, 1, tokens.length);
+			Object[] keys = args;
 			result = db.mget(keys).get();
 		} else if ("vsiz".equals(command)) {
-			result = db.vsiz(tokens[1]).get();
+			result = db.vsiz(args[0]).get();
 		} else if ("list".equals(command)) {
 			result = db.fwmkeys("", Integer.MAX_VALUE).get();
 		} else if ("fwmkeys".equals(command)) {
-			result = db.fwmkeys(tokens[1], Integer.parseInt(tokens[2])).get();
+			result = db.fwmkeys(args[0], Integer.parseInt(args[1])).get();
 		} else if ("addint".equals(command)) {
-			result = db.addint(tokens[1], Integer.parseInt(tokens[2])).get();
+			result = db.addint(args[0], Integer.parseInt(args[1])).get();
 		} else if ("adddouble".equals(command)) {
-			result = db.adddouble(tokens[1], Double.parseDouble(tokens[2])).get();
+			result = db.adddouble(args[0], Double.parseDouble(args[1])).get();
 		} else if ("ext".equals(command)) {
-			result = db.ext(tokens[1], tokens[2], tokens[3], Integer.parseInt(tokens[4])).get();
+			result = db.ext(args[0], args[1], args[2], Integer.parseInt(args[3])).get();
 		} else if ("sync".equals(command)) {
 			result = db.sync().get();
 		} else if ("vanish".equals(command)) {

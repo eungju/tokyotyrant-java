@@ -1,8 +1,7 @@
 package tokyotyrant.transcoder;
 
 import java.io.UnsupportedEncodingException;
-
-import org.apache.commons.lang.ArrayUtils;
+import java.util.Arrays;
 
 /**
  * Always treat values as character string.
@@ -22,7 +21,7 @@ public class StringTranscoder implements Transcoder {
 		try {
 			return new String(encoded, characterEncoding);
 		} catch (UnsupportedEncodingException e) {
-			throw new IllegalArgumentException("Unable to decode " + ArrayUtils.toString(encoded), e);
+			throw new IllegalArgumentException("Unable to decode " + Arrays.toString(encoded), e);
 		}
 	}
 

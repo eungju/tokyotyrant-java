@@ -2,8 +2,7 @@ package tokyotyrant.transcoder;
 
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
-
-import org.apache.commons.lang.ArrayUtils;
+import java.util.Arrays;
 
 public class IntegerTranscoder implements Transcoder {
 	private final ByteOrder byteOrder;
@@ -22,7 +21,7 @@ public class IntegerTranscoder implements Transcoder {
 
 	public Object decode(byte[] encoded) {
 		if (encoded.length != Integer.SIZE / 8) {
-			throw new IllegalArgumentException("Unable to decode " + ArrayUtils.toString(encoded));
+			throw new IllegalArgumentException("Unable to decode " + Arrays.toString(encoded));
 		}
 		return ByteBuffer.wrap(encoded).order(byteOrder).getInt();
 	}

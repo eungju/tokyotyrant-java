@@ -5,8 +5,6 @@ import java.net.InetSocketAddress;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.commons.lang.ArrayUtils;
-
 import tokyotyrant.RDB;
 
 public class RDBShell extends Shell {
@@ -31,28 +29,28 @@ public class RDBShell extends Shell {
 	}
 
 	public Object repl(String input) throws Exception {
-		String[] tokens = input.split("\\s");
-		String command = tokens[0];
+		String command = command(input);
+		String[] args = arguments(input);
 		Object result = null;
 		if ("put".equals(command)) {
-			result = db.put(tokens[1], tokens[2]);
+			result = db.put(args[0], args[1]);
 		} else if ("putkeep".equals(command)) {
-			result = db.putkeep(tokens[1], tokens[2]);
+			result = db.putkeep(args[0], args[1]);
 		} else if ("putcat".equals(command)) {
-			result = db.putcat(tokens[1], tokens[2]);
+			result = db.putcat(args[0], args[1]);
 		} else if ("putshl".equals(command)) {
-			result = db.putshl(tokens[1], tokens[2], Integer.parseInt(tokens[3]));
+			result = db.putshl(args[0], args[1], Integer.parseInt(args[2]));
 		} else if ("putnr".equals(command)) {
-			db.putnr(tokens[1], tokens[2]);
+			db.putnr(args[0], args[1]);
 		} else if ("out".equals(command)) {
-			result = db.out(tokens[1]);
+			result = db.out(args[0]);
 		} else if ("get".equals(command)) {
-			result = tokens[1] + "\t" + db.get(tokens[1]);
+			result = args[0] + "\t" + db.get(args[0]);
 		} else if ("mget".equals(command)) {
-			Object[] keys = ArrayUtils.subarray(tokens, 1, tokens.length);
+			Object[] keys = args;
 			result = db.mget(keys);
 		} else if ("vsiz".equals(command)) {
-			result = db.vsiz(tokens[1]);
+			result = db.vsiz(args[0]);
 		} else if ("iterinit".equals(command)) {
 			result = db.iterinit();
 		} else if ("iternext".equals(command)) {
@@ -71,23 +69,23 @@ public class RDBShell extends Shell {
 			}
 			result = keys;
 		} else if ("fwmkeys".equals(command)) {
-			result = db.fwmkeys(tokens[1], Integer.parseInt(tokens[2]));
+			result = db.fwmkeys(args[0], Integer.parseInt(args[1]));
 		} else if ("addint".equals(command)) {
-			result = db.addint(tokens[1], Integer.parseInt(tokens[2]));
+			result = db.addint(args[0], Integer.parseInt(args[1]));
 		} else if ("adddouble".equals(command)) {
-			result = db.adddouble(tokens[1], Double.parseDouble(tokens[2]));
+			result = db.adddouble(args[0], Double.parseDouble(args[1]));
 		} else if ("ext".equals(command)) {
-			result = db.ext(tokens[1], tokens[3], tokens[4], Integer.parseInt(tokens[2]));
+			result = db.ext(args[0], args[2], args[3], Integer.parseInt(args[1]));
 		} else if ("sync".equals(command)) {
 			result = db.sync();
 		} else if ("vanish".equals(command)) {
 			result = db.vanish();
 		} else if ("copy".equals(command)) {
-			result = db.copy(tokens[1]);
+			result = db.copy(args[0]);
 		} else if ("restore".equals(command)) {
-			result = db.restore(tokens[1], Long.parseLong(tokens[2]));
+			result = db.restore(args[0], Long.parseLong(args[1]));
 		} else if ("setmst".equals(command)) {
-			result = db.setmst(tokens[1], Integer.parseInt(tokens[2]));
+			result = db.setmst(args[0], Integer.parseInt(args[1]));
 		} else if ("rnum".equals(command)) {
 			result = db.rnum();
 		} else if ("size".equals(command)) {
