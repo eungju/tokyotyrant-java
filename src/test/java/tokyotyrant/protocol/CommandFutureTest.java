@@ -8,6 +8,7 @@ import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
+import org.jboss.netty.buffer.ChannelBuffer;
 import org.junit.Test;
 
 public class CommandFutureTest {
@@ -24,6 +25,13 @@ public class CommandFutureTest {
 			return null;
 		}
 
+		public boolean decode(ChannelBuffer in) {
+			return true;
+		}
+
+		public void encode(ChannelBuffer out) {
+		}
+		
 		public Object getReturnValue() {
 			return 42;
 		}

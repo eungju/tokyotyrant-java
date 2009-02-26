@@ -4,7 +4,6 @@ import static org.jboss.netty.channel.Channels.*;
 
 import java.net.SocketAddress;
 import java.net.URI;
-import java.nio.ByteBuffer;
 import java.util.Map;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
@@ -91,6 +90,11 @@ public class NettyNode extends FrameDecoder implements ServerNode {
 	}
 
 	public void send(Command<?> command) {
+		/*
+		if (!channel.isWritable()) {
+			throw new IllegalStateException("Write queue is full");
+		}
+		*/
 		channel.write(command);
 	}
 
@@ -119,26 +123,27 @@ public class NettyNode extends FrameDecoder implements ServerNode {
 
 	public void writeRequested(ChannelHandlerContext ctx, MessageEvent e) throws Exception {
 		Command<?> command = (Command<?>) e.getMessage();
-		ChannelBuffer buf = ChannelBuffers.dynamicBuffer();
-		buf.writeBytes(command.encode());
+		ChannelBuffer buffer = ChannelBuffers.dynamicBuffer();
+		command.encode(buffer);
 		command.reading();
 		readingCommands.add(command);
-		write(ctx, e.getChannel(), e.getFuture(), buf, e.getRemoteAddress());
+		write(ctx, e.getChannel(), e.getFuture(), buffer, e.getRemoteAddress());
 	}
 
 	protected Object decode(ChannelHandlerContext ctx, Channel channel, ChannelBuffer buffer) throws Exception {
 		Command<?> command = readingCommands.peek();
-		if (command == null) return null;
-		
-		ByteBuffer bb = buffer.toByteBuffer();
-		int pos = bb.position();
-		if (command.decode(bb)) {
-			buffer.readerIndex(buffer.readerIndex() + (bb.position() - pos));
-			command.complete();
-			Command<?> _removed = readingCommands.remove();
-			assert _removed == command;
-			return command;
+		if (command == null) {
+			return null;
 		}
-		return null;
+		
+		buffer.markReaderIndex();
+		if (!command.decode(buffer)) {
+			buffer.resetReaderIndex();
+			return null;
+		}
+		command.complete();
+		Command<?> _removed = readingCommands.remove();
+		assert _removed == command;
+		return command;
 	}
 }

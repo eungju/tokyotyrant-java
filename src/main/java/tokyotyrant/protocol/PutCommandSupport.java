@@ -2,6 +2,8 @@ package tokyotyrant.protocol;
 
 import java.nio.ByteBuffer;
 
+import org.jboss.netty.buffer.ChannelBuffer;
+
 
 public abstract class PutCommandSupport extends Command<Boolean> {
 	private Object key;
@@ -35,6 +37,24 @@ public abstract class PutCommandSupport extends Command<Boolean> {
 			return false;
 		}
 		code = in.get();
+		return true;
+	}
+
+	public void encode(ChannelBuffer out) {
+		byte[] kbuf = keyTranscoder.encode(key);
+		byte[] vbuf = valueTranscoder.encode(value);
+		out.writeBytes(magic);
+		out.writeInt(kbuf.length);
+		out.writeInt(vbuf.length);
+		out.writeBytes(kbuf);
+		out.writeBytes(vbuf);
+	}
+
+	public boolean decode(ChannelBuffer in) {
+		if (in.readableBytes() < 1) {
+			return false;
+		}
+		code = in.readByte();
 		return true;
 	}
 }
