@@ -1,9 +1,6 @@
 package tokyotyrant.protocol;
 
-import java.nio.ByteBuffer;
-
 import org.jboss.netty.buffer.ChannelBuffer;
-
 
 public abstract class CommandSupport<T> extends Command<T> {
 	/**
@@ -34,21 +31,6 @@ public abstract class CommandSupport<T> extends Command<T> {
 		super(commandId);
 		this.requestFormat = requestFormat;
 		this.responseFormat = responseFormat;
-	}
-
-	public ByteBuffer encode() {
-		PacketContext context = encodingContext();
-		pack(context);
-		return requestFormat.encode(context);
-	}
-	
-	public boolean decode(ByteBuffer in) {
-		PacketContext context = decodingContext();
-		if (!responseFormat.decode(context, in)) {
-			return false;
-		}
-		unpack(context);
-		return true;
 	}
 
 	public void encode(ChannelBuffer out) {

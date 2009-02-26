@@ -1,6 +1,5 @@
 package tokyotyrant.protocol;
 
-import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -19,44 +18,6 @@ public class Fwmkeys extends Command<List<Object>> {
 	
 	public List<Object> getReturnValue() {
 		return isSuccess() ? keys : null;
-	}
-
-	public ByteBuffer encode() {
-		byte[] pbuf = keyTranscoder.encode(prefix);
-		ByteBuffer buffer = ByteBuffer.allocate(magic.length + 4 + 4 + pbuf.length);
-		buffer.put(magic);
-		buffer.putInt(pbuf.length);
-		buffer.putInt(max);
-		buffer.put(pbuf);
-		buffer.flip();
-		return buffer;
-	}
-
-	public boolean decode(ByteBuffer in) {
-		if (in.remaining() < 1) {
-			return false;
-		}
-		code = in.get();
-
-		if (in.remaining() < 4) {
-			return false;
-		}
-		int knum = in.getInt();
-
-		keys = new ArrayList<Object>(knum);
-		for (int i = 0; i < knum; i++) {
-			if (in.remaining() < 4) {
-				return false;
-			}
-			int ksiz = in.getInt();
-			if (in.remaining() < ksiz) {
-				return false;
-			}
-			byte[] kbuf = new byte[ksiz];
-			in.get(kbuf);
-			keys.add(keyTranscoder.decode(kbuf));
-		}
-		return true;
 	}
 
 	public void encode(ChannelBuffer out) {
