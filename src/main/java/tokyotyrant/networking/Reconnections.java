@@ -6,12 +6,13 @@ import java.util.List;
 import java.util.SortedMap;
 import java.util.TreeMap;
 
-public class Reconnections {
+public class Reconnections implements Runnable {
 	static final int INITIAL_BACKOFF = 100;
 	// maximum amount of time to wait between reconnect attempts
 	static final int MAX_BACKOFF = 60 * 1000;
 	
 	private final SortedMap<Long, ServerNode> queue = new TreeMap<Long, ServerNode>();
+	private boolean running;
 
 	long now() {
 		return System.currentTimeMillis();
@@ -30,6 +31,9 @@ public class Reconnections {
 		node.disconnect();
 		node.reconnecting();
 		queue.put(findEmptyTimeSlot(now() + backoff(node)), node);
+		synchronized (this) {
+			notifyAll();
+		}
 	}
 	
 	long findEmptyTimeSlot(long timeSlot) {
@@ -69,5 +73,32 @@ public class Reconnections {
 	
 	public void clear() {
 		queue.clear();
+	}
+	
+	public void start() {
+		running = true;
+		new Thread(this).start();
+	}
+	
+	public void stop() {
+		running = false;
+		synchronized (this) {
+			notifyAll();
+		}
+	}
+	
+	public void run() {
+		while (running) {
+			try {
+				synchronized (this) {
+					try {
+						wait(getTimeToNextAttempt());
+					} catch (InterruptedException e) {
+					}
+				}
+				reconnectDelayed();
+			} catch (Exception e) {
+			}
+		}
 	}
 }
