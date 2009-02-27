@@ -79,6 +79,8 @@ public class NioNode implements ServerNode {
 		try {
 			channel = SocketChannel.open();
 			channel.configureBlocking(false);
+			channel.socket().setTcpNoDelay(true);
+			channel.socket().setKeepAlive(true);
 			channel.connect(socketAddress);
 			selectionKey = channel.register(selector, SelectionKey.OP_CONNECT, this);
 			return true;
