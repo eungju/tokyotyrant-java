@@ -98,7 +98,6 @@ public abstract class Command<T> {
 	
 	public abstract T getReturnValue();
 
-	/*
 	public ByteBuffer encode() {
 		ChannelBuffer buffer = ChannelBuffers.dynamicBuffer();
 		encode(buffer);
@@ -115,7 +114,6 @@ public abstract class Command<T> {
 		in.position(in.position() + (buffer.readerIndex() - index));
 		return completed;
 	}
-	*/
 
 	public abstract void encode(ChannelBuffer out);
 
