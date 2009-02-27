@@ -22,7 +22,7 @@ public class NioNodeTest {
 	@Before public void beforeEach() {
 		channel = mockery.mock(SocketChannel.class);
 		dut = new NioNode(null) {
-			public void fixupOperations() {}
+			public void fixupInterests() {}
 		};
 		dut.channel = channel;
 	}

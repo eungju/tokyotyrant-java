@@ -99,7 +99,7 @@ public class NioNode implements ServerNode {
 		reconnecting++;
 	}
 
-	public void fixupOperations() {
+	public void fixupInterests() {
 		if (selectionKey == null || !selectionKey.isValid()) {
 			return;
 		}

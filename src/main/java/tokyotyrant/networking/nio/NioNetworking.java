@@ -89,7 +89,7 @@ public class NioNetworking extends AbstractNetworking implements Runnable {
 				continue;
 			}
 			NioNode node = (NioNode) each;
-			node.fixupOperations();
+			node.fixupInterests();
 		}
 	}
 	
@@ -113,6 +113,6 @@ public class NioNetworking extends AbstractNetworking implements Runnable {
 			logger.error("Error while handling IO on " + node, e);
 			reconnections.reconnect(node);
 		}
-		node.fixupOperations();
+		node.fixupInterests();
 	}
 }
