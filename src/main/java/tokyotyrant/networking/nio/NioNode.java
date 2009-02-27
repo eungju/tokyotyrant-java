@@ -151,7 +151,7 @@ public class NioNode implements ServerNode {
 				readingCommands.add(command);
 			} catch (Exception exception) {
 				command.error(exception);
-				throw new IOException("Cannot write " + command, exception);
+				throw new IOException(exception);
 			}
 		}
 		
@@ -186,7 +186,7 @@ public class NioNode implements ServerNode {
 				assert _removed == command;
 			} catch (Exception exception) {
 				command.error(exception);
-				throw new IOException("Cannot read " + command, exception);
+				throw new IOException(exception);
 			}
 		}
 	}

@@ -2,6 +2,7 @@ package tokyotyrant.networking.netty;
 
 import static org.jboss.netty.channel.Channels.*;
 
+import java.io.IOException;
 import java.net.SocketAddress;
 import java.net.URI;
 import java.util.Map;
@@ -123,11 +124,17 @@ public class NettyNode extends FrameDecoder implements ServerNode {
 
 	public void writeRequested(ChannelHandlerContext ctx, MessageEvent e) throws Exception {
 		Command<?> command = (Command<?>) e.getMessage();
-		ChannelBuffer buffer = ChannelBuffers.dynamicBuffer();
-		command.encode(buffer);
-		command.reading();
-		readingCommands.add(command);
-		write(ctx, e.getChannel(), e.getFuture(), buffer, e.getRemoteAddress());
+
+		try {
+			ChannelBuffer buffer = ChannelBuffers.dynamicBuffer();
+			command.encode(buffer);
+			write(ctx, e.getChannel(), e.getFuture(), buffer, e.getRemoteAddress());
+			command.reading();
+			readingCommands.add(command);
+		} catch (Exception exception) {
+			command.error(exception);
+			throw new IOException(exception);
+		}
 	}
 
 	protected Object decode(ChannelHandlerContext ctx, Channel channel, ChannelBuffer buffer) throws Exception {
@@ -135,15 +142,20 @@ public class NettyNode extends FrameDecoder implements ServerNode {
 		if (command == null) {
 			return null;
 		}
-		
-		buffer.markReaderIndex();
-		if (!command.decode(buffer)) {
-			buffer.resetReaderIndex();
-			return null;
+
+		try {
+			buffer.markReaderIndex();
+			if (!command.decode(buffer)) {
+				buffer.resetReaderIndex();
+				return null;
+			}
+			command.complete();
+			Command<?> _removed = readingCommands.remove();
+			assert _removed == command;
+			return command;
+		} catch (Exception exception) {
+			command.error(exception);
+			throw new IOException(exception);
 		}
-		command.complete();
-		Command<?> _removed = readingCommands.remove();
-		assert _removed == command;
-		return command;
 	}
 }
