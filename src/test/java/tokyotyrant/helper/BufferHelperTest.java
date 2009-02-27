@@ -2,18 +2,19 @@ package tokyotyrant.helper;
 
 import static org.junit.Assert.*;
 
-import java.nio.ByteBuffer;
-
+import org.jboss.netty.buffer.ChannelBuffer;
+import org.jboss.netty.buffer.ChannelBuffers;
 import org.junit.Test;
 
 public class BufferHelperTest {
-	@Test public void expand() {
-		ByteBuffer buffer = ByteBuffer.allocate(4);
-		buffer.put(new byte[] { 1, 2, 3 });
-		ByteBuffer expanded = BufferHelper.expand(buffer);
-		assertEquals(buffer.capacity() * 2, expanded.capacity());
-		assertEquals(buffer.position(), expanded.position());
-		assertEquals(expanded.capacity(), expanded.limit());
-		assertArrayEquals(new byte[] { 1, 2, 3, 0, 0, 0, 0, 0 }, expanded.array());
+	@Test public void prefixedDataAvailable() {
+		ChannelBuffer buffer = ChannelBuffers.dynamicBuffer();
+
+		assertFalse(BufferHelper.prefixedDataAvailable(buffer, 4));
+		
+		buffer.writeInt(1);
+		assertFalse(BufferHelper.prefixedDataAvailable(buffer, 4));
+		buffer.writeByte((byte) 1);
+		assertTrue(BufferHelper.prefixedDataAvailable(buffer, 4));
 	}
 }

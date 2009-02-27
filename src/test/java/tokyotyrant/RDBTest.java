@@ -1,12 +1,14 @@
 package tokyotyrant;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.nio.ByteBuffer;
 
+import org.jboss.netty.buffer.ChannelBuffer;
+import org.jboss.netty.buffer.ChannelBuffers;
 import org.jmock.Expectations;
 import org.jmock.Mockery;
 import org.jmock.integration.junit4.JMock;
@@ -40,10 +42,11 @@ public class RDBTest {
 	
 	@Test public void execute() throws IOException {
 		Vanish command = new Vanish();
-		final ByteBuffer buffer = command.encode();
+		final ChannelBuffer buffer = ChannelBuffers.dynamicBuffer();
+		command.encode(buffer);
 
 		mockery.checking(new Expectations() {{
-			one(outputStream).write(with(any(byte[].class)), with(equal(0)), with(equal(buffer.limit())));
+			one(outputStream).write(with(any(byte[].class)), with(equal(0)), with(equal(buffer.readableBytes())));
 			one(inputStream).read(with(any(byte[].class))); will(returnValue(0));
 			one(inputStream).read(with(any(byte[].class))); will(returnValue(1));
 		}});

@@ -1,6 +1,6 @@
 package tokyotyrant.protocol;
 
-import java.nio.ByteBuffer;
+import org.jboss.netty.buffer.ChannelBuffer;
 
 public class Putnr extends PutCommandSupport {
 	public Putnr(Object key, Object value) {
@@ -10,8 +10,8 @@ public class Putnr extends PutCommandSupport {
 	public Boolean getReturnValue() {
 		throw new UnsupportedOperationException("Putnr has no return value");
 	}
-	
-	public boolean decode(ByteBuffer in) {
+
+	public boolean decode(ChannelBuffer in) {
 		return true;
 	}
 }

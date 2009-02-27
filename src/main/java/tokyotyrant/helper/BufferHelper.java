@@ -1,7 +1,5 @@
 package tokyotyrant.helper;
 
-import java.nio.ByteBuffer;
-
 import org.jboss.netty.buffer.ChannelBuffer;
 
 public class BufferHelper {
@@ -33,20 +31,9 @@ public class BufferHelper {
             throw new IllegalStateException("dataLength: " + dataLength);
         }
 
-        return in.readableBytes() - prefixLength >= dataLength;
+        return in.readableBytes() >= dataLength + prefixLength;
 	}
 
-	public static ByteBuffer expand(ByteBuffer buffer) {
-		return expand(buffer, buffer.capacity());
-	}
-
-	public static ByteBuffer expand(ByteBuffer buffer, int capacity) {
-		ByteBuffer expanded = ByteBuffer.allocate(buffer.capacity() + capacity);
-		buffer.flip();
-		expanded.put(buffer);
-		return expanded;
-	}
-
-	private BufferHelper() {
+    private BufferHelper() {
 	}
 }

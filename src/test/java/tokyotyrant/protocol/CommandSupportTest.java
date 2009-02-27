@@ -1,9 +1,12 @@
 package tokyotyrant.protocol;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertArrayEquals;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
-import java.nio.ByteBuffer;
-
+import org.jboss.netty.buffer.ChannelBuffer;
+import org.jboss.netty.buffer.ChannelBuffers;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -15,25 +18,25 @@ public class CommandSupportTest {
 	}
 	
 	@Test public void packBeforeEncodeToPacket() {
-		ByteBuffer buffer = dut.encode();
-		assertEquals((byte)0xc8, buffer.get());
-		assertEquals((byte)0xff, buffer.get());
-		assertEquals(42, buffer.getInt());
-		assertFalse(buffer.hasRemaining());
+		ChannelBuffer buffer = ChannelBuffers.dynamicBuffer();
+		dut.encode(buffer);
+		assertEquals((byte)0xc8, buffer.readByte());
+		assertEquals((byte)0xff, buffer.readByte());
+		assertEquals(42, buffer.readInt());
+		assertFalse(buffer.readable());
 	}
 
 	@Test public void unpackWhenPacketDecodingIsCompleted() {
-		ByteBuffer buffer = ByteBuffer.allocate(1024);
-		buffer.put((byte)0).putInt(43);
-		buffer.flip();
+		ChannelBuffer buffer = ChannelBuffers.buffer(1024);
+		buffer.writeByte((byte) 0);
+		buffer.writeInt(43);
 		assertTrue(dut.decode(buffer));
 		assertEquals(43, dut.pong);
 	}
 
 	@Test public void doNotUnpackWhenPacketDecodingIsNotCompleted() {
-		ByteBuffer buffer = ByteBuffer.allocate(1024);
-		buffer.put((byte)0);
-		buffer.flip();
+		ChannelBuffer buffer = ChannelBuffers.buffer(1024);
+		buffer.writeByte((byte) 0);
 		assertFalse(dut.decode(buffer));
 		assertEquals(0, dut.pong);
 	}

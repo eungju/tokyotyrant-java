@@ -1,10 +1,8 @@
 package tokyotyrant.protocol;
 
-import java.nio.ByteBuffer;
 import java.util.concurrent.CountDownLatch;
 
 import org.jboss.netty.buffer.ChannelBuffer;
-import org.jboss.netty.buffer.ChannelBuffers;
 
 import tokyotyrant.transcoder.Transcoder;
 
@@ -97,23 +95,6 @@ public abstract class Command<T> {
 	}
 	
 	public abstract T getReturnValue();
-
-	public ByteBuffer encode() {
-		ChannelBuffer buffer = ChannelBuffers.dynamicBuffer();
-		encode(buffer);
-		ByteBuffer out = ByteBuffer.allocate(buffer.readableBytes());
-		buffer.readBytes(out);
-		out.flip();
-		return out;
-	}
-
-	public boolean decode(ByteBuffer in) {
-		ChannelBuffer buffer = ChannelBuffers.wrappedBuffer(in);
-		int index = buffer.readerIndex();
-		boolean completed = decode(buffer);
-		in.position(in.position() + (buffer.readerIndex() - index));
-		return completed;
-	}
 
 	public abstract void encode(ChannelBuffer out);
 

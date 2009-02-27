@@ -2,10 +2,11 @@ package tokyotyrant.protocol;
 
 import static org.junit.Assert.*;
 
-import java.nio.ByteBuffer;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.jboss.netty.buffer.ChannelBuffer;
+import org.jboss.netty.buffer.ChannelBuffers;
 import org.junit.Test;
 
 import tokyotyrant.RDB;
@@ -25,20 +26,25 @@ public class ProtocolTest {
 	private void putFamily(PutCommandSupport dut, int commandId) {
 		setupTranscoders(dut);
 		
-		ByteBuffer request = ByteBuffer.allocate(2 + 4 + 4 + key.length + value.length)
-			.put(new byte[] { (byte) 0xC8, (byte) commandId }).putInt(key.length).putInt(value.length).put(key).put(value);
-		assertArrayEquals(request.array(), dut.encode().array());
+		ChannelBuffer expected = ChannelBuffers.buffer(2 + 4 + 4 + key.length + value.length);
+		expected.writeBytes(new byte[] { (byte) 0xC8, (byte) commandId });
+		expected.writeInt(key.length);
+		expected.writeInt(value.length);
+		expected.writeBytes(key);
+		expected.writeBytes(value);
+		ChannelBuffer actual = ChannelBuffers.buffer(expected.capacity());
+		dut.encode(actual);
+		assertEquals(expected, actual);
 		
-		ByteBuffer response = ByteBuffer.allocate(1);
-		response.flip();
+		ChannelBuffer response = ChannelBuffers.buffer(1);
 		assertFalse(dut.decode(response));
-		response.limit(response.capacity());
-		response.put(Command.ESUCCESS).flip();
+
+		response.writeByte(Command.ESUCCESS);
 		assertTrue(dut.decode(response));
 		assertTrue(dut.getReturnValue());
 
 		response.clear();
-		response.put(Command.EUNKNOWN).flip();
+		response.writeByte(Command.EUNKNOWN);
 		assertTrue(dut.decode(response));
 		assertFalse(dut.getReturnValue());
 	}
@@ -60,22 +66,27 @@ public class ProtocolTest {
 		Putshl dut = new Putshl(key, value, width);
 		setupTranscoders(dut);
 		
-		ByteBuffer request = ByteBuffer.allocate(2 + 4 + 4 + 4 + key.length + value.length)
-			.put(new byte[] { (byte) 0xC8, (byte) 0x13 }).putInt(key.length).putInt(value.length).putInt(width).put(key).put(value);
-		assertArrayEquals(request.array(), dut.encode().array());
+		ChannelBuffer expected = ChannelBuffers.buffer(2 + 4 + 4 + 4 + key.length + value.length);
+		expected.writeBytes(new byte[] { (byte) 0xC8, (byte) 0x13 });
+		expected.writeInt(key.length);
+		expected.writeInt(value.length);
+		expected.writeInt(width);
+		expected.writeBytes(key);
+		expected.writeBytes(value);
+		ChannelBuffer actual = ChannelBuffers.buffer(expected.capacity());
+		dut.encode(actual);
+		assertEquals(expected, actual);
 		
-		ByteBuffer response = ByteBuffer.allocate(1);
-		response.flip();
+		ChannelBuffer response = ChannelBuffers.buffer(1);
 		assertFalse(dut.decode(response));
 		
-		response.limit(response.capacity());
-		response.put(Command.ESUCCESS).flip();
+		response.writeByte(Command.ESUCCESS);
 		assertTrue(dut.decode(response));
 		assertTrue(dut.getReturnValue());
 		
 		//error
 		response.clear();
-		response.put(Command.EUNKNOWN).flip();
+		response.writeByte(Command.EUNKNOWN);
 		assertTrue(dut.decode(response));
 		assertFalse(dut.getReturnValue());
 	}
@@ -85,12 +96,17 @@ public class ProtocolTest {
 		Putnr dut = new Putnr(key, value);
 		setupTranscoders(dut);
 		
-		ByteBuffer request = ByteBuffer.allocate(2 + 4 + 4 + key.length + value.length)
-			.put(new byte[] { (byte) 0xC8, (byte) 0x18 }).putInt(key.length).putInt(value.length).put(key).put(value);
-		assertArrayEquals(request.array(), dut.encode().array());
+		ChannelBuffer expected = ChannelBuffers.buffer(2 + 4 + 4 + key.length + value.length);
+		expected.writeBytes(new byte[] { (byte) 0xC8, (byte) 0x18 });
+		expected.writeInt(key.length);
+		expected.writeInt(value.length);
+		expected.writeBytes(key);
+		expected.writeBytes(value);
+		ChannelBuffer actual = ChannelBuffers.buffer(expected.capacity());
+		dut.encode(actual);
+		assertEquals(expected, actual);
 		
-		ByteBuffer response = ByteBuffer.allocate(1);
-		response.flip();
+		ChannelBuffer response = ChannelBuffers.buffer(1);
 		assertTrue(dut.decode(response));
 		dut.getReturnValue();
 	}
@@ -99,22 +115,24 @@ public class ProtocolTest {
 		Out dut = new Out(key);
 		setupTranscoders(dut);
 		
-		ByteBuffer request = ByteBuffer.allocate(2 + 4 + key.length)
-			.put(new byte[] { (byte) 0xC8, (byte) 0x20 }).putInt(key.length).put(key);
-		assertArrayEquals(request.array(), dut.encode().array());
+		ChannelBuffer expected = ChannelBuffers.buffer(2 + 4 + key.length);
+		expected.writeBytes(new byte[] { (byte) 0xC8, (byte) 0x20 });
+		expected.writeInt(key.length);
+		expected.writeBytes(key);
+		ChannelBuffer actual = ChannelBuffers.buffer(expected.capacity());
+		dut.encode(actual);
+		assertEquals(expected, actual);
 		
-		ByteBuffer response = ByteBuffer.allocate(1);
-		response.flip();
+		ChannelBuffer response = ChannelBuffers.buffer(1);
 		assertFalse(dut.decode(response));
 		
-		response.limit(response.capacity());
-		response.put(Command.ESUCCESS).flip();
+		response.writeByte(Command.ESUCCESS);
 		assertTrue(dut.decode(response));
 		assertTrue(dut.getReturnValue());
 		
 		//error
 		response.clear();
-		response.put(Command.EUNKNOWN).flip();
+		response.writeByte(Command.EUNKNOWN);
 		assertTrue(dut.decode(response));
 		assertFalse(dut.getReturnValue());
 	}
@@ -123,26 +141,29 @@ public class ProtocolTest {
 		Get dut = new Get(key);
 		setupTranscoders(dut);
 		
-		ByteBuffer request = ByteBuffer.allocate(2 + 4 + key.length)
-			.put(new byte[] { (byte) 0xC8, (byte) 0x30 }).putInt(key.length).put(key);
-		assertArrayEquals(request.array(), dut.encode().array());
+		ChannelBuffer request = ChannelBuffers.buffer(2 + 4 + key.length);
+		request.writeBytes(new byte[] { (byte) 0xC8, (byte) 0x30 });
+		request.writeInt(key.length);
+		request.writeBytes(key);
+		ChannelBuffer actual = ChannelBuffers.buffer(request.capacity());
+		dut.encode(actual);
+		assertEquals(request, actual);
 		
-		ByteBuffer response = ByteBuffer.allocate(1 + 4 + value.length);
-		response.flip();
+		ChannelBuffer response = ChannelBuffers.buffer(1 + 4 + value.length);
 		assertFalse(dut.decode(response));
 		
-		response.limit(response.capacity());
-		response.put(Command.ESUCCESS).flip();
+		response.writeByte(Command.ESUCCESS);
 		assertFalse(dut.decode(response));
+		response.resetReaderIndex();
 		
-		response.limit(response.capacity());
-		response.putInt(value.length).put(value).flip();
+		response.writeInt(value.length);
+		response.writeBytes(value);
 		assertTrue(dut.decode(response));
 		assertArrayEquals(value, (byte[])dut.getReturnValue());
 		
 		//error
 		response.clear();
-		response.put(Command.EUNKNOWN).flip();
+		response.writeByte(Command.EUNKNOWN);
 		assertTrue(dut.decode(response));
 		assertNull(dut.getReturnValue());
 	}
@@ -151,34 +172,40 @@ public class ProtocolTest {
 		Mget dut = new Mget(new Object[] { key });
 		setupTranscoders(dut);
 		
-		ByteBuffer request = ByteBuffer.allocate(2 + 4 + 4 + key.length)
-			.put(new byte[] { (byte) 0xC8, (byte) 0x31 }).putInt(1).putInt(key.length).put(key);
-		assertArrayEquals(request.array(), dut.encode().array());
+		ChannelBuffer request = ChannelBuffers.buffer(2 + 4 + 4 + key.length);
+		request.writeBytes(new byte[] { (byte) 0xC8, (byte) 0x31 });
+		request.writeInt(1);
+		request.writeInt(key.length);
+		request.writeBytes(key);
+		ChannelBuffer actual = ChannelBuffers.buffer(request.capacity());
+		dut.encode(actual);
+		assertEquals(request, actual);
 		
-		ByteBuffer response = ByteBuffer.allocate(1 + 4 + 4 + 4 + key.length + value.length);
-		response.flip();
+		ChannelBuffer response = ChannelBuffers.buffer(1 + 4 + 4 + 4 + key.length + value.length);
 		assertFalse(dut.decode(response));
 		
-		response.limit(response.capacity());
-		response.put(Command.ESUCCESS).flip();
+		response.writeByte(Command.ESUCCESS);
 		assertFalse(dut.decode(response));
+		response.resetReaderIndex();
 
-		response.limit(response.capacity());
-		response.putInt(1).flip();
+		response.writeInt(1);
 		assertFalse(dut.decode(response));
+		response.resetReaderIndex();
 
-		response.limit(response.capacity());
-		response.putInt(key.length).putInt(value.length).flip();
+		response.writeInt(key.length);
+		response.writeInt(value.length);
 		assertFalse(dut.decode(response));
+		response.resetReaderIndex();
 		
-		response.limit(response.capacity());
-		response.put(key).put(value).flip();
+		response.writeBytes(key);
+		response.writeBytes(value);
 		assertTrue(dut.decode(response));
 		assertArrayEquals(value, (byte[]) dut.getReturnValue().values().iterator().next());
 		
 		//error
 		response.clear();
-		response.put(Command.EUNKNOWN).putInt(0).flip();
+		response.writeByte(Command.EUNKNOWN);
+		response.writeInt(0);
 		assertTrue(dut.decode(response));
 		assertNull(dut.getReturnValue());
 	}
@@ -187,26 +214,28 @@ public class ProtocolTest {
 		Vsiz dut = new Vsiz(key);
 		setupTranscoders(dut);
 		
-		ByteBuffer request = ByteBuffer.allocate(2 + 4 + key.length)
-			.put(new byte[] { (byte) 0xC8, (byte) 0x38 }).putInt(key.length).put(key);
-		assertArrayEquals(request.array(), dut.encode().array());
+		ChannelBuffer request = ChannelBuffers.buffer(2 + 4 + key.length);
+		request.writeBytes(new byte[] { (byte) 0xC8, (byte) 0x38 });
+		request.writeInt(key.length);
+		request.writeBytes(key);
+		ChannelBuffer actual = ChannelBuffers.buffer(request.capacity());
+		dut.encode(actual);
+		assertEquals(request, actual);
 		
-		ByteBuffer response = ByteBuffer.allocate(1 + 4 + value.length);
-		response.flip();
+		ChannelBuffer response = ChannelBuffers.buffer(1 + 4 + value.length);
 		assertFalse(dut.decode(response));
 		
-		response.limit(response.capacity());
-		response.put(Command.ESUCCESS).flip();
+		response.writeByte(Command.ESUCCESS);
 		assertFalse(dut.decode(response));
+		response.resetReaderIndex();
 		
-		response.limit(response.capacity());
-		response.putInt(value.length).flip();
+		response.writeInt(value.length);
 		assertTrue(dut.decode(response));
 		assertEquals(value.length, (int)dut.getReturnValue());
 		
 		//error
 		response.clear();
-		response.put(Command.EUNKNOWN).flip();
+		response.writeByte(Command.EUNKNOWN);
 		assertTrue(dut.decode(response));
 		assertEquals(-1, (int)dut.getReturnValue());
 	}
@@ -215,22 +244,22 @@ public class ProtocolTest {
 		Iterinit dut = new Iterinit();
 		setupTranscoders(dut);
 		
-		ByteBuffer request = ByteBuffer.allocate(2)
-			.put(new byte[] { (byte) 0xC8, (byte) 0x50 });
-		assertArrayEquals(request.array(), dut.encode().array());
+		ChannelBuffer request = ChannelBuffers.buffer(2);
+		request.writeBytes(new byte[] { (byte) 0xC8, (byte) 0x50 });
+		ChannelBuffer actual = ChannelBuffers.buffer(request.capacity());
+		dut.encode(actual);
+		assertEquals(request, actual);
 		
-		ByteBuffer response = ByteBuffer.allocate(1);
-		response.flip();
+		ChannelBuffer response = ChannelBuffers.buffer(1);
 		assertFalse(dut.decode(response));
 		
-		response.limit(response.capacity());
-		response.put(Command.ESUCCESS).flip();
+		response.writeByte(Command.ESUCCESS);
 		assertTrue(dut.decode(response));
 		assertTrue(dut.getReturnValue());
 		
 		//error
 		response.clear();
-		response.put(Command.EUNKNOWN).flip();
+		response.writeByte(Command.EUNKNOWN);
 		assertTrue(dut.decode(response));
 		assertFalse(dut.getReturnValue());
 	}
@@ -239,26 +268,27 @@ public class ProtocolTest {
 		Iternext dut = new Iternext();
 		setupTranscoders(dut);
 		
-		ByteBuffer request = ByteBuffer.allocate(2)
-			.put(new byte[] { (byte) 0xC8, (byte) 0x51 });
-		assertArrayEquals(request.array(), dut.encode().array());
+		ChannelBuffer request = ChannelBuffers.buffer(2);
+		request.writeBytes(new byte[] { (byte) 0xC8, (byte) 0x51 });
+		ChannelBuffer actual = ChannelBuffers.buffer(request.capacity());
+		dut.encode(actual);
+		assertEquals(request, actual);
 		
-		ByteBuffer response = ByteBuffer.allocate(1 + 4 + value.length);
-		response.flip();
+		ChannelBuffer response = ChannelBuffers.buffer(1 + 4 + value.length);
 		assertFalse(dut.decode(response));
 		
-		response.limit(response.capacity());
-		response.put(Command.ESUCCESS).flip();
+		response.writeByte(Command.ESUCCESS);
 		assertFalse(dut.decode(response));
+		response.resetReaderIndex();
 		
-		response.limit(response.capacity());
-		response.putInt(value.length).put(value).flip();
+		response.writeInt(value.length);
+		response.writeBytes(value);
 		assertTrue(dut.decode(response));
 		assertArrayEquals(value, (byte[])dut.getReturnValue());
 		
 		//error
 		response.clear();
-		response.put(Command.EUNKNOWN).flip();
+		response.writeByte(Command.EUNKNOWN);
 		assertTrue(dut.decode(response));
 		assertNull(dut.getReturnValue());
 	}
@@ -267,35 +297,39 @@ public class ProtocolTest {
 		Fwmkeys dut = new Fwmkeys(key, Integer.MAX_VALUE);
 		setupTranscoders(dut);
 		
-		ByteBuffer request = ByteBuffer.allocate(2 + 4 + 4 + key.length)
-			.put(new byte[] { (byte) 0xC8, (byte) 0x58 }).putInt(key.length).putInt(Integer.MAX_VALUE).put(key);
-		assertArrayEquals(request.array(), dut.encode().array());
+		ChannelBuffer request = ChannelBuffers.buffer(2 + 4 + 4 + key.length);
+		request.writeBytes(new byte[] { (byte) 0xC8, (byte) 0x58 });
+		request.writeInt(key.length);
+		request.writeInt(Integer.MAX_VALUE);
+		request.writeBytes(key);
+		ChannelBuffer actual = ChannelBuffers.buffer(request.capacity());
+		dut.encode(actual);
+		assertEquals(request, actual);
 		
-		ByteBuffer response = ByteBuffer.allocate(1 + 4 + 4 + key.length);
-		response.flip();
+		ChannelBuffer response = ChannelBuffers.buffer(1 + 4 + 4 + key.length);
 		assertFalse(dut.decode(response));
 		
-		response.limit(response.capacity());
-		response.put(Command.ESUCCESS).flip();
+		response.writeByte(Command.ESUCCESS);
 		assertFalse(dut.decode(response));
+		response.resetReaderIndex();
 
-		response.limit(response.capacity());
-		response.putInt(1).flip();
+		response.writeInt(1);
 		assertFalse(dut.decode(response));
+		response.resetReaderIndex();
 
-		response.limit(response.capacity());
-		response.putInt(key.length).flip();
+		response.writeInt(key.length);
 		assertFalse(dut.decode(response));
+		response.resetReaderIndex();
 		
-		response.limit(response.capacity());
-		response.put(key).flip();
+		response.writeBytes(key);
 		assertTrue(dut.decode(response));
 		assertEquals(1, dut.getReturnValue().size());
 		assertArrayEquals(key, (byte[]) dut.getReturnValue().get(0));
 		
 		//error
 		response.clear();
-		response.put(Command.EUNKNOWN).putInt(0).flip();
+		response.writeByte(Command.EUNKNOWN);
+		response.writeInt(0);
 		assertTrue(dut.decode(response));
 		assertNull(dut.getReturnValue());
 	}
@@ -305,26 +339,29 @@ public class ProtocolTest {
 		Addint dut = new Addint(key, num);
 		setupTranscoders(dut);
 		
-		ByteBuffer request = ByteBuffer.allocate(2 + 4 + 4 + key.length)
-			.put(new byte[] { (byte) 0xC8, (byte) 0x60 }).putInt(key.length).putInt(num).put(key);
-		assertArrayEquals(request.array(), dut.encode().array());
+		ChannelBuffer request = ChannelBuffers.buffer(2 + 4 + 4 + key.length);
+		request.writeBytes(new byte[] { (byte) 0xC8, (byte) 0x60 });
+		request.writeInt(key.length);
+		request.writeInt(num);
+		request.writeBytes(key);
+		ChannelBuffer actual = ChannelBuffers.buffer(request.capacity());
+		dut.encode(actual);
+		assertEquals(request, actual);
 		
-		ByteBuffer response = ByteBuffer.allocate(1 + 4);
-		response.flip();
+		ChannelBuffer response = ChannelBuffers.buffer(1 + 4);
 		assertFalse(dut.decode(response));
 		
-		response.limit(response.capacity());
-		response.put(Command.ESUCCESS).flip();
+		response.writeByte(Command.ESUCCESS);
 		assertFalse(dut.decode(response));
+		response.resetReaderIndex();
 		
-		response.limit(response.capacity());
-		response.putInt(3 + num).flip();
+		response.writeInt(3 + num);
 		assertTrue(dut.decode(response));
 		assertEquals(3 + num, (int)dut.getReturnValue());
 		
 		//error
 		response.clear();
-		response.put(Command.EUNKNOWN).flip();
+		response.writeByte(Command.EUNKNOWN);
 		assertTrue(dut.decode(response));
 		assertEquals(Integer.MIN_VALUE, (int)dut.getReturnValue());
 	}
@@ -334,30 +371,34 @@ public class ProtocolTest {
 		Adddouble dut = new Adddouble(key, num);
 		setupTranscoders(dut);
 		
-		ByteBuffer request = ByteBuffer.allocate(2 + 4 + 8 + 8 + key.length)
-			.put(new byte[] { (byte) 0xC8, (byte) 0x61 }).putInt(key.length).putLong(dut._integ(num)).putLong(dut._fract(num)).put(key);
-		assertArrayEquals(request.array(), dut.encode().array());
+		ChannelBuffer request = ChannelBuffers.buffer(2 + 4 + 8 + 8 + key.length);
+		request.writeBytes(new byte[] { (byte) 0xC8, (byte) 0x61 });
+		request.writeInt(key.length);
+		request.writeLong(dut._integ(num));
+		request.writeLong(dut._fract(num));
+		request.writeBytes(key);
+		ChannelBuffer actual = ChannelBuffers.buffer(request.capacity());
+		dut.encode(actual);
+		assertEquals(request, actual);
 		
-		ByteBuffer response = ByteBuffer.allocate(1 + 8 + 8);
-		response.flip();
+		ChannelBuffer response = ChannelBuffers.buffer(1 + 8 + 8);
 		assertFalse(dut.decode(response));
 		
-		response.limit(response.capacity());
-		response.put(Command.ESUCCESS).flip();
+		response.writeByte(Command.ESUCCESS);
 		assertFalse(dut.decode(response));
+		response.resetReaderIndex();
 		
-		response.limit(response.capacity());
-		response.putLong(dut._integ(3.0 + num)).flip();
+		response.writeLong(dut._integ(3.0 + num));
 		assertFalse(dut.decode(response));
+		response.resetReaderIndex();
 
-		response.limit(response.capacity());
-		response.putLong(dut._fract(3.0 + num)).flip();
+		response.writeLong(dut._fract(3.0 + num));
 		assertTrue(dut.decode(response));
 		assertEquals(3.0 + num, (double)dut.getReturnValue(), 0.0);
 		
 		//error
 		response.clear();
-		response.put(Command.EUNKNOWN).flip();
+		response.writeByte(Command.EUNKNOWN);
 		assertTrue(dut.decode(response));
 		assertEquals(Double.NaN, (double)dut.getReturnValue(), 0.0);
 	}
@@ -367,28 +408,34 @@ public class ProtocolTest {
 		Ext dut = new Ext(name, key, value, RDB.XOLCKREC);
 		setupTranscoders(dut);
 		
-		ByteBuffer request = ByteBuffer.allocate(2 + 4 + 4 + 4 + 4 + name.getBytes().length + key.length + value.length)
-			.put(new byte[] { (byte) 0xC8, (byte) 0x68 })
-			.putInt(name.getBytes().length).putInt(RDB.XOLCKREC).putInt(key.length).putInt(value.length)
-			.put(name.getBytes()).put(key).put(value);
-		assertArrayEquals(request.array(), dut.encode().array());
+		ChannelBuffer request = ChannelBuffers.buffer(2 + 4 + 4 + 4 + 4 + name.getBytes().length + key.length + value.length);
+		request.writeBytes(new byte[] { (byte) 0xC8, (byte) 0x68 });
+		request.writeInt(name.getBytes().length);
+		request.writeInt(RDB.XOLCKREC);
+		request.writeInt(key.length);
+		request.writeInt(value.length);
+		request.writeBytes(name.getBytes());
+		request.writeBytes(key);
+		request.writeBytes(value);
+		ChannelBuffer actual = ChannelBuffers.buffer(request.capacity());
+		dut.encode(actual);
+		assertEquals(request, actual);
 		
-		ByteBuffer response = ByteBuffer.allocate(1 + 4 + value.length);
-		response.flip();
+		ChannelBuffer response = ChannelBuffers.buffer(1 + 4 + value.length);
 		assertFalse(dut.decode(response));
 		
-		response.limit(response.capacity());
-		response.put(Command.ESUCCESS).flip();
+		response.writeByte(Command.ESUCCESS);
 		assertFalse(dut.decode(response));
+		response.resetReaderIndex();
 		
-		response.limit(response.capacity());
-		response.putInt(value.length).put(value).flip();
+		response.writeInt(value.length);
+		response.writeBytes(value);
 		assertTrue(dut.decode(response));
 		assertArrayEquals(value, (byte[])dut.getReturnValue());
 		
 		//error
 		response.clear();
-		response.put(Command.EUNKNOWN).flip();
+		response.writeByte(Command.EUNKNOWN);
 		assertTrue(dut.decode(response));
 		assertNull(dut.getReturnValue());
 	}
@@ -397,22 +444,22 @@ public class ProtocolTest {
 		Sync dut = new Sync();
 		setupTranscoders(dut);
 		
-		ByteBuffer request = ByteBuffer.allocate(2)
-			.put(new byte[] { (byte) 0xC8, (byte) 0x70 });
-		assertArrayEquals(request.array(), dut.encode().array());
+		ChannelBuffer request = ChannelBuffers.buffer(2);
+		request.writeBytes(new byte[] { (byte) 0xC8, (byte) 0x70 });
+		ChannelBuffer actual = ChannelBuffers.buffer(request.capacity());
+		dut.encode(actual);
+		assertEquals(request, actual);
 		
-		ByteBuffer response = ByteBuffer.allocate(1);
-		response.flip();
+		ChannelBuffer response = ChannelBuffers.buffer(1);
 		assertFalse(dut.decode(response));
 		
-		response.limit(response.capacity());
-		response.put(Command.ESUCCESS).flip();
+		response.writeByte(Command.ESUCCESS);
 		assertTrue(dut.decode(response));
 		assertTrue(dut.getReturnValue());
 		
 		//error
 		response.clear();
-		response.put(Command.EUNKNOWN).flip();
+		response.writeByte(Command.EUNKNOWN);
 		assertTrue(dut.decode(response));
 		assertFalse(dut.getReturnValue());
 	}
@@ -421,22 +468,22 @@ public class ProtocolTest {
 		Vanish dut = new Vanish();
 		setupTranscoders(dut);
 		
-		ByteBuffer request = ByteBuffer.allocate(2)
-			.put(new byte[] { (byte) 0xC8, (byte) 0x71 });
-		assertArrayEquals(request.array(), dut.encode().array());
+		ChannelBuffer request = ChannelBuffers.buffer(2);
+		request.writeBytes(new byte[] { (byte) 0xC8, (byte) 0x71 });
+		ChannelBuffer actual = ChannelBuffers.buffer(request.capacity());
+		dut.encode(actual);
+		assertEquals(request, actual);
 		
-		ByteBuffer response = ByteBuffer.allocate(1);
-		response.flip();
+		ChannelBuffer response = ChannelBuffers.buffer(1);
 		assertFalse(dut.decode(response));
 		
-		response.limit(response.capacity());
-		response.put(Command.ESUCCESS).flip();
+		response.writeByte(Command.ESUCCESS);
 		assertTrue(dut.decode(response));
 		assertTrue(dut.getReturnValue());
 		
 		//error
 		response.clear();
-		response.put(Command.EUNKNOWN).flip();
+		response.writeByte(Command.EUNKNOWN);
 		assertTrue(dut.decode(response));
 		assertFalse(dut.getReturnValue());
 	}
@@ -446,22 +493,24 @@ public class ProtocolTest {
 		Copy dut = new Copy(path);
 		setupTranscoders(dut);
 		
-		ByteBuffer request = ByteBuffer.allocate(2 + 4 + path.getBytes().length)
-			.put(new byte[] { (byte) 0xC8, (byte) 0x72 }).putInt(path.getBytes().length).put(path.getBytes());
-		assertArrayEquals(request.array(), dut.encode().array());
+		ChannelBuffer request = ChannelBuffers.buffer(2 + 4 + path.getBytes().length);
+		request.writeBytes(new byte[] { (byte) 0xC8, (byte) 0x72 });
+		request.writeInt(path.getBytes().length);
+		request.writeBytes(path.getBytes());
+		ChannelBuffer actual = ChannelBuffers.buffer(request.capacity());
+		dut.encode(actual);
+		assertEquals(request, actual);
 		
-		ByteBuffer response = ByteBuffer.allocate(1);
-		response.flip();
+		ChannelBuffer response = ChannelBuffers.buffer(1);
 		assertFalse(dut.decode(response));
 		
-		response.limit(response.capacity());
-		response.put(Command.ESUCCESS).flip();
+		response.writeByte(Command.ESUCCESS);
 		assertTrue(dut.decode(response));
 		assertTrue(dut.getReturnValue());
 		
 		//error
 		response.clear();
-		response.put(Command.EUNKNOWN).flip();
+		response.writeByte(Command.EUNKNOWN);
 		assertTrue(dut.decode(response));
 		assertFalse(dut.getReturnValue());
 	}
@@ -472,22 +521,25 @@ public class ProtocolTest {
 		Restore dut = new Restore(path, timestamp);
 		setupTranscoders(dut);
 		
-		ByteBuffer request = ByteBuffer.allocate(2 + 4 + 8 + path.getBytes().length)
-			.put(new byte[] { (byte) 0xC8, (byte) 0x73 }).putInt(path.getBytes().length).putLong(timestamp).put(path.getBytes());
-		assertArrayEquals(request.array(), dut.encode().array());
+		ChannelBuffer request = ChannelBuffers.buffer(2 + 4 + 8 + path.getBytes().length);
+		request.writeBytes(new byte[] { (byte) 0xC8, (byte) 0x73 });
+		request.writeInt(path.getBytes().length);
+		request.writeLong(timestamp);
+		request.writeBytes(path.getBytes());
+		ChannelBuffer actual = ChannelBuffers.buffer(request.capacity());
+		dut.encode(actual);
+		assertEquals(request, actual);
 		
-		ByteBuffer response = ByteBuffer.allocate(1);
-		response.flip();
+		ChannelBuffer response = ChannelBuffers.buffer(1);
 		assertFalse(dut.decode(response));
 		
-		response.limit(response.capacity());
-		response.put(Command.ESUCCESS).flip();
+		response.writeByte(Command.ESUCCESS);
 		assertTrue(dut.decode(response));
 		assertTrue(dut.getReturnValue());
 		
 		//error
 		response.clear();
-		response.put(Command.EUNKNOWN).flip();
+		response.writeByte(Command.EUNKNOWN);
 		assertTrue(dut.decode(response));
 		assertFalse(dut.getReturnValue());
 	}
@@ -498,22 +550,25 @@ public class ProtocolTest {
 		Setmst dut = new Setmst(host, port);
 		setupTranscoders(dut);
 		
-		ByteBuffer request = ByteBuffer.allocate(2 + 4 + 4 + host.getBytes().length)
-			.put(new byte[] { (byte) 0xC8, (byte) 0x78 }).putInt(host.getBytes().length).putInt(port).put(host.getBytes());
-		assertArrayEquals(request.array(), dut.encode().array());
+		ChannelBuffer request = ChannelBuffers.buffer(2 + 4 + 4 + host.getBytes().length);
+		request.writeBytes(new byte[] { (byte) 0xC8, (byte) 0x78 });
+		request.writeInt(host.getBytes().length);
+		request.writeInt(port);
+		request.writeBytes(host.getBytes());
+		ChannelBuffer actual = ChannelBuffers.buffer(request.capacity());
+		dut.encode(actual);
+		assertEquals(request, actual);
 		
-		ByteBuffer response = ByteBuffer.allocate(1);
-		response.flip();
+		ChannelBuffer response = ChannelBuffers.buffer(1);
 		assertFalse(dut.decode(response));
 		
-		response.limit(response.capacity());
-		response.put(Command.ESUCCESS).flip();
+		response.writeByte(Command.ESUCCESS);
 		assertTrue(dut.decode(response));
 		assertTrue(dut.getReturnValue());
 		
 		//error
 		response.clear();
-		response.put(Command.EUNKNOWN).flip();
+		response.writeByte(Command.EUNKNOWN);
 		assertTrue(dut.decode(response));
 		assertFalse(dut.getReturnValue());
 	}
@@ -523,20 +578,20 @@ public class ProtocolTest {
 		Rnum dut = new Rnum();
 		setupTranscoders(dut);
 		
-		ByteBuffer request = ByteBuffer.allocate(2)
-			.put(new byte[] { (byte) 0xC8, (byte) 0x80 });
-		assertArrayEquals(request.array(), dut.encode().array());
+		ChannelBuffer request = ChannelBuffers.buffer(2);
+		request.writeBytes(new byte[] { (byte) 0xC8, (byte) 0x80 });
+		ChannelBuffer actual = ChannelBuffers.buffer(request.capacity());
+		dut.encode(actual);
+		assertEquals(request, actual);
 		
-		ByteBuffer response = ByteBuffer.allocate(1 + 8);
-		response.flip();
+		ChannelBuffer response = ChannelBuffers.buffer(1 + 8);
 		assertFalse(dut.decode(response));
 		
-		response.limit(response.capacity());
-		response.put(Command.ESUCCESS).flip();
+		response.writeByte(Command.ESUCCESS);
 		assertFalse(dut.decode(response));
+		response.resetReaderIndex();
 		
-		response.limit(response.capacity());
-		response.putLong(rnum).flip();
+		response.writeLong(rnum);
 		assertTrue(dut.decode(response));
 		assertEquals(rnum, (long)dut.getReturnValue());
 	}
@@ -546,20 +601,20 @@ public class ProtocolTest {
 		Size dut = new Size();
 		setupTranscoders(dut);
 		
-		ByteBuffer request = ByteBuffer.allocate(2)
-			.put(new byte[] { (byte) 0xC8, (byte) 0x81 });
-		assertArrayEquals(request.array(), dut.encode().array());
+		ChannelBuffer request = ChannelBuffers.buffer(2);
+		request.writeBytes(new byte[] { (byte) 0xC8, (byte) 0x81 });
+		ChannelBuffer actual = ChannelBuffers.buffer(request.capacity());
+		dut.encode(actual);
+		assertEquals(request, actual);
 		
-		ByteBuffer response = ByteBuffer.allocate(1 + 8);
-		response.flip();
+		ChannelBuffer response = ChannelBuffers.buffer(1 + 8);
 		assertFalse(dut.decode(response));
 		
-		response.limit(response.capacity());
-		response.put(Command.ESUCCESS).flip();
+		response.writeByte(Command.ESUCCESS);
 		assertFalse(dut.decode(response));
+		response.resetReaderIndex();
 		
-		response.limit(response.capacity());
-		response.putLong(size).flip();
+		response.writeLong(size);
 		assertTrue(dut.decode(response));
 		assertEquals(size, (long)dut.getReturnValue());
 	}
@@ -570,24 +625,24 @@ public class ProtocolTest {
 		Stat dut = new Stat();
 		setupTranscoders(dut);
 		
-		ByteBuffer request = ByteBuffer.allocate(2)
-			.put(new byte[] { (byte) 0xC8, (byte) 0x88 });
-		assertArrayEquals(request.array(), dut.encode().array());
+		ChannelBuffer request = ChannelBuffers.buffer(2);
+		request.writeBytes(new byte[] { (byte) 0xC8, (byte) 0x88 });
+		ChannelBuffer actual = ChannelBuffers.buffer(request.capacity());
+		dut.encode(actual);
+		assertEquals(request, actual);
 		
-		ByteBuffer response = ByteBuffer.allocate(1 + 4 + stat.getBytes().length);
-		response.flip();
+		ChannelBuffer response = ChannelBuffers.buffer(1 + 4 + stat.getBytes().length);
 		assertFalse(dut.decode(response));
 		
-		response.limit(response.capacity());
-		response.put(Command.ESUCCESS).flip();
+		response.writeByte(Command.ESUCCESS);
 		assertFalse(dut.decode(response));
+		response.resetReaderIndex();
 
-		response.limit(response.capacity());
-		response.putInt(stat.getBytes().length).flip();
+		response.writeInt(stat.getBytes().length);
 		assertFalse(dut.decode(response));
+		response.resetReaderIndex();
 
-		response.limit(response.capacity());
-		response.put(stat.getBytes()).flip();
+		response.writeBytes(stat.getBytes());
 		assertTrue(dut.decode(response));
 		Map<String, String> expected = new HashMap<String, String>();
 		expected.put("k1", "v1");

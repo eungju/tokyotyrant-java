@@ -2,60 +2,68 @@ package tokyotyrant.protocol;
 
 import static org.junit.Assert.*;
 
-import java.nio.ByteBuffer;
-
+import org.jboss.netty.buffer.ChannelBuffer;
+import org.jboss.netty.buffer.ChannelBuffers;
 import org.junit.Test;
 
 public class PacketFormatTest {
 	@Test public void shouldEncodeStaticSizeField() {
 		PacketContext context = new PacketContext();
-		context.put("magic", new byte[] {(byte) 0xC8, (byte) 0x80});
-		ByteBuffer actual = new PacketFormatBuilder().bytes("magic", 2).end().encode(context);
-		assertArrayEquals(new byte[] {(byte) 0xC8, (byte) 0x80}, actual.array());
+		context.put("magic", new byte[] { (byte) 0xC8, (byte) 0x80 });
+		ChannelBuffer actual = ChannelBuffers.dynamicBuffer();
+		new PacketFormatBuilder().bytes("magic", 2).end().encode(context, actual);
+		ChannelBuffer expected = ChannelBuffers.dynamicBuffer();
+		expected.writeBytes(new byte[] { (byte) 0xC8, (byte) 0x80 });
+		assertEquals(expected, actual);
 	}
 	
 	@Test public void shouldEncodeVariableSizeField() {
 		PacketContext context = new PacketContext();
 		context.put("ksiz", 3);
-		context.put("kbuf", new byte[] {1, 2, 3});
-		ByteBuffer actual = new PacketFormatBuilder().int32("ksiz").bytes("kbuf", "ksiz").end().encode(context);
-		assertArrayEquals(ByteBuffer.allocate(4 + 3).putInt(3).put(new byte[] {1, 2, 3}).array(), actual.array());
+		context.put("kbuf", new byte[] { 1, 2, 3 });
+		ChannelBuffer actual = ChannelBuffers.dynamicBuffer();
+		new PacketFormatBuilder().int32("ksiz").bytes("kbuf", "ksiz").end().encode(context, actual);
+		ChannelBuffer expected = ChannelBuffers.dynamicBuffer();
+		expected.writeInt(3);
+		expected.writeBytes(new byte[] { 1, 2, 3 });
+		assertEquals(expected, actual);
 	}
 	
 	@Test public void shouldDecodeStaticSizeField() {
-		ByteBuffer in = ByteBuffer.allocate(1);
-		in.put((byte) 1).flip();
+		ChannelBuffer in = ChannelBuffers.buffer(1);
+		in.writeByte((byte) 1);
 		PacketContext context = new PacketContext();
 		assertTrue(new PacketFormatBuilder().int8("code").end().decode(context, in));
 		assertEquals((byte)1, context.get("code"));
 	}
 	
 	@Test public void shouldDecodeVariableSizeField() {
-		ByteBuffer in = ByteBuffer.allocate(4 + 3);
-		in.putInt(3).put(new byte[] {1, 2, 3}).flip();
+		ChannelBuffer in = ChannelBuffers.buffer(4 + 3);
+		in.writeInt(3);
+		in.writeBytes(new byte[] { 1, 2, 3 });
 		PacketContext context = new PacketContext();
 		assertTrue(new PacketFormatBuilder().int32("vsiz").bytes("vbuf", "vsiz").end().decode(context, in));
 		assertEquals(3, context.get("vsiz"));
-		assertArrayEquals(new byte[] {1, 2, 3}, (byte[])context.get("vbuf"));
+		assertArrayEquals(new byte[] { 1, 2, 3 }, (byte[]) context.get("vbuf"));
 	}
 
 	@Test public void shouldStopToDecodeAfterCodeWhenError() {
-		ByteBuffer in = ByteBuffer.allocate(1);
-		in.put((byte) 1).flip();
+		ChannelBuffer in = ChannelBuffers.buffer(1);
+		in.writeByte((byte) 1);
 		PacketContext context = new PacketContext();
 		assertTrue(new PacketFormatBuilder().code(true).int32("vsiz").end().decode(context, in));
 	}
 
 	@Test public void shouldNotStopDecodeAfterCodeWhenSuccess() {
-		ByteBuffer in = ByteBuffer.allocate(1);
-		in.put((byte) 0).flip();
+		ChannelBuffer in = ChannelBuffers.buffer(1);
+		in.writeByte((byte) 0);
 		PacketContext context = new PacketContext();
 		assertFalse(new PacketFormatBuilder().code(true).int32("vsiz").end().decode(context, in));
 	}
 
 	@Test public void shouldNotStopDecodeAfterCode() {
-		ByteBuffer in = ByteBuffer.allocate(1);
-		in.put((byte) 1).flip();
+		ChannelBuffer in = ChannelBuffers.buffer(1);
+		in.writeByte((byte) 1);
 		PacketContext context = new PacketContext();
 		assertFalse(new PacketFormatBuilder().code(false).int32("vsiz").end().decode(context, in));
 	}
@@ -66,7 +74,8 @@ public class PacketFormatTest {
 		PacketContext decodingContext = new PacketContext();
 		PacketFormat format = new PacketFormatBuilder().bytes(fieldName, 1).end();
 		encodingContext.put(fieldName, new byte[] {42});
-		ByteBuffer buffer = format.encode(encodingContext);
+		ChannelBuffer buffer = ChannelBuffers.dynamicBuffer();
+		format.encode(encodingContext, buffer);
 		assertArrayEquals(new byte[] {42}, (byte[])encodingContext.get(fieldName));
 		format.decode(decodingContext, buffer);
 		assertArrayEquals((byte[])decodingContext.get(fieldName), (byte[])encodingContext.get(fieldName));
@@ -78,7 +87,8 @@ public class PacketFormatTest {
 		PacketContext decodingContext = new PacketContext();
 		PacketFormat format = new PacketFormatBuilder().int32(fieldName).end();
 		encodingContext.put(fieldName, 42);
-		ByteBuffer buffer = format.encode(encodingContext);
+		ChannelBuffer buffer = ChannelBuffers.dynamicBuffer();
+		format.encode(encodingContext, buffer);
 		assertEquals(42, encodingContext.get(fieldName));
 		format.decode(decodingContext, buffer);
 		assertEquals(decodingContext.get(fieldName), encodingContext.get(fieldName));
@@ -90,7 +100,8 @@ public class PacketFormatTest {
 		PacketContext decodingContext = new PacketContext();
 		PacketFormat format = new PacketFormatBuilder().int8(fieldName).end();
 		encodingContext.put(fieldName, (byte) 42);
-		ByteBuffer buffer = format.encode(encodingContext);
+		ChannelBuffer buffer = ChannelBuffers.dynamicBuffer();
+		format.encode(encodingContext, buffer);
 		assertTrue(encodingContext.get(fieldName) instanceof Byte);
 		assertEquals((byte)42, encodingContext.get(fieldName));
 		format.decode(decodingContext, buffer);
@@ -103,7 +114,8 @@ public class PacketFormatTest {
 		PacketContext decodingContext = new PacketContext();
 		PacketFormat format = new PacketFormatBuilder().int64(fieldName).end();
 		encodingContext.put(fieldName, 42L);
-		ByteBuffer buffer = format.encode(encodingContext);
+		ChannelBuffer buffer = ChannelBuffers.dynamicBuffer();
+		format.encode(encodingContext, buffer);
 		assertTrue(encodingContext.get(fieldName) instanceof Long);
 		assertEquals(42L, encodingContext.get(fieldName));
 		format.decode(decodingContext, buffer);
@@ -111,21 +123,21 @@ public class PacketFormatTest {
 	}
 	
 	@Test(expected=UnsupportedOperationException.class)
-	public void encodeUnsupportedTypeDouble() {
+	public void shouldNotEncodeUnsupportedType() {
 		String fieldName = "field";
-		PacketFormat format = new PacketFormatBuilder().add(new PacketFormat.Field(fieldName, Double.class, 8)).end();
+		PacketFormat format = new PacketFormatBuilder().add(new PacketFormat.Field(fieldName, Short.class, 2)).end();
 		PacketContext encodingContext = new PacketContext();
 		encodingContext.put(fieldName, 42L);
-		format.encode(encodingContext);
+		format.encode(encodingContext, ChannelBuffers.dynamicBuffer());
 	}
 
 	@Test(expected=UnsupportedOperationException.class)
-	public void decodeUnsupportedTypeDouble() {
+	public void shouldNotDecodeUnsupportedType() {
 		final String fieldName = "field";
-		PacketFormat format = new PacketFormatBuilder().add(new PacketFormat.Field(fieldName, Double.class, 8)).end();
+		PacketFormat format = new PacketFormatBuilder().add(new PacketFormat.Field(fieldName, Short.class, 2)).end();
 		PacketContext decodingContext = new PacketContext();
-		ByteBuffer buffer = ByteBuffer.allocate(8);
-		buffer.putDouble(42).flip();
+		ChannelBuffer buffer = ChannelBuffers.buffer(2);
+		buffer.writeShort((short) 42);
 		format.decode(decodingContext, buffer);
 	}
 }
