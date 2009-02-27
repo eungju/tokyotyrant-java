@@ -1,11 +1,9 @@
 package tokyotyrant.networking;
 
-import java.net.URI;
-
 import tokyotyrant.protocol.Command;
 
 public interface Networking {
-	void initialize(URI[] addresses);
+	void initialize(NodeAddress[] addresses);
 	
 	void start() throws Exception;
 	

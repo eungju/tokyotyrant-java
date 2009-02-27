@@ -1,8 +1,5 @@
 package tokyotyrant.networking.nio;
 
-import static org.junit.Assert.*;
-
-import java.net.URI;
 import java.nio.channels.SocketChannel;
 
 import org.jmock.Expectations;
@@ -28,16 +25,6 @@ public class NioNodeTest {
 			public void fixupOperations() {}
 		};
 		dut.channel = channel;
-	}
-	
-	@Test public void readOnlyDisabled() {
-		dut.initialize(URI.create("tcp://localhost:1978"));
-		assertFalse(dut.isReadOnly());
-	}
-	
-	@Test public void readOnlyEnabled() {
-		dut.initialize(URI.create("tcp://localhost:1978/?readOnly=true"));
-		assertTrue(dut.isReadOnly());
 	}
 	
 	@Test public void handleConnect() throws Exception {

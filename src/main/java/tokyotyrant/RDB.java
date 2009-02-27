@@ -5,7 +5,6 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.Socket;
 import java.net.SocketAddress;
-import java.net.URI;
 import java.util.List;
 import java.util.Map;
 
@@ -14,7 +13,7 @@ import org.jboss.netty.buffer.ChannelBuffers;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import tokyotyrant.helper.UriHelper;
+import tokyotyrant.networking.NodeAddress;
 import tokyotyrant.protocol.Adddouble;
 import tokyotyrant.protocol.Addint;
 import tokyotyrant.protocol.Command;
@@ -68,11 +67,10 @@ public class RDB {
 	 * 
 	 * @param uri specifies the uri of the server.
 	 */
-	public void open(URI uri) throws IOException {
-		SocketAddress address = UriHelper.getSocketAddress(uri);
-		Map<String, String> parameters = UriHelper.getParameters(uri);
+	public void open(NodeAddress address) throws IOException {
+		Map<String, String> parameters = address.parameters();
 		int timeout = parameters.containsKey("timeout") ? Integer.parseInt(parameters.get("timeout")) : 0;
-		open(address, timeout);
+		open(address.socketAddress(), timeout);
 	}
 
 	/**

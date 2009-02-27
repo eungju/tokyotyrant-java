@@ -1,7 +1,7 @@
 package tokyotyrant.example;
 
 import tokyotyrant.MRDB;
-import tokyotyrant.helper.UriHelper;
+import tokyotyrant.networking.NodeAddress;
 import tokyotyrant.transcoder.DoubleTranscoder;
 import tokyotyrant.transcoder.IntegerTranscoder;
 
@@ -13,7 +13,7 @@ public class MRDBExample {
 		MRDB db = new MRDB();
 
 		// connect to the servers
-		db.open(UriHelper.getUris("tcp://localhost:1978"));
+		db.open(NodeAddress.addresses("tcp://localhost:1978"));
 
 		// store records
 		if (!db.await(db.put("foo", "hop"))

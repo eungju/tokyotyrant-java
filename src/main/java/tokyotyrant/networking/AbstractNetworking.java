@@ -1,11 +1,9 @@
 package tokyotyrant.networking;
 
-import java.net.URI;
-
 import tokyotyrant.protocol.Command;
 
 public abstract class AbstractNetworking implements Networking {
-	protected URI[] addresses;
+	protected NodeAddress[] addresses;
 	protected NodeLocator nodeLocator;
 	protected NodeSelector nodeSelector;
 	protected Reconnections reconnections = new Reconnections();
@@ -15,7 +13,7 @@ public abstract class AbstractNetworking implements Networking {
 		this.nodeSelector = nodeSelector;
 	}
 
-	public void initialize(URI[] addresses) {
+	public void initialize(NodeAddress[] addresses) {
 		this.addresses = addresses;
 	}
 

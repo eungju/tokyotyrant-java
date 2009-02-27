@@ -1,0 +1,66 @@
+package tokyotyrant.networking;
+
+import java.net.InetSocketAddress;
+import java.net.SocketAddress;
+import java.net.URI;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+public class NodeAddress {
+	private final URI uri;
+	private final Map<String, String> parameters;
+	
+	public NodeAddress(String uri) {
+		this(URI.create(uri));
+	}
+	
+	public NodeAddress(URI uri) {
+		if (!"tcp".equals(uri.getScheme())) {
+			throw new IllegalArgumentException("Only support Tokyo Tyrant protocol");
+		}
+		
+		this.uri = uri;
+		parameters = new HashMap<String, String>();
+		if (uri.getQuery() != null) {
+			String qs = uri.getQuery();
+			for (String each : qs.split("&")) {
+				String[] keyAndValue = each.split("=");
+				parameters.put(keyAndValue[0], keyAndValue[1]);
+			}
+		}
+	}
+	
+	public boolean equals(Object o) {
+		if (!(o instanceof NodeAddress)) {
+			return false;
+		}
+		NodeAddress other = (NodeAddress) o;
+		return uri.equals(other.uri);
+	}
+	
+	public int hashCode() {
+		return uri.hashCode();
+	}
+	
+	public Map<String, String> parameters() {
+		return parameters;
+	}
+	
+	public SocketAddress socketAddress() {
+		return new InetSocketAddress(uri.getHost(), uri.getPort());
+	}
+
+	public boolean isReadOnly() {
+		return parameters().containsKey("readOnly") && "true".equals(parameters().get("readOnly"));
+	}
+	
+	public static NodeAddress[] addresses(String addresses) {
+		List<NodeAddress> result = new ArrayList<NodeAddress>();
+		for (String each : addresses.split("\\s")) {
+			result.add(new NodeAddress(each));
+		}
+		return result.toArray(new NodeAddress[result.size()]);
+	}
+}

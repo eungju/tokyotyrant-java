@@ -3,15 +3,15 @@ package tokyotyrant.example;
 import static org.junit.Assert.*;
 
 import java.io.IOException;
-import java.net.URI;
 
 import tokyotyrant.RDB;
+import tokyotyrant.networking.NodeAddress;
 import tokyotyrant.transcoder.SerializingTranscoder;
 
 public class RDBBenchmark {
 	public static void main(String[] args) throws IOException {
 		RDB rdb = new RDB();
-		rdb.open(URI.create(args[0]));
+		rdb.open(new NodeAddress(args[0]));
 		rdb.setValueTranscoder(new SerializingTranscoder());
 		byte[] value = new byte[128];
 		rdb.put("key", value);

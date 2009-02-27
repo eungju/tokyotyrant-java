@@ -1,6 +1,5 @@
 package tokyotyrant;
 
-import java.net.URI;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -11,6 +10,7 @@ import java.util.concurrent.TimeoutException;
 
 import tokyotyrant.networking.ActiveStandbyNodeLocator;
 import tokyotyrant.networking.Networking;
+import tokyotyrant.networking.NodeAddress;
 import tokyotyrant.networking.NodeSelector;
 import tokyotyrant.networking.ServerNode;
 import tokyotyrant.networking.nio.NioNetworking;
@@ -56,7 +56,7 @@ public class MRDB {
 		this.networking = networking;
 	}
     
-    public void open(URI[] addresses) throws Exception {
+    public void open(NodeAddress[] addresses) throws Exception {
 		if (addresses.length == 0) {
 			throw new IllegalArgumentException("Requires at least 1 node");
 		}
@@ -242,12 +242,12 @@ public class MRDB {
 		return execute(new Size());
 	}
 
-	public Map<URI, Map<String, String>> stat() {
+	public Map<NodeAddress, Map<String, String>> stat() {
 		Map<ServerNode, Future<Map<String, String>>> futures = new HashMap<ServerNode, Future<Map<String, String>>>();
 		for (ServerNode each : networking.getNodeLocator().getAll()) {
 			futures.put(each, execute(new Stat()));
 		}
-		Map<URI, Map<String, String>> result = new HashMap<URI, Map<String, String>>();
+		Map<NodeAddress, Map<String, String>> result = new HashMap<NodeAddress, Map<String, String>>();
 		for (ServerNode each : networking.getNodeLocator().getAll()) {
 			result.put(each.getAddress(), await(futures.get(each)));
 		}

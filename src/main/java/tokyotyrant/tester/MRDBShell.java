@@ -1,18 +1,17 @@
 package tokyotyrant.tester;
 
-import java.net.URI;
-
 import tokyotyrant.MRDB;
+import tokyotyrant.networking.NodeAddress;
 
 public class MRDBShell extends Shell {
 	private MRDB db;
-	private URI[] addresses;
+	private NodeAddress[] addresses;
 	
 	protected void options(String[] args) {
-		addresses = new URI[args.length];
+		addresses = new NodeAddress[args.length];
 		int i = 0;
 		for (String each : args) {
-			addresses[i++] = URI.create(each);
+			addresses[i++] = new NodeAddress(each);
 		}
 	}
 

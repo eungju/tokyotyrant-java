@@ -1,6 +1,5 @@
 package tokyotyrant.networking;
 
-import java.net.URI;
 import java.util.Arrays;
 import java.util.Iterator;
 
@@ -30,8 +29,6 @@ public class AbstractNetworkingTest {
 	@Before public void beforeEach() {
 		nodeLocator = mockery.mock(NodeLocator.class);
 		dut = new AbstractNetworking(nodeLocator, nodeSelector) {
-			public void initialize(URI[] addresses) {
-			}
 			public void start() {
 			}
 			public void stop() {

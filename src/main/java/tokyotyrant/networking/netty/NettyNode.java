@@ -2,9 +2,6 @@ package tokyotyrant.networking.netty;
 
 import static org.jboss.netty.channel.Channels.*;
 
-import java.net.SocketAddress;
-import java.net.URI;
-import java.util.Map;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 
@@ -21,16 +18,14 @@ import org.jboss.netty.handler.codec.frame.FrameDecoder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import tokyotyrant.helper.UriHelper;
+import tokyotyrant.networking.NodeAddress;
 import tokyotyrant.networking.ServerNode;
 import tokyotyrant.protocol.Command;
 
 @ChannelPipelineCoverage("one")
 public class NettyNode extends FrameDecoder implements ServerNode {
 	private final Logger logger = LoggerFactory.getLogger(getClass());
-	private URI address;
-	private SocketAddress socketAddress;
-	private Map<String, String> parameters;
+	private NodeAddress address;
 
 	private NettyNetworking networking;
 	private ClientBootstrap bootstrap;
@@ -42,14 +37,8 @@ public class NettyNode extends FrameDecoder implements ServerNode {
 		this.networking = networking;
 	}
 	
-	public void initialize(URI address) {
-		if (!"tcp".equals(address.getScheme())) {
-			throw new IllegalArgumentException("Only support Tokyo Tyrant protocol");
-		}
+	public void initialize(NodeAddress address) {
 		this.address = address;
-		
-		socketAddress = UriHelper.getSocketAddress(address);
-		parameters = UriHelper.getParameters(address);
 
 		bootstrap = new ClientBootstrap(networking.getFactory());
 		bootstrap.getPipeline().addLast("handler", this);
@@ -57,16 +46,12 @@ public class NettyNode extends FrameDecoder implements ServerNode {
 		bootstrap.setOption("keepAlive", true);
 	}
 	
-	public URI getAddress() {
+	public NodeAddress getAddress() {
 		return address;
-	}
-	
-	public boolean isReadOnly() {
-		return parameters.containsKey("readOnly") && "true".equals(parameters.get("readOnly"));
 	}
 
 	public boolean connect() {
-		channel = bootstrap.connect(socketAddress).getChannel();
+		channel = bootstrap.connect(address.socketAddress()).getChannel();
 		return true;
 	}
 

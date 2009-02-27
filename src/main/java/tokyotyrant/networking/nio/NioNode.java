@@ -1,14 +1,11 @@
 package tokyotyrant.networking.nio;
 
 import java.io.IOException;
-import java.net.SocketAddress;
-import java.net.URI;
 import java.nio.ByteBuffer;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
 import java.nio.channels.SocketChannel;
 import java.util.Iterator;
-import java.util.Map;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 
@@ -17,15 +14,13 @@ import org.jboss.netty.buffer.ChannelBuffers;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import tokyotyrant.helper.UriHelper;
+import tokyotyrant.networking.NodeAddress;
 import tokyotyrant.networking.ServerNode;
 import tokyotyrant.protocol.Command;
 
 public class NioNode implements ServerNode {
 	private final Logger logger = LoggerFactory.getLogger(getClass());
-	private URI address;
-	private SocketAddress socketAddress;
-	private Map<String, String> parameters;
+	private NodeAddress address;
 	private int bufferCapacity = 8 * 1024;
 
 	Selector selector;
@@ -43,22 +38,12 @@ public class NioNode implements ServerNode {
 		this.selector = selector;
 	}
 	
-	public void initialize(URI address) {
-		if (!"tcp".equals(address.getScheme())) {
-			throw new IllegalArgumentException("Only support Tokyo Tyrant protocol");
-		}
+	public void initialize(NodeAddress address) {
 		this.address = address;
-		
-		socketAddress = UriHelper.getSocketAddress(address);
-		parameters = UriHelper.getParameters(address);
 	}
 	
-	public URI getAddress() {
+	public NodeAddress getAddress() {
 		return address;
-	}
-	
-	public boolean isReadOnly() {
-		return parameters.containsKey("readOnly") && "true".equals(parameters.get("readOnly"));
 	}
 		
 	public void send(Command<?> command) {
@@ -81,7 +66,7 @@ public class NioNode implements ServerNode {
 			channel.configureBlocking(false);
 			channel.socket().setTcpNoDelay(true);
 			channel.socket().setKeepAlive(true);
-			channel.connect(socketAddress);
+			channel.connect(address.socketAddress());
 			selectionKey = channel.register(selector, SelectionKey.OP_CONNECT, this);
 			return true;
 		} catch (IOException e) {
