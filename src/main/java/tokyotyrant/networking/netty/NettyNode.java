@@ -2,7 +2,6 @@ package tokyotyrant.networking.netty;
 
 import static org.jboss.netty.channel.Channels.*;
 
-import java.io.IOException;
 import java.net.SocketAddress;
 import java.net.URI;
 import java.util.Map;
@@ -13,7 +12,6 @@ import org.jboss.netty.bootstrap.ClientBootstrap;
 import org.jboss.netty.buffer.ChannelBuffer;
 import org.jboss.netty.buffer.ChannelBuffers;
 import org.jboss.netty.channel.Channel;
-import org.jboss.netty.channel.ChannelEvent;
 import org.jboss.netty.channel.ChannelHandlerContext;
 import org.jboss.netty.channel.ChannelPipelineCoverage;
 import org.jboss.netty.channel.ChannelStateEvent;
@@ -91,11 +89,6 @@ public class NettyNode extends FrameDecoder implements ServerNode {
 	}
 
 	public void send(Command<?> command) {
-		/*
-		if (!channel.isWritable()) {
-			throw new IllegalStateException("Write queue is full");
-		}
-		*/
 		channel.write(command);
 	}
 
@@ -103,20 +96,6 @@ public class NettyNode extends FrameDecoder implements ServerNode {
     	reconnecting = 0;
     }
     
-	public void handleUpstream(ChannelHandlerContext ctx, ChannelEvent e) throws Exception {
-		if (e instanceof ChannelStateEvent) {
-			logger.info("UP: " + e.toString());
-		}
-		super.handleUpstream(ctx, e);
-	}
-
-	public void handleDownstream(ChannelHandlerContext ctx, ChannelEvent e) throws Exception {
-		if (e instanceof ChannelStateEvent) {
-			logger.info("DOWN: " + e.toString());
-		}
-		super.handleDownstream(ctx, e);
-	}
-
 	public void exceptionCaught(ChannelHandlerContext ctx, ExceptionEvent e) {
 		logger.warn("Unexpected exception from downstream.", e.getCause());
 		networking.reconnect(this);
