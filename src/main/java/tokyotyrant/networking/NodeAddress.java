@@ -44,6 +44,10 @@ public class NodeAddress {
 		return uri.hashCode();
 	}
 	
+	public String toString() {
+		return uri.toString();
+	}
+	
 	public Map<String, String> parameters() {
 		return parameters;
 	}
