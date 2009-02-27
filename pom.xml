@@ -31,8 +31,23 @@
 			<url>http://www.apache.org/licenses/LICENSE-2.0</url>
 		</license>
 	</licenses>
+
+	<repositories>
+		<repository>
+			<id>repository.jboss.org</id>
+			<url>http://repository.jboss.org/maven2</url>
+			<snapshots>
+				<enabled>false</enabled>
+			</snapshots>
+		</repository>
+	</repositories>
 	
   <dependencies>
+	<dependency>
+		<groupId>org.jboss.netty</groupId>
+		<artifactId>netty</artifactId>
+		<version>3.1.0.ALPHA3</version>
+	</dependency>
     <dependency>
       <groupId>org.slf4j</groupId>
       <artifactId>slf4j-api</artifactId>

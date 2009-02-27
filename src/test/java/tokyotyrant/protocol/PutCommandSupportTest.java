@@ -2,8 +2,8 @@ package tokyotyrant.protocol;
 
 import static org.junit.Assert.*;
 
-import java.nio.ByteBuffer;
-
+import org.jboss.netty.buffer.ChannelBuffer;
+import org.jboss.netty.buffer.ChannelBuffers;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -22,38 +22,38 @@ public class PutCommandSupportTest {
 	}
 	
 	@Test public void encodeShouldBeSuccefulAlways() {
-		ByteBuffer expected = ByteBuffer.allocate(2 + 4 + 4 + key.length + value.length);
-		expected.put((byte) 0xc8).put((byte) 0xff);
-		expected.putInt(3).putInt(5);
-		expected.put(key).put(value);
-		expected.flip();
-		ByteBuffer actual = dut.encode();
+		ChannelBuffer expected = ChannelBuffers.buffer(2 + 4 + 4 + key.length + value.length);
+		expected.writeBytes(new byte[] { (byte) 0xc8, (byte) 0xff });
+		expected.writeInt(3);
+		expected.writeInt(5);
+		expected.writeBytes(key);
+		expected.writeBytes(value);
+		ChannelBuffer actual = ChannelBuffers.buffer(expected.capacity());
+		dut.encode(actual);
 		assertEquals(expected, actual);
-		assertArrayEquals(expected.array(), actual.array());
 	}
 	
 	@Test public void decodeShouldBeCompletedWhenCodeIsGiven() {
-		ByteBuffer input = ByteBuffer.allocate(1);
-		input.put((byte) 0).flip();
+		ChannelBuffer input = ChannelBuffers.buffer(1);
+		input.writeByte((byte) 0);
 		assertTrue(dut.decode(input));
 	}
 
 	@Test public void decodeShouldNotBeCompletedWhenCodeIsNotGiven() {
-		ByteBuffer input = ByteBuffer.allocate(1);
-		input.flip();
+		ChannelBuffer input = ChannelBuffers.buffer(1);
 		assertFalse(dut.decode(input));
 	}
 	
 	@Test public void returnValueShouldBeTrueWhenCodeIsZero() {
-		ByteBuffer input = ByteBuffer.allocate(1);
-		input.put((byte) 0).flip();
+		ChannelBuffer input = ChannelBuffers.buffer(1);
+		input.writeByte((byte) 0);
 		dut.decode(input);
 		assertTrue(dut.getReturnValue());
 	}
 	
 	@Test public void returnValueShouldBeFalseWhenCodeIsNotZero() {
-		ByteBuffer input = ByteBuffer.allocate(1);
-		input.put((byte) 1).flip();
+		ChannelBuffer input = ChannelBuffers.buffer(1);
+		input.writeByte((byte) 1);
 		dut.decode(input);
 		assertFalse(dut.getReturnValue());
 	}

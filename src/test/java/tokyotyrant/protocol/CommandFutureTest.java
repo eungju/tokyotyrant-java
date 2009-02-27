@@ -2,12 +2,12 @@ package tokyotyrant.protocol;
 
 import static org.junit.Assert.*;
 
-import java.nio.ByteBuffer;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
+import org.jboss.netty.buffer.ChannelBuffer;
 import org.junit.Test;
 
 public class CommandFutureTest {
@@ -16,14 +16,13 @@ public class CommandFutureTest {
 			super((byte)0xff);
 		}
 		
-		public boolean decode(ByteBuffer in) {
+		public boolean decode(ChannelBuffer in) {
 			return true;
 		}
 
-		public ByteBuffer encode() {
-			return null;
+		public void encode(ChannelBuffer out) {
 		}
-
+		
 		public Object getReturnValue() {
 			return 42;
 		}

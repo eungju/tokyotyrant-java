@@ -6,14 +6,14 @@ import java.io.OutputStream;
 import java.net.Socket;
 import java.net.SocketAddress;
 import java.net.URI;
-import java.nio.ByteBuffer;
 import java.util.List;
 import java.util.Map;
 
+import org.jboss.netty.buffer.ChannelBuffer;
+import org.jboss.netty.buffer.ChannelBuffers;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import tokyotyrant.helper.BufferHelper;
 import tokyotyrant.helper.UriHelper;
 import tokyotyrant.protocol.Adddouble;
 import tokyotyrant.protocol.Addint;
@@ -92,6 +92,8 @@ public class RDB {
 	 */
 	public void open(SocketAddress address, int timeout) throws IOException {
 		socket = new Socket();
+		socket.setTcpNoDelay(true);
+		socket.setKeepAlive(true);
 		socket.setSoTimeout(timeout);
 		socket.connect(address, timeout);
 		inputStream = socket.getInputStream();
@@ -176,9 +178,10 @@ public class RDB {
 	 * @param command the command to send request.
 	 */
 	protected void sendRequest(Command<?> command) throws IOException {
-		ByteBuffer buffer = command.encode();
+		ChannelBuffer buffer = ChannelBuffers.dynamicBuffer();
+		command.encode(buffer);
 		//In blocking-mode, a write operation will return only after writing all of the requested bytes.
-		outputStream.write(buffer.array(), 0, buffer.limit());
+		buffer.readBytes(outputStream, buffer.readableBytes());
 		logger.debug("Sent request " + buffer);
 	}
 
@@ -188,33 +191,27 @@ public class RDB {
 	 * @param command the command to receive response.
 	 */
 	protected void receiveResponse(Command<?> command) throws IOException {
-		ByteBuffer buffer = ByteBuffer.allocate(bufferCapacity);
+		ChannelBuffer buffer = ChannelBuffers.dynamicBuffer();
 		while (true) {
 			//fill buffer
-			int n = inputStream.read(buffer.array(), buffer.position(), buffer.remaining());
+			byte[] chunk = new byte[bufferCapacity];
+			int n = inputStream.read(chunk);
 			if (n == -1) {
 				throw new IOException("Connection closed unexpectedly");
 			}
-			buffer.position(buffer.position() + n);
+			buffer.writeBytes(chunk, 0, n);
 			logger.debug("Received {} bytes", n);
 			
 			//try to decode
-			int oldPos = buffer.position();
-			buffer.flip();
+			buffer.markReaderIndex();
 			logger.debug("Try to decode {}", buffer);
 			if (command.decode(buffer)) {
 				logger.debug("Received response of {}", command);
 				break;
 			}
-			buffer.position(oldPos);
-			buffer.limit(buffer.capacity());
-			
-			//expand if necessary
-			if (buffer.remaining() < bufferCapacity) {
-				buffer = BufferHelper.expand(buffer);
-			}
+			buffer.resetReaderIndex();
 		}
-	}	
+	}
 
 	/**
 	 * Store a record.

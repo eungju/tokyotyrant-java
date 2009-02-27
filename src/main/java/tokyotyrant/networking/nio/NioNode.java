@@ -3,6 +3,7 @@ package tokyotyrant.networking.nio;
 import java.io.IOException;
 import java.net.SocketAddress;
 import java.net.URI;
+import java.nio.ByteBuffer;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
 import java.nio.channels.SocketChannel;
@@ -11,6 +12,8 @@ import java.util.Map;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 
+import org.jboss.netty.buffer.ChannelBuffer;
+import org.jboss.netty.buffer.ChannelBuffers;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -31,10 +34,10 @@ public class NioNode implements ServerNode {
 	int reconnecting = 0;
 	
 	BlockingQueue<Command<?>> writingCommands = new ArrayBlockingQueue<Command<?>>(16 * 1024);
-	OutgoingBuffer outgoingBuffer = new OutgoingBuffer(bufferCapacity);
+	ChannelBuffer outgoingBuffer = ChannelBuffers.dynamicBuffer(bufferCapacity);
 
 	BlockingQueue<Command<?>> readingCommands = new ArrayBlockingQueue<Command<?>>(16 * 1024);
-	IncomingBuffer incomingBuffer = new IncomingBuffer(bufferCapacity);
+	ChannelBuffer incomingBuffer = ChannelBuffers.dynamicBuffer(bufferCapacity);
 	
 	public NioNode(Selector selector) {
 		this.selector = selector;
@@ -76,6 +79,8 @@ public class NioNode implements ServerNode {
 		try {
 			channel = SocketChannel.open();
 			channel.configureBlocking(false);
+			channel.socket().setTcpNoDelay(true);
+			channel.socket().setKeepAlive(true);
 			channel.connect(socketAddress);
 			selectionKey = channel.register(selector, SelectionKey.OP_CONNECT, this);
 			return true;
@@ -119,7 +124,7 @@ public class NioNode implements ServerNode {
 			if (!readingCommands.isEmpty()) {
 				ops |= SelectionKey.OP_READ;
 			}
-			if (!outgoingBuffer.isEmpty() || !writingCommands.isEmpty()) {
+			if (outgoingBuffer.readable() || !writingCommands.isEmpty()) {
 				ops |= SelectionKey.OP_WRITE;
 			}
 		} else {
@@ -128,54 +133,62 @@ public class NioNode implements ServerNode {
 		selectionKey.interestOps(ops);
 	}
 	
-	public void handleConnect() throws IOException {
+	public void handleConnect() throws Exception {
 		if (!channel.finishConnect()) {
 			throw new IllegalStateException("Connection is not established");
 		}
 		reconnecting = 0;
 	}
 	
-	public void handleWrite() throws IOException {
-		//fill the buffer
-		if (outgoingBuffer.isEmpty()) {
-			while (!writingCommands.isEmpty() && outgoingBuffer.isHungry()) {
-				Command<?> command = writingCommands.peek();
-				try {
-					outgoingBuffer.fill(command);
-					Command<?> _removed = writingCommands.remove();
-					assert _removed == command;
-					command.reading();
-					readingCommands.add(command);
-				} catch (Exception exception) {
-					command.error(exception);
-					throw new IOException("Cannot write " + command, exception);
-				}
+	public void handleWrite() throws Exception {
+		while (!writingCommands.isEmpty()) {
+			Command<?> command = writingCommands.peek();
+			try {
+				//FIXME: Wait netty bug fix. DynamicChannelBuffer#ensureWritableBytes doesn't work correctly
+				outgoingBuffer.discardReadBytes();
+				command.encode(outgoingBuffer);
+				Command<?> _removed = writingCommands.remove();
+				assert _removed == command;
+				command.reading();
+				readingCommands.add(command);
+			} catch (Exception exception) {
+				command.error(exception);
+				throw new Exception("Error while sending " + command, exception);
 			}
 		}
 		
-		//consume the buffer
-		outgoingBuffer.consume(channel);
+		ByteBuffer chunk = outgoingBuffer.toByteBuffer();
+		int n = channel.write(chunk);
+		outgoingBuffer.skipBytes(n);
 	}
 
-	public void handleRead() throws IOException {
-		//fill the buffer
-		incomingBuffer.fill(channel);
+	public void handleRead() throws Exception {
+		ByteBuffer chunk = ByteBuffer.allocate(bufferCapacity);
+		int n = channel.read(chunk);
+		if (n == -1) {
+			throw new IOException("Channel " + channel + " is closed");
+		} else if (n == 0) {
+			return;
+		}
+		chunk.flip();
+		//FIXME: Wait netty bug fix. DynamicChannelBuffer#ensureWritableBytes doesn't work correctly
+		incomingBuffer.discardReadBytes();
+		incomingBuffer.writeBytes(chunk);
 
-		//consume the buffer
 		while (!readingCommands.isEmpty()) {
 			Command<?> command = readingCommands.peek();
 			try {
-				if (incomingBuffer.consume(command)) {
-					logger.debug("Received response of {}", command);
-					command.complete();
-					Command<?> _removed = readingCommands.remove();
-					assert _removed == command;
-				} else {
+				incomingBuffer.markReaderIndex();
+				if (!command.decode(incomingBuffer)) {
+					incomingBuffer.resetReaderIndex();
 					break;
 				}
+				command.complete();
+				Command<?> _removed = readingCommands.remove();
+				assert _removed == command;
 			} catch (Exception exception) {
 				command.error(exception);
-				throw new IOException("Cannot read " + command, exception);
+				throw new Exception("Error while receiving " + command, exception);
 			}
 		}
 	}
