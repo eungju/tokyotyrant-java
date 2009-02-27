@@ -133,14 +133,14 @@ public class NioNode implements ServerNode {
 		selectionKey.interestOps(ops);
 	}
 	
-	public void handleConnect() throws IOException {
+	public void handleConnect() throws Exception {
 		if (!channel.finishConnect()) {
 			throw new IllegalStateException("Connection is not established");
 		}
 		reconnecting = 0;
 	}
 	
-	public void handleWrite() throws IOException {
+	public void handleWrite() throws Exception {
 		while (!writingCommands.isEmpty()) {
 			Command<?> command = writingCommands.peek();
 			try {
@@ -153,7 +153,7 @@ public class NioNode implements ServerNode {
 				readingCommands.add(command);
 			} catch (Exception exception) {
 				command.error(exception);
-				throw new IOException(exception);
+				throw new Exception("Error while sending " + command, exception);
 			}
 		}
 		
@@ -162,7 +162,7 @@ public class NioNode implements ServerNode {
 		outgoingBuffer.skipBytes(n);
 	}
 
-	public void handleRead() throws IOException {
+	public void handleRead() throws Exception {
 		ByteBuffer chunk = ByteBuffer.allocate(bufferCapacity);
 		int n = channel.read(chunk);
 		if (n == -1) {
@@ -188,7 +188,7 @@ public class NioNode implements ServerNode {
 				assert _removed == command;
 			} catch (Exception exception) {
 				command.error(exception);
-				throw new IOException(exception);
+				throw new Exception("Error while receiving " + command, exception);
 			}
 		}
 	}

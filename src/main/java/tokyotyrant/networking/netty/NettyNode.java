@@ -133,7 +133,7 @@ public class NettyNode extends FrameDecoder implements ServerNode {
 			readingCommands.add(command);
 		} catch (Exception exception) {
 			command.error(exception);
-			throw new IOException(exception);
+			throw new Exception("Error while sending " + command, exception);
 		}
 	}
 
@@ -155,7 +155,7 @@ public class NettyNode extends FrameDecoder implements ServerNode {
 			return command;
 		} catch (Exception exception) {
 			command.error(exception);
-			throw new IOException(exception);
+			throw new Exception("Error while receiving " + command, exception);
 		}
 	}
 }
