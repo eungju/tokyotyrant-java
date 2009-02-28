@@ -6,41 +6,19 @@ import java.util.List;
 import java.util.SortedMap;
 import java.util.TreeMap;
 
-public class Reconnections implements Runnable {
+public class Reconnections {
 	static final int INITIAL_BACKOFF = 100;
 	// maximum amount of time to wait between reconnect attempts
 	static final int MAX_BACKOFF = 60 * 1000;
-	
 	private final SortedMap<Long, ServerNode> queue = new TreeMap<Long, ServerNode>();
-	private boolean running;
 
-	long now() {
-		return System.currentTimeMillis();
-	}
-	
-	int backoff(ServerNode node) {
-		return backoff(Math.min(node.getReconnectAttempt(), 16));
-	}
-	
-	int backoff(int attempts) {
-		return Math.min(INITIAL_BACKOFF * (1 << attempts), MAX_BACKOFF);
-	}
-	
 	public void reconnect(ServerNode node) {
-		assert !queue.containsValue(node);
+		if (queue.containsValue(node)) {
+			return;
+		}
 		node.disconnect();
 		node.reconnecting();
 		queue.put(findEmptyTimeSlot(now() + backoff(node)), node);
-		synchronized (this) {
-			notifyAll();
-		}
-	}
-	
-	long findEmptyTimeSlot(long timeSlot) {
-		while (queue.containsKey(timeSlot)) {
-			timeSlot++;
-		}
-		return timeSlot;
 	}
 	
 	/**
@@ -70,35 +48,23 @@ public class Reconnections implements Runnable {
 	public int countDelayed() {
 		return queue.size();
 	}
-	
-	public void clear() {
-		queue.clear();
+
+	long now() {
+		return System.currentTimeMillis();
 	}
 	
-	public void start() {
-		running = true;
-		new Thread(this).start();
+	int backoff(ServerNode node) {
+		return backoff(Math.min(node.getReconnectAttempt(), 16));
 	}
 	
-	public void stop() {
-		running = false;
-		synchronized (this) {
-			notifyAll();
+	int backoff(int attempts) {
+		return Math.min(INITIAL_BACKOFF * (1 << attempts), MAX_BACKOFF);
+	}
+	
+	long findEmptyTimeSlot(long timeSlot) {
+		while (queue.containsKey(timeSlot)) {
+			timeSlot++;
 		}
-	}
-	
-	public void run() {
-		while (running) {
-			try {
-				synchronized (this) {
-					try {
-						wait(getTimeToNextAttempt());
-					} catch (InterruptedException e) {
-					}
-				}
-				reconnectDelayed();
-			} catch (Exception e) {
-			}
-		}
+		return timeSlot;
 	}
 }

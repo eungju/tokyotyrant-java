@@ -8,15 +8,18 @@ import org.jboss.netty.channel.socket.nio.NioClientSocketChannelFactory;
 import tokyotyrant.networking.AbstractNetworking;
 import tokyotyrant.networking.NodeLocator;
 import tokyotyrant.networking.NodeSelector;
+import tokyotyrant.networking.ReconnectionMonitor;
 import tokyotyrant.networking.ServerNode;
 
 public class NettyNetworking extends AbstractNetworking {
 	private ChannelFactory factory;
+	private ReconnectionMonitor reconnectionMonitor;
 
 	public NettyNetworking(NodeLocator nodeLocator, NodeSelector nodeSelector) {
 		super(nodeLocator, nodeSelector);
 		factory = new NioClientSocketChannelFactory(Executors
 				.newCachedThreadPool(), Executors.newCachedThreadPool());
+		reconnectionMonitor = new ReconnectionMonitor(reconnections);
 	}
 	
 	public void start() throws Exception {
@@ -27,11 +30,11 @@ public class NettyNetworking extends AbstractNetworking {
 		}
 		nodeLocator.initialize(nodes);
 		connectAllNodes();
-		reconnections.start();
+		reconnectionMonitor.start();
 	}
 	
 	public void stop() {
-		reconnections.stop();
+		reconnectionMonitor.stop();
 		disconnectAllNodes();
 		factory.releaseExternalResources();
 	}
@@ -41,6 +44,6 @@ public class NettyNetworking extends AbstractNetworking {
 	}
 	
 	public void reconnect(ServerNode node) {
-		reconnections.reconnect(node);
+		reconnectionMonitor.reconnect(node);
 	}
 }
