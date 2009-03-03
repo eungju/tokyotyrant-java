@@ -39,11 +39,7 @@ public class NettyNode extends FrameDecoder implements ServerNode {
 	
 	public void initialize(NodeAddress address) {
 		this.address = address;
-
-		bootstrap = new ClientBootstrap(networking.getFactory());
-		bootstrap.getPipeline().addLast("handler", this);
-		bootstrap.setOption("tcpNoDelay", true);
-		bootstrap.setOption("keepAlive", true);
+		bootstrap = networking.getBootstrap(this);
 	}
 	
 	public NodeAddress getAddress() {
@@ -83,7 +79,7 @@ public class NettyNode extends FrameDecoder implements ServerNode {
     
 	public void exceptionCaught(ChannelHandlerContext ctx, ExceptionEvent e) {
 		logger.warn("Unexpected exception from downstream.", e.getCause());
-		networking.reconnect(this);
+		networking.getReconnectionMonitor().reconnect(this);
 	}
 
 	public void writeRequested(ChannelHandlerContext ctx, MessageEvent e) throws Exception {
