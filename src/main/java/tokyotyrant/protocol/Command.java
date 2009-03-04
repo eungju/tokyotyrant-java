@@ -31,6 +31,10 @@ public abstract class Command<T> {
 		this.valueTranscoder = transcoder;
 	}
 	
+	public boolean responseRequired() {
+		return true;
+	}
+	
 	public boolean isSuccess() {
 		return code == ESUCCESS;
 	}

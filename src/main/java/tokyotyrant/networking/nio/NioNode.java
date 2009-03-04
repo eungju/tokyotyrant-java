@@ -152,8 +152,6 @@ public class NioNode implements ServerNode {
 		int n = channel.read(chunk);
 		if (n == -1) {
 			throw new IOException("Channel " + channel + " is closed");
-		} else if (n == 0) {
-			return;
 		}
 		chunk.flip();
 		//FIXME: Wait netty bug fix. DynamicChannelBuffer#ensureWritableBytes doesn't work correctly

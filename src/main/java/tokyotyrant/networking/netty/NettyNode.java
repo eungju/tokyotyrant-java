@@ -90,7 +90,11 @@ public class NettyNode extends FrameDecoder implements ServerNode {
 			command.encode(buffer);
 			write(ctx, e.getChannel(), e.getFuture(), buffer, e.getRemoteAddress());
 			command.reading();
-			readingCommands.add(command);
+			if (command.responseRequired()) {
+				readingCommands.add(command);
+			} else {
+				command.complete();
+			}
 		} catch (Exception exception) {
 			command.error(exception);
 			throw new Exception("Error while sending " + command, exception);
@@ -101,7 +105,7 @@ public class NettyNode extends FrameDecoder implements ServerNode {
 		Command<?> command = readingCommands.peek();
 		if (command == null) {
 			return null;
-		}
+		} 
 
 		try {
 			buffer.markReaderIndex();

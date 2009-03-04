@@ -7,6 +7,10 @@ public class Putnr extends PutCommandSupport {
 		super((byte) 0x18, key, value);
 	}
 	
+	public boolean responseRequired() {
+		return false;
+	}
+	
 	public Boolean getReturnValue() {
 		throw new UnsupportedOperationException("Putnr has no return value");
 	}

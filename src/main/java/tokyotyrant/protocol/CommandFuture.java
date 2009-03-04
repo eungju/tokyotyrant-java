@@ -32,13 +32,13 @@ public class CommandFuture<T> implements Future<T> {
 
 	public T get(long timeout, TimeUnit unit) throws InterruptedException, ExecutionException, TimeoutException {
 		if (!latch.await(timeout, unit)) {
-			throw new TimeoutException("Timed out waiting for operation");
+			throw new TimeoutException("Timed out waiting for operation " + command.toString());
 		}
 		if (command.hasError()) {
 			throw new ExecutionException(command.getErrorException());
 		}
 		if (isCancelled()) {
-			throw new ExecutionException(new RuntimeException("Cancelled"));
+			throw new ExecutionException(new RuntimeException("Cancelled " + command.toString()));
 		}
 		return (T) command.getReturnValue();
 	}
