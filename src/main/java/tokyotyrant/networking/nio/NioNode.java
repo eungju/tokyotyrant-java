@@ -126,6 +126,11 @@ public class NioNode implements ServerNode {
 	}
 	
 	public void handleWrite() throws Exception {
+		fillOutgoingBuffer();
+		consumeOutgoingBuffer();
+	}
+	
+	void fillOutgoingBuffer() throws Exception {
 		while (!writingCommands.isEmpty()) {
 			Command<?> command = writingCommands.peek();
 			try {
@@ -141,13 +146,20 @@ public class NioNode implements ServerNode {
 				throw new Exception("Error while sending " + command, exception);
 			}
 		}
-		
+	}
+	
+	void consumeOutgoingBuffer() throws IOException {
 		ByteBuffer chunk = outgoingBuffer.toByteBuffer();
 		int n = channel.write(chunk);
 		outgoingBuffer.skipBytes(n);
 	}
 
 	public void handleRead() throws Exception {
+		fillIncomingBuffer();
+		consumeIncomingBuffer();
+	}
+	
+	void fillIncomingBuffer() throws IOException {
 		ByteBuffer chunk = ByteBuffer.allocate(bufferCapacity);
 		int n = channel.read(chunk);
 		if (n == -1) {
@@ -157,7 +169,9 @@ public class NioNode implements ServerNode {
 		//FIXME: Wait netty bug fix. DynamicChannelBuffer#ensureWritableBytes doesn't work correctly
 		incomingBuffer.discardReadBytes();
 		incomingBuffer.writeBytes(chunk);
-
+	}
+	
+	void consumeIncomingBuffer() throws Exception {
 		while (!readingCommands.isEmpty()) {
 			Command<?> command = readingCommands.peek();
 			try {
