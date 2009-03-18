@@ -134,8 +134,6 @@ public class NioNode implements ServerNode {
 		while (!writingCommands.isEmpty()) {
 			Command<?> command = writingCommands.peek();
 			try {
-				//FIXME: Wait netty bug fix. DynamicChannelBuffer#ensureWritableBytes doesn't work correctly
-				outgoingBuffer.discardReadBytes();
 				command.encode(outgoingBuffer);
 				Command<?> _removed = writingCommands.remove();
 				assert _removed == command;
@@ -166,8 +164,6 @@ public class NioNode implements ServerNode {
 			throw new IOException("Channel " + channel + " is closed");
 		}
 		chunk.flip();
-		//FIXME: Wait netty bug fix. DynamicChannelBuffer#ensureWritableBytes doesn't work correctly
-		incomingBuffer.discardReadBytes();
 		incomingBuffer.writeBytes(chunk);
 	}
 	

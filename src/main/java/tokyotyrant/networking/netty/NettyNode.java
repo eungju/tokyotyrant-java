@@ -88,7 +88,7 @@ public class NettyNode extends FrameDecoder implements ServerNode {
 		try {
 			ChannelBuffer buffer = ChannelBuffers.dynamicBuffer();
 			command.encode(buffer);
-			write(ctx, e.getChannel(), e.getFuture(), buffer, e.getRemoteAddress());
+			write(ctx, e.getFuture(), buffer, e.getRemoteAddress());
 			command.reading();
 			if (command.responseRequired()) {
 				readingCommands.add(command);
