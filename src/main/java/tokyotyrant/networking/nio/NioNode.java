@@ -22,6 +22,7 @@ public class NioNode implements ServerNode {
 	private final Logger logger = LoggerFactory.getLogger(getClass());
 	private NodeAddress address;
 	private int bufferCapacity = 8 * 1024;
+	private int bufferHighWatermark = bufferCapacity * 4;
 
 	Selector selector;
 	SocketChannel channel;
@@ -131,7 +132,7 @@ public class NioNode implements ServerNode {
 	}
 	
 	void fillOutgoingBuffer() throws Exception {
-		while (!writingCommands.isEmpty()) {
+		while (!writingCommands.isEmpty() && outgoingBuffer.readableBytes() < bufferHighWatermark) {
 			Command<?> command = writingCommands.peek();
 			try {
 				command.encode(outgoingBuffer);
