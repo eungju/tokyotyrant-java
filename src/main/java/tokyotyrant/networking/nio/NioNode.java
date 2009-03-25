@@ -150,6 +150,7 @@ public class NioNode implements ServerNode {
 		ByteBuffer chunk = outgoingBuffer.toByteBuffer();
 		int n = channel.write(chunk);
 		outgoingBuffer.skipBytes(n);
+		outgoingBuffer.discardReadBytes();
 	}
 
 	public void handleRead() throws Exception {
@@ -184,6 +185,7 @@ public class NioNode implements ServerNode {
 				throw new Exception("Error while receiving " + command, exception);
 			}
 		}
+		incomingBuffer.discardReadBytes();
 	}
 	
 	public String toString() {
