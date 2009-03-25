@@ -6,8 +6,8 @@ import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
 import java.nio.channels.SocketChannel;
 import java.util.Iterator;
-import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.LinkedBlockingQueue;
 
 import org.jboss.netty.buffer.ChannelBuffer;
 import org.jboss.netty.buffer.ChannelBuffers;
@@ -28,10 +28,10 @@ public class NioNode implements ServerNode {
 	SelectionKey selectionKey;
 	int reconnecting = 0;
 	
-	BlockingQueue<Command<?>> writingCommands = new ArrayBlockingQueue<Command<?>>(16 * 1024);
+	BlockingQueue<Command<?>> writingCommands = new LinkedBlockingQueue<Command<?>>();
 	ChannelBuffer outgoingBuffer = ChannelBuffers.dynamicBuffer(bufferCapacity);
 
-	BlockingQueue<Command<?>> readingCommands = new ArrayBlockingQueue<Command<?>>(16 * 1024);
+	BlockingQueue<Command<?>> readingCommands = new LinkedBlockingQueue<Command<?>>();
 	ChannelBuffer incomingBuffer = ChannelBuffers.dynamicBuffer(bufferCapacity);
 	
 	public NioNode(Selector selector) {
