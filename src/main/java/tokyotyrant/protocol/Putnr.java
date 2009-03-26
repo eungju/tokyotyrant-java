@@ -12,7 +12,7 @@ public class Putnr extends PutCommandSupport {
 	}
 	
 	public Boolean getReturnValue() {
-		throw new UnsupportedOperationException("Putnr has no return value");
+		return null;
 	}
 
 	public boolean decode(ChannelBuffer in) {

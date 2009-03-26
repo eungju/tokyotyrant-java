@@ -91,8 +91,7 @@ public class ProtocolTest {
 		assertFalse(dut.getReturnValue());
 	}
 
-	@Test(expected=UnsupportedOperationException.class)
-	public void putnr() {
+	@Test public void putnr() {
 		Putnr dut = new Putnr(key, value);
 		setupTranscoders(dut);
 		
@@ -108,7 +107,7 @@ public class ProtocolTest {
 		
 		ChannelBuffer response = ChannelBuffers.buffer(1);
 		assertTrue(dut.decode(response));
-		dut.getReturnValue();
+		assertNull(dut.getReturnValue());
 	}
 
 	@Test public void out() {

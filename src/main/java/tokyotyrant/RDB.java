@@ -189,15 +189,6 @@ public class RDB {
 	protected void receiveResponse(Command<?> command) throws IOException {
 		ChannelBuffer buffer = ChannelBuffers.dynamicBuffer();
 		while (true) {
-			//fill buffer
-			byte[] chunk = new byte[4 * 1024];
-			int n = inputStream.read(chunk);
-			if (n == -1) {
-				throw new IOException("Connection closed unexpectedly");
-			}
-			buffer.writeBytes(chunk, 0, n);
-			logger.debug("Received {} bytes", n);
-			
 			//try to decode
 			buffer.markReaderIndex();
 			logger.debug("Try to decode {}", buffer);
@@ -206,6 +197,15 @@ public class RDB {
 				break;
 			}
 			buffer.resetReaderIndex();
+
+			//fill buffer
+			byte[] chunk = new byte[4 * 1024];
+			int n = inputStream.read(chunk);
+			if (n == -1) {
+				throw new IOException("Connection closed unexpectedly");
+			}
+			buffer.writeBytes(chunk, 0, n);
+			logger.debug("Received {} bytes", n);
 		}
 	}
 
