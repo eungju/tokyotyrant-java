@@ -57,7 +57,6 @@ public class RDB {
 	private final Logger logger = LoggerFactory.getLogger(getClass());
 	private Transcoder keyTranscoder = new StringTranscoder();
 	private Transcoder valueTranscoder = new StringTranscoder();
-	int bufferCapacity = 4 * 1024;
 	private Socket socket;
 	InputStream inputStream;
 	OutputStream outputStream;
@@ -68,8 +67,7 @@ public class RDB {
 	 * @param uri specifies the uri of the server.
 	 */
 	public void open(NodeAddress address) throws IOException {
-		Map<String, String> parameters = address.parameters();
-		int timeout = parameters.containsKey("timeout") ? Integer.parseInt(parameters.get("timeout")) : 0;
+		int timeout = address.timeout();
 		open(address.socketAddress(), timeout);
 	}
 
@@ -192,7 +190,7 @@ public class RDB {
 		ChannelBuffer buffer = ChannelBuffers.dynamicBuffer();
 		while (true) {
 			//fill buffer
-			byte[] chunk = new byte[bufferCapacity];
+			byte[] chunk = new byte[4 * 1024];
 			int n = inputStream.read(chunk);
 			if (n == -1) {
 				throw new IOException("Connection closed unexpectedly");

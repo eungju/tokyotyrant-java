@@ -9,6 +9,9 @@ import java.util.List;
 import java.util.Map;
 
 public class NodeAddress {
+	static final int DEFAULT_TIMEOUT = 0;
+	static final int DEFAULT_BUFFER_CAPACITY = 8 * 1024;
+	
 	private final URI uri;
 	private final Map<String, String> parameters;
 	
@@ -55,11 +58,39 @@ public class NodeAddress {
 	public SocketAddress socketAddress() {
 		return new InetSocketAddress(uri.getHost(), uri.getPort());
 	}
-
-	public boolean isReadOnly() {
-		return parameters().containsKey("readOnly") && "true".equals(parameters().get("readOnly"));
-	}
 	
+	int parameterAsInt(String name, int defaultValue) {
+		String value = parameters.get(name);
+		if (null == value) {
+			return defaultValue;
+		}
+		return Integer.parseInt(value);
+	}
+
+	boolean parameterAsBoolean(String name, boolean defaultValue) {
+		String value = parameters.get(name);
+		if (null == value) {
+			return defaultValue;
+		}
+		return Boolean.parseBoolean(value);
+	}
+
+	public boolean readOnly() {
+		return parameterAsBoolean("readOnly", false);
+	}
+
+	public int timeout() {
+		return parameterAsInt("timeout", DEFAULT_TIMEOUT);
+	}
+
+	public int bufferCapacity() {
+		return parameterAsInt("bufferCapacity", DEFAULT_BUFFER_CAPACITY);
+	}
+
+	public int bufferHighwatermark() {
+		return parameterAsInt("bufferHighwatermark", bufferCapacity() * 4);
+	}
+
 	public static NodeAddress[] addresses(String addresses) {
 		List<NodeAddress> result = new ArrayList<NodeAddress>();
 		for (String each : addresses.split("\\s")) {

@@ -20,20 +20,25 @@ import tokyotyrant.protocol.Command;
 
 public class NioNode implements ServerNode {
 	private final Logger logger = LoggerFactory.getLogger(getClass());
+	
+	//Configuration
 	private NodeAddress address;
-	private int bufferCapacity = 8 * 1024;
-	private int bufferHighWatermark = bufferCapacity * 4;
+	private int bufferCapacity;
+	private int bufferHighWatermark;
 
+	//Status
+	int reconnecting = 0;
+
+	//Network
 	Selector selector;
 	SocketChannel channel;
 	SelectionKey selectionKey;
-	int reconnecting = 0;
-	
-	BlockingQueue<Command<?>> writingCommands = new LinkedBlockingQueue<Command<?>>();
-	ChannelBuffer outgoingBuffer = ChannelBuffers.dynamicBuffer(bufferCapacity);
 
-	BlockingQueue<Command<?>> readingCommands = new LinkedBlockingQueue<Command<?>>();
-	ChannelBuffer incomingBuffer = ChannelBuffers.dynamicBuffer(bufferCapacity);
+	//Queuing and buffering
+	BlockingQueue<Command<?>> writingCommands;
+	ChannelBuffer outgoingBuffer;
+	BlockingQueue<Command<?>> readingCommands;
+	ChannelBuffer incomingBuffer;
 	
 	public NioNode(Selector selector) {
 		this.selector = selector;
@@ -41,6 +46,12 @@ public class NioNode implements ServerNode {
 	
 	public void initialize(NodeAddress address) {
 		this.address = address;
+		bufferCapacity = address.bufferCapacity();
+		bufferHighWatermark = address.bufferHighwatermark();
+		writingCommands = new LinkedBlockingQueue<Command<?>>();
+		outgoingBuffer = ChannelBuffers.dynamicBuffer(bufferCapacity);
+		readingCommands = new LinkedBlockingQueue<Command<?>>();
+		incomingBuffer = ChannelBuffers.dynamicBuffer(bufferCapacity);
 	}
 	
 	public NodeAddress getAddress() {
