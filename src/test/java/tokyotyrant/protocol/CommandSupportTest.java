@@ -28,7 +28,7 @@ public class CommandSupportTest {
 
 	@Test public void unpackWhenPacketDecodingIsCompleted() {
 		ChannelBuffer buffer = ChannelBuffers.buffer(1024);
-		buffer.writeByte((byte) 0);
+		buffer.writeByte(Command.ESUCCESS);
 		buffer.writeInt(43);
 		assertTrue(dut.decode(buffer));
 		assertEquals(43, dut.pong);
