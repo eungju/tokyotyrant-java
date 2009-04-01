@@ -1,16 +1,10 @@
 package tokyotyrant.networking.nio;
 
 import java.io.IOException;
-import java.nio.ByteBuffer;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
 import java.nio.channels.SocketChannel;
-import java.util.Iterator;
-import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.LinkedBlockingQueue;
 
-import org.jboss.netty.buffer.ChannelBuffer;
-import org.jboss.netty.buffer.ChannelBuffers;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -23,8 +17,6 @@ public class NioNode implements ServerNode {
 	
 	//Configuration
 	private NodeAddress address;
-	private int bufferCapacity;
-	private int bufferHighWatermark;
 
 	//Status
 	int reconnecting = 0;
@@ -34,11 +26,8 @@ public class NioNode implements ServerNode {
 	SocketChannel channel;
 	SelectionKey selectionKey;
 
-	//Queuing and buffering
-	BlockingQueue<Command<?>> writingCommands;
-	ChannelBuffer outgoingBuffer;
-	BlockingQueue<Command<?>> readingCommands;
-	ChannelBuffer incomingBuffer;
+	Incoming incoming;
+	Outgoing outgoing;
 	
 	public NioNode(Selector selector) {
 		this.selector = selector;
@@ -46,12 +35,8 @@ public class NioNode implements ServerNode {
 	
 	public void initialize(NodeAddress address) {
 		this.address = address;
-		bufferCapacity = address.bufferCapacity();
-		bufferHighWatermark = address.bufferHighwatermark();
-		writingCommands = new LinkedBlockingQueue<Command<?>>();
-		outgoingBuffer = ChannelBuffers.dynamicBuffer(bufferCapacity);
-		readingCommands = new LinkedBlockingQueue<Command<?>>();
-		incomingBuffer = ChannelBuffers.dynamicBuffer(bufferCapacity);
+		incoming = new Incoming(address.bufferCapacity());
+		outgoing = new Outgoing(incoming, address.bufferCapacity(), address.bufferHighwatermark());
 	}
 	
 	public NodeAddress getAddress() {
@@ -59,7 +44,7 @@ public class NioNode implements ServerNode {
 	}
 		
 	public void send(Command<?> command) {
-		writingCommands.add(command);
+		outgoing.put(command);
 		selector.wakeup();
 	}
 
@@ -79,6 +64,8 @@ public class NioNode implements ServerNode {
 			channel.socket().setTcpNoDelay(true);
 			channel.socket().setKeepAlive(true);
 			channel.connect(address.socketAddress());
+			outgoing.attach(channel);
+			incoming.attach(channel);
 			selectionKey = channel.register(selector, SelectionKey.OP_CONNECT, this);
 			return true;
 		} catch (IOException e) {
@@ -95,14 +82,8 @@ public class NioNode implements ServerNode {
 		} catch (IOException e) {
 			logger.error("Error while closing connection to " + address, e);
 		} finally {
-			outgoingBuffer.clear();
-			incomingBuffer.clear();
-			for (Iterator<Command<?>> i = readingCommands.iterator(); i.hasNext(); ) {
-				Command<?> each = i.next();
-				each.cancel();
-				i.remove();
-			}
-			assert readingCommands.isEmpty();
+			outgoing.cancelAll();
+			incoming.cancelAll();
 		}
 	}
 
@@ -118,10 +99,10 @@ public class NioNode implements ServerNode {
 		
 		int ops = 0;
 		if (channel.isConnected()) {
-			if (!readingCommands.isEmpty()) {
+			if (incoming.hasReadable()) {
 				ops |= SelectionKey.OP_READ;
 			}
-			if (outgoingBuffer.readable() || !writingCommands.isEmpty()) {
+			if (outgoing.hasWritable()) {
 				ops |= SelectionKey.OP_WRITE;
 			}
 		} else {
@@ -138,66 +119,11 @@ public class NioNode implements ServerNode {
 	}
 	
 	public void handleWrite() throws Exception {
-		fillOutgoingBuffer();
-		consumeOutgoingBuffer();
+		outgoing.write();
 	}
 	
-	void fillOutgoingBuffer() throws Exception {
-		while (!writingCommands.isEmpty() && outgoingBuffer.readableBytes() < bufferHighWatermark) {
-			Command<?> command = writingCommands.peek();
-			try {
-				command.encode(outgoingBuffer);
-				Command<?> _removed = writingCommands.remove();
-				assert _removed == command;
-				command.reading();
-				readingCommands.add(command);
-			} catch (Exception exception) {
-				command.error(exception);
-				throw new Exception("Error while sending " + command, exception);
-			}
-		}
-	}
-	
-	void consumeOutgoingBuffer() throws IOException {
-		ByteBuffer chunk = outgoingBuffer.toByteBuffer();
-		int n = channel.write(chunk);
-		outgoingBuffer.skipBytes(n);
-		outgoingBuffer.discardReadBytes();
-	}
-
 	public void handleRead() throws Exception {
-		fillIncomingBuffer();
-		consumeIncomingBuffer();
-	}
-	
-	void fillIncomingBuffer() throws IOException {
-		ByteBuffer chunk = ByteBuffer.allocate(bufferCapacity);
-		int n = channel.read(chunk);
-		if (n == -1) {
-			throw new IOException("Channel " + channel + " is closed");
-		}
-		chunk.flip();
-		incomingBuffer.writeBytes(chunk);
-	}
-	
-	void consumeIncomingBuffer() throws Exception {
-		while (!readingCommands.isEmpty()) {
-			Command<?> command = readingCommands.peek();
-			try {
-				incomingBuffer.markReaderIndex();
-				if (!command.decode(incomingBuffer)) {
-					incomingBuffer.resetReaderIndex();
-					break;
-				}
-				command.complete();
-				Command<?> _removed = readingCommands.remove();
-				assert _removed == command;
-			} catch (Exception exception) {
-				command.error(exception);
-				throw new Exception("Error while receiving " + command, exception);
-			}
-		}
-		incomingBuffer.discardReadBytes();
+		incoming.read();
 	}
 	
 	public String toString() {

@@ -1,12 +1,7 @@
 package tokyotyrant.networking.nio;
 
-import static org.junit.Assert.*;
-
-import java.nio.ByteBuffer;
 import java.nio.channels.SocketChannel;
 
-import org.jboss.netty.buffer.ChannelBuffer;
-import org.jboss.netty.buffer.ChannelBuffers;
 import org.jmock.Expectations;
 import org.jmock.Mockery;
 import org.jmock.integration.junit4.JMock;
@@ -17,8 +12,6 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import tokyotyrant.networking.NodeAddress;
-import tokyotyrant.protocol.Command;
-import tokyotyrant.protocol.PingCommand;
 
 @RunWith(JMock.class)
 public class NioNodeTest {
@@ -47,43 +40,20 @@ public class NioNodeTest {
 	}
 	
 	@Test public void handleWrite() throws Exception {
+		final Outgoing outgoing = mockery.mock(Outgoing.class);
 		mockery.checking(new Expectations() {{
-			one(channel).write(with(any(ByteBuffer.class))); will(returnValue(0));
+			one(outgoing).write();
 		}});
+		dut.outgoing = outgoing;
 		dut.handleWrite();
-	}
-	
-	@Test public void fillOutgoingBufferWithOneCommand() throws Exception {
-		PingCommand command = new PingCommand(1);
-		dut.writingCommands.add(command);
-		dut.fillOutgoingBuffer();
-		assertTrue(command.isReading());
-		ChannelBuffer buffer = ChannelBuffers.dynamicBuffer();
-		command.encode(buffer);
-		assertEquals(buffer, dut.outgoingBuffer);
-	}
-
-	@Test public void fillOutgoingBufferShouldNotExceedHighwatermark() throws Exception {
-		dut.outgoingBuffer.writeBytes(new byte[address.bufferHighwatermark()]);
-		PingCommand command = new PingCommand(1);
-		dut.writingCommands.add(command);
-		dut.fillOutgoingBuffer();
-		assertEquals(address.bufferHighwatermark(), dut.outgoingBuffer.readableBytes());
 	}
 
 	@Test public void handleRead() throws Exception {
+		final Incoming incoming = mockery.mock(Incoming.class);
 		mockery.checking(new Expectations() {{
-			one(channel).read(with(any(ByteBuffer.class))); will(returnValue(0));
+			one(incoming).read();
 		}});
+		dut.incoming = incoming;
 		dut.handleRead();
-	}
-	
-	@Test public void consumeIncomingBuffer() throws Exception {
-		PingCommand command = new PingCommand(1);
-		command.reading();
-		dut.readingCommands.add(command);
-		dut.incomingBuffer.writeByte(Command.EUNKNOWN);
-		dut.consumeIncomingBuffer();
-		assertTrue(command.isCompleted());
 	}
 }
