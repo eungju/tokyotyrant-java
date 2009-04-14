@@ -3,14 +3,15 @@ package tokyotyrant.networking;
 import tokyotyrant.protocol.Command;
 
 public abstract class AbstractNetworking implements Networking {
-	protected NodeAddress[] addresses;
 	protected NodeLocator nodeLocator;
 	protected NodeSelector nodeSelector;
-	protected Reconnections reconnections = new Reconnections();
+	protected NodeAddress[] addresses;
+	protected Reconnections reconnections;
 	
 	protected AbstractNetworking(NodeLocator nodeLocator, NodeSelector nodeSelector) {
 		this.nodeLocator = nodeLocator;
 		this.nodeSelector = nodeSelector;
+		this.reconnections = new Reconnections();
 	}
 
 	public void initialize(NodeAddress[] addresses) {
