@@ -69,7 +69,7 @@ public class Outgoing {
 		buffer.discardReadBytes();
 	}
 	
-	public void cancelAll() {
+	public void forgetBuffered() {
 		buffer.clear();
 	}
 }

@@ -82,7 +82,7 @@ public class NioNode implements ServerNode {
 		} catch (IOException e) {
 			logger.error("Error while closing connection to " + address, e);
 		} finally {
-			outgoing.cancelAll();
+			outgoing.forgetBuffered();
 			incoming.cancelAll();
 		}
 	}

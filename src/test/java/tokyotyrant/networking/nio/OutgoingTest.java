@@ -62,10 +62,10 @@ public class OutgoingTest {
 		assertEquals(1024, buffer.readableBytes());
 	}
 
-	@Test public void cancelAll() throws Exception {
+	@Test public void forgetBuffered() throws Exception {
 		PingCommand command = new PingCommand(1);
 		dut.put(command);
-		dut.cancelAll();
+		dut.forgetBuffered();
 		assertFalse(buffer.readable());
 		assertTrue(dut.hasWritable());
 	}
