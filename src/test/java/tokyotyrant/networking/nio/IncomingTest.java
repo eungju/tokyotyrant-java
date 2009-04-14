@@ -50,6 +50,15 @@ public class IncomingTest {
 		assertTrue(command.isCompleted());
 	}
 
+	@Test public void consumeBufferIncompleted() throws Exception {
+		PingCommand command = new PingCommand(1);
+		dut.put(command);
+		int mark = buffer.readerIndex();
+		dut.consumeBuffer();
+		assertFalse(command.isCompleted());
+		assertEquals(mark, buffer.readerIndex());
+	}
+
 	@Test public void cancelAll() throws Exception {
 		PingCommand command = new PingCommand(1);
 		dut.put(command);
