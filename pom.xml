@@ -41,6 +41,14 @@
 			</snapshots>
 		</repository>
 	</repositories>
+
+	<pluginRepositories>
+		<pluginRepository>
+			<id>sonatype.org</id>
+			<name>Public Sonatype Maven Repository</name>
+			<url>http://repository.sonatype.org/content/groups/public</url>
+		</pluginRepository>
+	</pluginRepositories>
 	
   <dependencies>
 	<dependency>
@@ -142,24 +150,6 @@
 					</execution>
 				</executions>
 			</plugin>
-			<plugin>
-				<groupId>com.atlassian.maven.plugins</groupId>
-				<artifactId>maven-clover2-plugin</artifactId>
-				<version>${clover.version}</version>
-				<configuration>
-					<licenseLocation>${clover.licenseLocation}</licenseLocation>
-					<jdk>${maven.compiler.source}</jdk>
-					<encoding>${maven.compiler.encoding}</encoding>
-				</configuration>
-				<executions>
-					<execution>
-						<phase>pre-site</phase>
-						<goals>
-							<goal>instrument</goal>
-						</goals>
-					</execution>
-				</executions>
-			</plugin>
 		</plugins>
 	</build>
 
@@ -181,6 +171,10 @@
 			<plugin>
 				<groupId>org.codehaus.mojo</groupId>
 				<artifactId>cobertura-maven-plugin</artifactId>
+			</plugin>
+			<plugin>
+				<groupId>org.sonatype.maven.plugin</groupId>
+				<artifactId>emma-maven-plugin</artifactId>
 			</plugin>
 			<plugin>
 				<groupId>org.codehaus.mojo</groupId>
@@ -206,14 +200,6 @@
 					<forceEncoding>${maven.compiler.encoding}</forceEncoding>
 				</configuration>
 			</plugin>
-			<plugin>
-				<groupId>com.atlassian.maven.plugins</groupId>
-				<artifactId>maven-clover2-plugin</artifactId>
-				<version>${clover.version}</version>
-				<configuration>
-					<licenseLocation>${clover.licenseLocation}</licenseLocation>
-				</configuration>
-			</plugin>
 		</plugins>
 	</reporting>	
 
@@ -221,7 +207,6 @@
 		<maven.compiler.encoding>utf-8</maven.compiler.encoding>
 		<maven.compiler.target>1.5</maven.compiler.target>
 		<maven.compiler.source>1.5</maven.compiler.source>
-		<clover.version>2.3.1</clover.version>
 	</properties>
 
 	<distributionManagement>
@@ -232,4 +217,47 @@
 		</repository>
 	</distributionManagement>
 
+	<profiles>
+		<profile>
+			<id>clover</id>
+			<properties>
+				<clover.version>2.3.1</clover.version>
+			</properties>
+			<build>
+				<plugins>
+					<plugin>
+						<groupId>com.atlassian.maven.plugins</groupId>
+						<artifactId>maven-clover2-plugin</artifactId>
+						<version>${clover.version}</version>
+						<configuration>
+							<licenseLocation>${clover.licenseLocation}</licenseLocation>
+							<jdk>${maven.compiler.source}</jdk>
+							<encoding>${maven.compiler.encoding}</encoding>
+						</configuration>
+						<executions>
+							<execution>
+								<phase>pre-site</phase>
+								<goals>
+									<goal>instrument</goal>
+								</goals>
+							</execution>
+						</executions>
+					</plugin>
+				</plugins>
+			</build>
+			<reporting>
+				<plugins>
+					<plugin>
+						<groupId>com.atlassian.maven.plugins</groupId>
+						<artifactId>maven-clover2-plugin</artifactId>
+						<version>${clover.version}</version>
+						<configuration>
+							<licenseLocation>${clover.licenseLocation}</licenseLocation>
+						</configuration>
+					</plugin>
+				</plugins>
+			</reporting>	
+		</profile>
+	</profiles>
+	
 </project>
