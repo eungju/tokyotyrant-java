@@ -9,10 +9,13 @@ import java.util.concurrent.LinkedBlockingQueue;
 
 import org.jboss.netty.buffer.ChannelBuffer;
 import org.jboss.netty.buffer.ChannelBuffers;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import tokyotyrant.protocol.Command;
 
 public class Incoming {
+	private final Logger logger = LoggerFactory.getLogger(getClass());  
 	private final int bufferCapacity;
 	private final ChannelBuffer buffer;
 	private final BlockingQueue<Command<?>> readingCommands;
@@ -78,11 +81,14 @@ public class Incoming {
 	
 	public void cancelAll() {
 		buffer.clear();
+		int count = 0;
 		for (Iterator<Command<?>> i = readingCommands.iterator(); i.hasNext(); ) {
 			Command<?> each = i.next();
 			each.cancel();
 			i.remove();
+			count++;
 		}
+		logger.warn("{} commands are cancelled", count);
 		assert readingCommands.isEmpty();
 	}
 }
