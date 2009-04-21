@@ -22,6 +22,7 @@ public class ReconnectionMonitorTest {
 		reconnections = mockery.mock(Reconnections.class);
 		mockery.checking(new Expectations() {{
 			allowing(reconnections).getTimeToNextAttempt(); will(returnValue(Long.MAX_VALUE));
+			allowing(reconnections).reconnectDelayed();
 		}});
 		dut = new ReconnectionMonitor(reconnections);
 		dut.start();
