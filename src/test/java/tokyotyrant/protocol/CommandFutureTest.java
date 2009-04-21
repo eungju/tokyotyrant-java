@@ -13,7 +13,7 @@ import org.junit.Test;
 public class CommandFutureTest {
 	static class DummyCommand extends Command<Object> {
 		public DummyCommand() {
-			super((byte)0xff);
+			super((byte) 0xff, null, null);
 		}
 		
 		public boolean decode(ChannelBuffer in) {

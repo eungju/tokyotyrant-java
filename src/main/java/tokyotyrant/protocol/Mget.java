@@ -5,24 +5,35 @@ import java.util.Map;
 
 import org.jboss.netty.buffer.ChannelBuffer;
 
-public class Mget extends Command<Map<Object, Object>> {
-	private Object[] keys;
-	private Map<Object, Object> values;
+import tokyotyrant.transcoder.Transcoder;
 
-	public Mget(Object[] keys) {
-		super((byte)0x31);
-		this.keys = keys;
+public class Mget extends Command<Map<Object, Object>> {
+	private final byte[][] keys;
+	private Map<byte[], byte[]> values;
+
+	public Mget(Transcoder keyTranscoder, Transcoder valueTranscoder, Object[] keys) {
+		super((byte)0x31, keyTranscoder, valueTranscoder);
+		this.keys = new byte[keys.length][];
+		for (int i = 0; i < keys.length; i++) {
+			this.keys[i] = keyTranscoder.encode(keys[i]);
+		}
 	}
 	
 	public Map<Object, Object> getReturnValue() {
-		return isSuccess() ? values : null;
+		if (!isSuccess()) {
+			return null;
+		}
+		Map<Object, Object> result = new HashMap<Object, Object>(values.size());
+		for (Map.Entry<byte[], byte[]> each : values.entrySet()) {
+			result.put(keyTranscoder.decode(each.getKey()), valueTranscoder.decode(each.getValue()));
+		}
+		return result;
 	}
 
 	public void encode(ChannelBuffer out) {
 		out.writeBytes(magic);
 		out.writeInt(keys.length);
-		for (Object each : keys) {
-			byte[] kbuf = keyTranscoder.encode(each);
+		for (byte[] kbuf : keys) {
 			out.writeInt(kbuf.length);
 			out.writeBytes(kbuf);
 		}
@@ -39,7 +50,7 @@ public class Mget extends Command<Map<Object, Object>> {
 		}
 		int rnum = in.readInt();
 
-		values = new HashMap<Object, Object>(rnum);
+		values = new HashMap<byte[], byte[]>(rnum);
 		for (int i = 0; i < rnum; i++) {
 			if (in.readableBytes() < 4 + 4) {
 				return false;
@@ -53,7 +64,7 @@ public class Mget extends Command<Map<Object, Object>> {
 			in.readBytes(kbuf);
 			byte[] vbuf = new byte[vsiz];
 			in.readBytes(vbuf);
-			values.put(keyTranscoder.decode(kbuf), valueTranscoder.decode(vbuf));
+			values.put(kbuf, vbuf);
 		}
 		return true;
 	}

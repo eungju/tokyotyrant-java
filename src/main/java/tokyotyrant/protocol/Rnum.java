@@ -6,7 +6,7 @@ public class Rnum extends CommandSupport<Long> {
 	private long rnum;
 
 	public Rnum() {
-		super((byte) 0x80, REQUEST, RESPONSE);
+		super((byte) 0x80, REQUEST, RESPONSE, null, null);
 	}
 	
 	public Long getReturnValue() {

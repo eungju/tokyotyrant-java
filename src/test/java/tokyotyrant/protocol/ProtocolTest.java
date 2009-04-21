@@ -16,16 +16,9 @@ import tokyotyrant.transcoder.Transcoder;
 public class ProtocolTest {
 	private byte[] key = "key".getBytes();
 	private byte[] value = "value".getBytes();
+	private Transcoder transcoder = new ByteArrayTranscoder();
 	
-	private void setupTranscoders(Command<?> command) {
-		Transcoder transcoder = new ByteArrayTranscoder();
-		command.setKeyTranscoder(transcoder);
-		command.setValueTranscoder(transcoder);
-	}
-
 	private void putFamily(PutCommandSupport dut, int commandId) {
-		setupTranscoders(dut);
-		
 		ChannelBuffer expected = ChannelBuffers.buffer(2 + 4 + 4 + key.length + value.length);
 		expected.writeBytes(new byte[] { (byte) 0xC8, (byte) commandId });
 		expected.writeInt(key.length);
@@ -50,21 +43,20 @@ public class ProtocolTest {
 	}
 	
 	@Test public void put() {
-		putFamily(new Put(key, value), 0x10);
+		putFamily(new Put(transcoder, transcoder, key, value), 0x10);
 	}
 
 	@Test public void putkeep() {
-		putFamily(new Putkeep(key, value), 0x11);
+		putFamily(new Putkeep(transcoder, transcoder, key, value), 0x11);
 	}
 
 	@Test public void putcat() {
-		putFamily(new Putcat(key, value), 0x12);
+		putFamily(new Putcat(transcoder, transcoder, key, value), 0x12);
 	}
 
 	@Test public void putshl() {
 		int width = 1;
-		Putshl dut = new Putshl(key, value, width);
-		setupTranscoders(dut);
+		Putshl dut = new Putshl(transcoder, transcoder, key, value, width);
 		
 		ChannelBuffer expected = ChannelBuffers.buffer(2 + 4 + 4 + 4 + key.length + value.length);
 		expected.writeBytes(new byte[] { (byte) 0xC8, (byte) 0x13 });
@@ -92,8 +84,7 @@ public class ProtocolTest {
 	}
 
 	@Test public void putnr() {
-		Putnr dut = new Putnr(key, value);
-		setupTranscoders(dut);
+		Putnr dut = new Putnr(transcoder, transcoder, key, value);
 		
 		ChannelBuffer expected = ChannelBuffers.buffer(2 + 4 + 4 + key.length + value.length);
 		expected.writeBytes(new byte[] { (byte) 0xC8, (byte) 0x18 });
@@ -111,8 +102,7 @@ public class ProtocolTest {
 	}
 
 	@Test public void out() {
-		Out dut = new Out(key);
-		setupTranscoders(dut);
+		Out dut = new Out(transcoder, transcoder, key);
 		
 		ChannelBuffer expected = ChannelBuffers.buffer(2 + 4 + key.length);
 		expected.writeBytes(new byte[] { (byte) 0xC8, (byte) 0x20 });
@@ -137,8 +127,7 @@ public class ProtocolTest {
 	}
 
 	@Test public void get() {
-		Get dut = new Get(key);
-		setupTranscoders(dut);
+		Get dut = new Get(transcoder, transcoder, key);
 		
 		ChannelBuffer request = ChannelBuffers.buffer(2 + 4 + key.length);
 		request.writeBytes(new byte[] { (byte) 0xC8, (byte) 0x30 });
@@ -168,8 +157,7 @@ public class ProtocolTest {
 	}
 
 	@Test public void mget() {
-		Mget dut = new Mget(new Object[] { key });
-		setupTranscoders(dut);
+		Mget dut = new Mget(transcoder, transcoder, new Object[] { key });
 		
 		ChannelBuffer request = ChannelBuffers.buffer(2 + 4 + 4 + key.length);
 		request.writeBytes(new byte[] { (byte) 0xC8, (byte) 0x31 });
@@ -210,8 +198,7 @@ public class ProtocolTest {
 	}
 
 	@Test public void vsiz() {
-		Vsiz dut = new Vsiz(key);
-		setupTranscoders(dut);
+		Vsiz dut = new Vsiz(transcoder, transcoder, key);
 		
 		ChannelBuffer request = ChannelBuffers.buffer(2 + 4 + key.length);
 		request.writeBytes(new byte[] { (byte) 0xC8, (byte) 0x38 });
@@ -241,7 +228,6 @@ public class ProtocolTest {
 
 	@Test public void iterinit() {
 		Iterinit dut = new Iterinit();
-		setupTranscoders(dut);
 		
 		ChannelBuffer request = ChannelBuffers.buffer(2);
 		request.writeBytes(new byte[] { (byte) 0xC8, (byte) 0x50 });
@@ -264,8 +250,7 @@ public class ProtocolTest {
 	}
 
 	@Test public void iternext() {
-		Iternext dut = new Iternext();
-		setupTranscoders(dut);
+		Iternext dut = new Iternext(transcoder, transcoder);
 		
 		ChannelBuffer request = ChannelBuffers.buffer(2);
 		request.writeBytes(new byte[] { (byte) 0xC8, (byte) 0x51 });
@@ -293,8 +278,7 @@ public class ProtocolTest {
 	}
 
 	@Test public void fwmkeys() {
-		Fwmkeys dut = new Fwmkeys(key, Integer.MAX_VALUE);
-		setupTranscoders(dut);
+		Fwmkeys dut = new Fwmkeys(transcoder, transcoder, key, Integer.MAX_VALUE);
 		
 		ChannelBuffer request = ChannelBuffers.buffer(2 + 4 + 4 + key.length);
 		request.writeBytes(new byte[] { (byte) 0xC8, (byte) 0x58 });
@@ -335,8 +319,7 @@ public class ProtocolTest {
 
 	@Test public void addint() {
 		int num = 4;
-		Addint dut = new Addint(key, num);
-		setupTranscoders(dut);
+		Addint dut = new Addint(transcoder, transcoder, key, num);
 		
 		ChannelBuffer request = ChannelBuffers.buffer(2 + 4 + 4 + key.length);
 		request.writeBytes(new byte[] { (byte) 0xC8, (byte) 0x60 });
@@ -367,8 +350,7 @@ public class ProtocolTest {
 
 	@Test public void adddouble() {
 		double num = 4;
-		Adddouble dut = new Adddouble(key, num);
-		setupTranscoders(dut);
+		Adddouble dut = new Adddouble(transcoder, transcoder, key, num);
 		
 		ChannelBuffer request = ChannelBuffers.buffer(2 + 4 + 8 + 8 + key.length);
 		request.writeBytes(new byte[] { (byte) 0xC8, (byte) 0x61 });
@@ -404,8 +386,7 @@ public class ProtocolTest {
 
 	@Test public void ext() {
 		String name = "function";
-		Ext dut = new Ext(name, key, value, RDB.XOLCKREC);
-		setupTranscoders(dut);
+		Ext dut = new Ext(transcoder, transcoder, name, key, value, RDB.XOLCKREC);
 		
 		ChannelBuffer request = ChannelBuffers.buffer(2 + 4 + 4 + 4 + 4 + name.getBytes().length + key.length + value.length);
 		request.writeBytes(new byte[] { (byte) 0xC8, (byte) 0x68 });
@@ -441,7 +422,6 @@ public class ProtocolTest {
 
 	@Test public void sync() {
 		Sync dut = new Sync();
-		setupTranscoders(dut);
 		
 		ChannelBuffer request = ChannelBuffers.buffer(2);
 		request.writeBytes(new byte[] { (byte) 0xC8, (byte) 0x70 });
@@ -465,7 +445,6 @@ public class ProtocolTest {
 
 	@Test public void vanish() {
 		Vanish dut = new Vanish();
-		setupTranscoders(dut);
 		
 		ChannelBuffer request = ChannelBuffers.buffer(2);
 		request.writeBytes(new byte[] { (byte) 0xC8, (byte) 0x71 });
@@ -490,7 +469,6 @@ public class ProtocolTest {
 	@Test public void copy() {
 		String path = "path";
 		Copy dut = new Copy(path);
-		setupTranscoders(dut);
 		
 		ChannelBuffer request = ChannelBuffers.buffer(2 + 4 + path.getBytes().length);
 		request.writeBytes(new byte[] { (byte) 0xC8, (byte) 0x72 });
@@ -518,7 +496,6 @@ public class ProtocolTest {
 		String path = "path";
 		long timestamp = System.currentTimeMillis();
 		Restore dut = new Restore(path, timestamp);
-		setupTranscoders(dut);
 		
 		ChannelBuffer request = ChannelBuffers.buffer(2 + 4 + 8 + path.getBytes().length);
 		request.writeBytes(new byte[] { (byte) 0xC8, (byte) 0x73 });
@@ -547,7 +524,6 @@ public class ProtocolTest {
 		String host = "host";
 		int port = 1978;
 		Setmst dut = new Setmst(host, port);
-		setupTranscoders(dut);
 		
 		ChannelBuffer request = ChannelBuffers.buffer(2 + 4 + 4 + host.getBytes().length);
 		request.writeBytes(new byte[] { (byte) 0xC8, (byte) 0x78 });
@@ -575,7 +551,6 @@ public class ProtocolTest {
 	@Test public void rnum() {
 		long rnum = 123;
 		Rnum dut = new Rnum();
-		setupTranscoders(dut);
 		
 		ChannelBuffer request = ChannelBuffers.buffer(2);
 		request.writeBytes(new byte[] { (byte) 0xC8, (byte) 0x80 });
@@ -598,7 +573,6 @@ public class ProtocolTest {
 	@Test public void size() {
 		long size = 12345;
 		Size dut = new Size();
-		setupTranscoders(dut);
 		
 		ChannelBuffer request = ChannelBuffers.buffer(2);
 		request.writeBytes(new byte[] { (byte) 0xC8, (byte) 0x81 });
@@ -622,7 +596,6 @@ public class ProtocolTest {
 	@Test public void stat() {
 		String stat = "k1\tv1\nk2\tv2\n";
 		Stat dut = new Stat();
-		setupTranscoders(dut);
 		
 		ChannelBuffer request = ChannelBuffers.buffer(2);
 		request.writeBytes(new byte[] { (byte) 0xC8, (byte) 0x88 });

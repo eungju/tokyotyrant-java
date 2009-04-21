@@ -1,8 +1,10 @@
 package tokyotyrant.protocol;
 
+import tokyotyrant.transcoder.Transcoder;
+
 
 public class Put extends PutCommandSupport {
-	public Put(Object key, Object value) {
-		super((byte) 0x10, key, value);
+	public Put(Transcoder keyTranscoder, Transcoder valueTranscoder, Object key, Object value) {
+		super((byte) 0x10, keyTranscoder, valueTranscoder, key, value);
 	}
 }

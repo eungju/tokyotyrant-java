@@ -1,16 +1,18 @@
 package tokyotyrant.protocol;
 
+import tokyotyrant.transcoder.Transcoder;
+
 public class Putshl extends CommandSupport<Boolean> {
 	private static final PacketFormat REQUEST = magic().int32("ksiz").int32("vsiz").int32("width").bytes("kbuf", "ksiz").bytes("vbuf", "vsiz").end();
 	private static final PacketFormat RESPONSE = code(false).end();
-	private Object key;
-	private Object value;
-	private int width;
+	private final byte[] key;
+	private final byte[] value;
+	private final int width;
 	
-	public Putshl(Object key, Object value, int width) {
-		super((byte) 0x13, REQUEST, RESPONSE);
-		this.key = key;
-		this.value = value;
+	public Putshl(Transcoder keyTranscoder, Transcoder valueTranscoder, Object key, Object value, int width) {
+		super((byte) 0x13, REQUEST, RESPONSE, keyTranscoder, valueTranscoder);
+		this.key = keyTranscoder.encode(key);
+		this.value = valueTranscoder.encode(value);
 		this.width = width;
 	}
 
@@ -19,13 +21,11 @@ public class Putshl extends CommandSupport<Boolean> {
 	}
 	
 	protected void pack(PacketContext context) {
-		byte[] kbuf = keyTranscoder.encode(key);
-		byte[] vbuf = valueTranscoder.encode(value);
-		context.put("ksiz", kbuf.length);
-		context.put("vsiz", vbuf.length);
+		context.put("ksiz", key.length);
+		context.put("vsiz", value.length);
 		context.put("width", width);
-		context.put("kbuf", kbuf);
-		context.put("vbuf", vbuf);
+		context.put("kbuf", key);
+		context.put("vbuf", value);
 	}
 	
 	protected void unpack(PacketContext context) {

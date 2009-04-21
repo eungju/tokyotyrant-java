@@ -6,7 +6,7 @@ public class Size extends CommandSupport<Long> {
 	private long size;
 	             
 	public Size() {
-		super((byte) 0x81, REQUEST, RESPONSE);
+		super((byte) 0x81, REQUEST, RESPONSE, null, null);
 	}
 	
 	public Long getReturnValue() {

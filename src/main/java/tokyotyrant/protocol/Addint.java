@@ -1,15 +1,17 @@
 package tokyotyrant.protocol;
 
+import tokyotyrant.transcoder.Transcoder;
+
 public class Addint extends CommandSupport<Integer> {
 	private static final PacketFormat REQUEST = magic().int32("ksiz").int32("num").bytes("kbuf", "ksiz").end();
 	private static final PacketFormat RESPONSE = code(true).int32("sum").end();
-	private Object key;
-	private int num;
+	private final byte[] key;
+	private final int num;
 	private int sum;
 	
-	public Addint(Object key, int num) {
-		super((byte) 0x60, REQUEST, RESPONSE);
-		this.key = key;
+	public Addint(Transcoder keyTranscoder, Transcoder valueTranscoder, Object key, int num) {
+		super((byte) 0x60, REQUEST, RESPONSE, keyTranscoder, valueTranscoder);
+		this.key = keyTranscoder.encode(key);
 		this.num = num;
 	}
 	
@@ -18,9 +20,8 @@ public class Addint extends CommandSupport<Integer> {
 	}
 	
 	protected void pack(PacketContext context) {
-		byte[] kbuf = keyTranscoder.encode(key);
-		context.put("ksiz", kbuf.length);
-		context.put("kbuf", kbuf);
+		context.put("ksiz", key.length);
+		context.put("kbuf", key);
 		context.put("num", num);
 	}
 	

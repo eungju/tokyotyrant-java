@@ -15,10 +15,8 @@ public class PutCommandSupportTest {
 	private byte[] value = "value".getBytes();
 	
 	@Before public void beforeEach() {
-		dut = new PutCommandSupport((byte) 0xff, key, value) {
+		dut = new PutCommandSupport((byte) 0xff, new ByteArrayTranscoder(), new ByteArrayTranscoder(), key, value) {
 		};
-		dut.setKeyTranscoder(new ByteArrayTranscoder());
-		dut.setValueTranscoder(new ByteArrayTranscoder());
 	}
 	
 	@Test public void encodeShouldBeSuccefulAlways() {

@@ -5,27 +5,35 @@ import java.util.List;
 
 import org.jboss.netty.buffer.ChannelBuffer;
 
-public class Fwmkeys extends Command<List<Object>> {
-	private Object prefix;
-	private int max;
-	private List<Object> keys;
+import tokyotyrant.transcoder.Transcoder;
 
-	public Fwmkeys(Object prefix, int max) {
-		super((byte) 0x58);
-		this.prefix = prefix;
+public class Fwmkeys extends Command<List<Object>> {
+	private final byte[] prefix;
+	private final int max;
+	private List<byte[]> keys;
+
+	public Fwmkeys(Transcoder keyTranscoder, Transcoder valueTranscoder, Object prefix, int max) {
+		super((byte) 0x58, keyTranscoder, valueTranscoder);
+		this.prefix = keyTranscoder.encode(prefix);
 		this.max = max;
 	}
 	
 	public List<Object> getReturnValue() {
-		return isSuccess() ? keys : null;
+		if (!isSuccess()) {
+			return null;
+		}
+		List<Object> result = new ArrayList<Object>(keys.size());
+		for (byte[] kbuf : keys) {
+			result.add(valueTranscoder.decode(kbuf));
+		}
+		return result;
 	}
 
 	public void encode(ChannelBuffer out) {
-		byte[] pbuf = keyTranscoder.encode(prefix);
 		out.writeBytes(magic);
-		out.writeInt(pbuf.length);
+		out.writeInt(prefix.length);
 		out.writeInt(max);
-		out.writeBytes(pbuf);
+		out.writeBytes(prefix);
 	}
 
 	public boolean decode(ChannelBuffer in) {
@@ -39,7 +47,7 @@ public class Fwmkeys extends Command<List<Object>> {
 		}
 		int knum = in.readInt();
 
-		keys = new ArrayList<Object>(knum);
+		keys = new ArrayList<byte[]>(knum);
 		for (int i = 0; i < knum; i++) {
 			if (in.readableBytes() < 4) {
 				return false;
@@ -50,7 +58,7 @@ public class Fwmkeys extends Command<List<Object>> {
 			}
 			byte[] kbuf = new byte[ksiz];
 			in.readBytes(kbuf);
-			keys.add(keyTranscoder.decode(kbuf));
+			keys.add(kbuf);
 		}
 		return true;
 	}

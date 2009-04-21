@@ -6,14 +6,14 @@ import java.util.Map;
 public class Stat extends CommandSupport<Map<String, String>> {
 	private static final PacketFormat REQUEST = magic().end();
 	private static final PacketFormat RESPONSE = code(false).int32("ssiz").bytes("sbuf", "ssiz").end();
-	private Map<String, String> stat;
+	private byte[] sbuf;
 	             
 	public Stat() {
-		super((byte) 0x88, REQUEST, RESPONSE);
+		super((byte) 0x88, REQUEST, RESPONSE, null, null);
 	}
 	
 	public Map<String, String> getReturnValue() {
-		return stat;
+		return parseTsv(new String(sbuf));
 	}
 	
 	protected void pack(PacketContext context) {
@@ -21,7 +21,7 @@ public class Stat extends CommandSupport<Map<String, String>> {
 	
 	protected void unpack(PacketContext context) {
 		code = (Byte)context.get("code");
-		stat = parseTsv(new String((byte[])context.get("sbuf")));
+		sbuf = (byte[]) context.get("sbuf");
 	}
 	
 	Map<String, String> parseTsv(String tsv) {

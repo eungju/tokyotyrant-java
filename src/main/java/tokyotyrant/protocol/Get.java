@@ -3,25 +3,25 @@ package tokyotyrant.protocol;
 import org.jboss.netty.buffer.ChannelBuffer;
 
 import tokyotyrant.helper.BufferHelper;
+import tokyotyrant.transcoder.Transcoder;
 
 public class Get extends Command<Object> {
-	private Object key;
-	private Object value;
+	private final byte[] key;
+	private byte[] value;
 
-	public Get(Object key) {
-		super((byte)0x30);
-		this.key = key;
+	public Get(Transcoder keyTranscoder, Transcoder valueTranscoder, Object key) {
+		super((byte) 0x30, keyTranscoder, valueTranscoder);
+		this.key = keyTranscoder.encode(key);
 	}
 	
 	public Object getReturnValue() {
-		return isSuccess() ? value : null;
+		return isSuccess() ? valueTranscoder.decode(value) : null;
 	}
 
 	public void encode(ChannelBuffer out) {
-		byte[] kbuf = keyTranscoder.encode(key);
 		out.writeBytes(magic);
-		out.writeInt(kbuf.length);
-		out.writeBytes(kbuf);
+		out.writeInt(key.length);
+		out.writeBytes(key);
 	}
 
 	public boolean decode(ChannelBuffer in) {
@@ -36,9 +36,8 @@ public class Get extends Command<Object> {
 			return false;
 		}
 		int vsiz = in.readInt();
-		byte[] vbuf = new byte[vsiz];
-		in.readBytes(vbuf);
-		value = valueTranscoder.decode(vbuf);
+		value = new byte[vsiz];
+		in.readBytes(value);
 		return true;
 	}
 }

@@ -9,26 +9,22 @@ import tokyotyrant.transcoder.Transcoder;
 public abstract class Command<T> {
 	public static final byte ESUCCESS = 0x00;
 	public static final byte EUNKNOWN = (byte) 0xff;
-	protected byte[] magic;
-	protected byte code = EUNKNOWN;
+
+	protected final Transcoder keyTranscoder;
+	protected final Transcoder valueTranscoder;
 	
-	protected Transcoder keyTranscoder;
-	protected Transcoder valueTranscoder;
+	protected final byte[] magic;
+	
+	protected byte code = EUNKNOWN;
 
 	private CountDownLatch latch = new CountDownLatch(1);
 	private CommandState state = CommandState.WRITING;
 	private Exception errorException = null; 
 	
-	public Command(byte commandId) {
+	public Command(byte commandId, Transcoder keyTranscoder, Transcoder valueTranscoder) {
 		magic = new byte[] {(byte) 0xC8, commandId};
-	}
-	
-	public void setKeyTranscoder(Transcoder transcoder) {
-		this.keyTranscoder = transcoder;
-	}
-	
-	public void setValueTranscoder(Transcoder transcoder) {
-		this.valueTranscoder = transcoder;
+		this.keyTranscoder = keyTranscoder;
+		this.valueTranscoder = valueTranscoder;
 	}
 	
 	public boolean responseRequired() {

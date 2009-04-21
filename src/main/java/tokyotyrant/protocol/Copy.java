@@ -3,11 +3,11 @@ package tokyotyrant.protocol;
 public class Copy extends CommandSupport<Boolean> {
 	private static final PacketFormat REQUEST = magic().int32("psiz").bytes("path", "psiz").end();
 	private static final PacketFormat RESPONSE = code(false).end();
-	private String path;
+	private final byte[] path;
 	
 	public Copy(String path) {
-		super((byte) 0x72, REQUEST, RESPONSE);
-		this.path = path;
+		super((byte) 0x72, REQUEST, RESPONSE, null, null);
+		this.path = path.getBytes();
 	}
 
 	public Boolean getReturnValue() {
@@ -15,9 +15,8 @@ public class Copy extends CommandSupport<Boolean> {
 	}
 	
 	protected void pack(PacketContext context) {
-		byte[] pbuf = path.getBytes();
-		context.put("psiz", pbuf.length);
-		context.put("path", pbuf);
+		context.put("psiz", path.length);
+		context.put("path", path);
 	}
 	
 	protected void unpack(PacketContext context) {

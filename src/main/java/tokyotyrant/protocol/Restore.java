@@ -3,13 +3,13 @@ package tokyotyrant.protocol;
 public class Restore extends CommandSupport<Boolean> {
 	private static final PacketFormat REQUEST = magic().int32("psiz").int64("ts").bytes("path", "psiz").end();
 	private static final PacketFormat RESPONSE = code(false).end();
-	private String path;
-	private long ts;
+	private final byte[] path;
+	private final long timestamp;
 	
-	public Restore(String path, long ts) {
-		super((byte) 0x73, REQUEST, RESPONSE);
-		this.path = path;
-		this.ts = ts;
+	public Restore(String path, long timestamp) {
+		super((byte) 0x73, REQUEST, RESPONSE, null, null);
+		this.path = path.getBytes();
+		this.timestamp = timestamp;
 	}
 
 	public Boolean getReturnValue() {
@@ -17,10 +17,9 @@ public class Restore extends CommandSupport<Boolean> {
 	}
 	
 	protected void pack(PacketContext context) {
-		byte[] pbuf = path.getBytes();
-		context.put("psiz", pbuf.length);
-		context.put("ts", ts);
-		context.put("path", pbuf);
+		context.put("psiz", path.length);
+		context.put("ts", timestamp);
+		context.put("path", path);
 	}
 	
 	protected void unpack(PacketContext context) {

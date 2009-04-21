@@ -2,14 +2,16 @@ package tokyotyrant.protocol;
 
 import org.jboss.netty.buffer.ChannelBuffer;
 
-public abstract class PutCommandSupport extends Command<Boolean> {
-	private Object key;
-	private Object value;
+import tokyotyrant.transcoder.Transcoder;
 
-	public PutCommandSupport(byte commandId, Object key, Object value) {
-		super(commandId);
-		this.key = key;
-		this.value = value;
+public abstract class PutCommandSupport extends Command<Boolean> {
+	private final byte[] key;
+	private final byte[] value;
+
+	public PutCommandSupport(byte commandId, Transcoder keyTranscoder, Transcoder valueTranscoder, Object key, Object value) {
+		super(commandId, keyTranscoder, valueTranscoder);
+		this.key = keyTranscoder.encode(key);
+		this.value = valueTranscoder.encode(value);
 	}
 
 	public Boolean getReturnValue() {
@@ -17,13 +19,11 @@ public abstract class PutCommandSupport extends Command<Boolean> {
 	}
 	
 	public void encode(ChannelBuffer out) {
-		byte[] kbuf = keyTranscoder.encode(key);
-		byte[] vbuf = valueTranscoder.encode(value);
 		out.writeBytes(magic);
-		out.writeInt(kbuf.length);
-		out.writeInt(vbuf.length);
-		out.writeBytes(kbuf);
-		out.writeBytes(vbuf);
+		out.writeInt(key.length);
+		out.writeInt(value.length);
+		out.writeBytes(key);
+		out.writeBytes(value);
 	}
 
 	public boolean decode(ChannelBuffer in) {

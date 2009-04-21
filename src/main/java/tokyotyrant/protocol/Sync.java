@@ -5,7 +5,7 @@ public class Sync extends CommandSupport<Boolean> {
 	private static final PacketFormat RESPONSE = code(true).end();
 	             
 	public Sync() {
-		super((byte) 0x70, REQUEST, RESPONSE);
+		super((byte) 0x70, REQUEST, RESPONSE, null, null);
 	}
 	
 	public Boolean getReturnValue() {

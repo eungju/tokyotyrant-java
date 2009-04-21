@@ -89,20 +89,12 @@ public class MRDB {
 	}
 
 	protected <T> CommandFuture<T> execute(Command<T> command) {
-		return execute(command, valueTranscoder);
-	}
-
-	protected <T> CommandFuture<T> execute(Command<T> command, Transcoder valueTranscoder) {
-		command.setKeyTranscoder(keyTranscoder);
-		command.setValueTranscoder(valueTranscoder);
 		CommandFuture<T> future = new CommandFuture<T>(command, globalTimeout);
 		networking.send(command);
 		return future;
 	}
 
 	protected <T> CommandFuture<T> execute(ServerNode node, Command<T> command) {
-		command.setKeyTranscoder(keyTranscoder);
-		command.setValueTranscoder(valueTranscoder);
 		CommandFuture<T> future = new CommandFuture<T>(command, globalTimeout);
 		networking.send(node, command);
 		return future;
@@ -143,87 +135,87 @@ public class MRDB {
 	}
 
 	public Future<Boolean> put(Object key, Object value) {
-		return execute(new Put(key, value));
+		return execute(new Put(keyTranscoder, valueTranscoder, key, value));
 	}
 
 	public Future<Boolean> put(Object key, Object value, Transcoder valueTranscoder) {
-		return execute(new Put(key, value), valueTranscoder);
+		return execute(new Put(keyTranscoder, valueTranscoder, key, value));
 	}
 
 	public Future<Boolean> putkeep(Object key, Object value) {
-		return execute(new Putkeep(key, value));
+		return execute(new Putkeep(keyTranscoder, valueTranscoder, key, value));
 	}
 
 	public Future<Boolean> putkeep(Object key, Object value, Transcoder valueTranscoder) {
-		return execute(new Putkeep(key, value), valueTranscoder);
+		return execute(new Putkeep(keyTranscoder, valueTranscoder, key, value));
 	}
 
 	public Future<Boolean> putcat(Object key, Object value) {
-		return execute(new Putcat(key, value));
+		return execute(new Putcat(keyTranscoder, valueTranscoder, key, value));
 	}
 
 	public Future<Boolean> putcat(Object key, Object value, Transcoder valueTranscoder) {
-		return execute(new Putcat(key, value), valueTranscoder);
+		return execute(new Putcat(keyTranscoder, valueTranscoder, key, value));
 	}
 
 	public Future<Boolean> putshl(Object key, Object value, int width) {
-		return execute(new Putshl(key, value, width));
+		return execute(new Putshl(keyTranscoder, valueTranscoder, key, value, width));
 	}
 
 	public Future<Boolean> putshl(Object key, Object value, int width, Transcoder valueTranscoder) {
-		return execute(new Putshl(key, value, width), valueTranscoder);
+		return execute(new Putshl(keyTranscoder, valueTranscoder, key, value, width));
 	}
 
 	public void putnr(Object key, Object value) {
-		execute(new Putnr(key, value));
+		execute(new Putnr(keyTranscoder, valueTranscoder, key, value));
 	}
 
 	public void putnr(Object key, Object value, Transcoder valueTranscoder) {
-		execute(new Putnr(key, value), valueTranscoder);
+		execute(new Putnr(keyTranscoder, valueTranscoder, key, value));
 	}
 
 	public Future<Boolean> out(Object key) {
-		return execute(new Out(key));
+		return execute(new Out(keyTranscoder, valueTranscoder, key));
 	}
 	
 	public Future<Object> get(Object key) {
-		return execute(new Get(key));
+		return execute(new Get(keyTranscoder, valueTranscoder, key));
 	}
 	
 	public Future<Object> get(Object key, Transcoder valueTranscoder) {
-		return execute(new Get(key), valueTranscoder);
+		return execute(new Get(keyTranscoder, valueTranscoder, key));
 	}
 
 	public Future<Map<Object, Object>> mget(Object[] keys) {
-		return execute(new Mget(keys));
+		return execute(new Mget(keyTranscoder, valueTranscoder, keys));
 	}
 
 	public Future<Map<Object, Object>> mget(Object[] keys, Transcoder valueTranscoder) {
-		return execute(new Mget(keys), valueTranscoder);
+		return execute(new Mget(keyTranscoder, valueTranscoder, keys));
 	}
 
 	public Future<Integer> vsiz(Object key) {
-		return execute(new Vsiz(key));
+		return execute(new Vsiz(keyTranscoder, valueTranscoder, key));
 	}
 
 	public Future<List<Object>> fwmkeys(Object prefix, int max) {
-		return execute(new Fwmkeys(prefix, max));
+		return execute(new Fwmkeys(keyTranscoder, valueTranscoder, prefix, max));
 	}
 
 	public Future<Integer> addint(Object key, int num) {
-		return execute(new Addint(key, num));
+		return execute(new Addint(keyTranscoder, valueTranscoder, key, num));
 	}
 
 	public Future<Double> adddouble(Object key, double num) {
-		return execute(new Adddouble(key, num));
+		return execute(new Adddouble(keyTranscoder, valueTranscoder, key, num));
 	}
 
 	public Future<Object> ext(String name, Object key, Object value, int opts) {
-		return execute(new Ext(name, key, value, opts));
+		return execute(new Ext(keyTranscoder, valueTranscoder, name, key, value, opts));
 	}
 
 	public Future<Object> ext(String name, Object key, Object value, int opts, Transcoder valueTranscoder) {
-		return execute(new Ext(name, key, value, opts), valueTranscoder);
+		return execute(new Ext(keyTranscoder, valueTranscoder, name, key, value, opts));
 	}
 
 	public Future<Boolean> sync() {

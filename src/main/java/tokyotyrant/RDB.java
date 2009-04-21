@@ -149,20 +149,6 @@ public class RDB {
 	 * @return the return value of the command.
 	 */
 	protected <T> T execute(Command<T> command) throws IOException {
-		return execute(command, valueTranscoder);
-	}
-
-	/**
-	 * Execute the command.
-	 * 
-	 * @param <T> the type of the return value of the command.
-	 * @param command the command to execute.
-	 * @param valueTranscoder the transcoder for the values.
-	 * @return the return value of the command.
-	 */
-	protected <T> T execute(Command<T> command, Transcoder valueTranscoder) throws IOException {
-		command.setKeyTranscoder(keyTranscoder);
-		command.setValueTranscoder(valueTranscoder);
 		sendRequest(command);
 		receiveResponse(command);
 		return command.getReturnValue();
@@ -218,11 +204,11 @@ public class RDB {
 	 * @return If successful, the return value is true, else, it is false.
 	 */
 	public boolean put(Object key, Object value) throws IOException {
-		return execute(new Put(key, value));
+		return execute(new Put(keyTranscoder, valueTranscoder, key, value));
 	}
 
 	public boolean put(Object key, Object value, Transcoder valueTranscoder) throws IOException {
-		return execute(new Put(key, value), valueTranscoder);
+		return execute(new Put(keyTranscoder, valueTranscoder, key, value));
 	}
 
 	/**
@@ -234,11 +220,11 @@ public class RDB {
 	 * @return If successful, the return value is true, else, it is false.
 	 */
 	public boolean putkeep(Object key, Object value) throws IOException {
-		return execute(new Putkeep(key, value));
+		return execute(new Putkeep(keyTranscoder, valueTranscoder, key, value));
 	}
 
 	public boolean putkeep(Object key, Object value, Transcoder valueTranscoder) throws IOException {
-		return execute(new Putkeep(key, value), valueTranscoder);
+		return execute(new Putkeep(keyTranscoder, valueTranscoder, key, value));
 	}
 
 	/**
@@ -250,11 +236,11 @@ public class RDB {
 	 * @return If successful, the return value is true, else, it is false.
 	 */
 	public boolean putcat(Object key, Object value) throws IOException {
-		return execute(new Putcat(key, value));
+		return execute(new Putcat(keyTranscoder, valueTranscoder, key, value));
 	}
 
 	public boolean putcat(Object key, Object value, Transcoder valueTranscoder) throws IOException {
-		return execute(new Putcat(key, value), valueTranscoder);
+		return execute(new Putcat(keyTranscoder, valueTranscoder, key, value));
 	}
 
 	/**
@@ -267,11 +253,11 @@ public class RDB {
 	 * @return If successful, the return value is true, else, it is false.
 	 */
 	public boolean putshl(Object key, Object value, int width) throws IOException {
-		return execute(new Putshl(key, value, width));
+		return execute(new Putshl(keyTranscoder, valueTranscoder, key, value, width));
 	}
 
 	public boolean putshl(Object key, Object value, int width, Transcoder valueTranscoder) throws IOException {
-		return execute(new Putshl(key, value, width), valueTranscoder);
+		return execute(new Putshl(keyTranscoder, valueTranscoder, key, value, width));
 	}
 
 	/**
@@ -282,11 +268,11 @@ public class RDB {
 	 * @param value specifies the value.
 	 */
 	public void putnr(Object key, Object value) throws IOException {
-		execute(new Putnr(key, value));
+		execute(new Putnr(keyTranscoder, valueTranscoder, key, value));
 	}
 
 	public void putnr(Object key, Object value, Transcoder valueTranscoder) throws IOException {
-		execute(new Putnr(key, value), valueTranscoder);
+		execute(new Putnr(keyTranscoder, valueTranscoder, key, value));
 	}
 
 	/**
@@ -296,7 +282,7 @@ public class RDB {
 	 * @return If successful, the return value is true, else, it is false.
 	 */
 	public boolean out(Object key) throws IOException {
-		return execute(new Out(key));
+		return execute(new Out(keyTranscoder, valueTranscoder, key));
 	}
 	
 	/**
@@ -306,11 +292,11 @@ public class RDB {
 	 * @return If successful, the return value is the value of the corresponding record. {@code null} is returned if no record corresponds.
 	 */
 	public Object get(Object key) throws IOException {
-		return execute(new Get(key));
+		return execute(new Get(keyTranscoder, valueTranscoder, key));
 	}
 
 	public Object get(Object key, Transcoder valueTranscoder) throws IOException {
-		return execute(new Get(key), valueTranscoder);
+		return execute(new Get(keyTranscoder, valueTranscoder, key));
 	}
 
 	/**
@@ -320,11 +306,11 @@ public class RDB {
 	 * @return If successful, the return value is the map contains corresponding values, else, it is {@code null}. As a result of this method, keys existing in the database have the corresponding values and keys not existing in the database are removed.
 	 */
 	public Map<Object, Object> mget(Object[] keys) throws IOException {
-		return execute(new Mget(keys));
+		return execute(new Mget(keyTranscoder, valueTranscoder, keys));
 	}
 	
 	public Map<Object, Object> mget(Object[] keys, Transcoder valueTranscoder) throws IOException {
-		return execute(new Mget(keys), valueTranscoder);
+		return execute(new Mget(keyTranscoder, valueTranscoder, keys));
 	}
 
 	/**
@@ -334,7 +320,7 @@ public class RDB {
 	 * @return If successful, the return value is the size of the value of the corresponding record, else, it is -1.
 	 */
 	public int vsiz(Object key) throws IOException {
-		return execute(new Vsiz(key));
+		return execute(new Vsiz(keyTranscoder, valueTranscoder, key));
 	}
 
 	/**
@@ -354,7 +340,7 @@ public class RDB {
 	 * @return If successful, the return value is the next key, else, it is {@code null}. {@code null} is returned when no record is to be get out of the iterator.
 	 */
 	public Object iternext() throws IOException {
-		return execute(new Iternext());
+		return execute(new Iternext(keyTranscoder, valueTranscoder));
 	}
 
 	/**
@@ -366,7 +352,7 @@ public class RDB {
 	 * @return The return value is an array of the keys of the corresponding records. This method does never fail and return an empty list even if no record corresponds.
 	 */
 	public List<Object> fwmkeys(Object prefix, int max) throws IOException {
-		return execute(new Fwmkeys(prefix, max));
+		return execute(new Fwmkeys(keyTranscoder, valueTranscoder, prefix, max));
 	}
 
 	/**
@@ -378,7 +364,7 @@ public class RDB {
 	 * @return If successful, the return value is the summation value, else, it is {@link Integer#MIN_VALUE}.
 	 */
 	public int addint(Object key, int num) throws IOException {
-		return execute(new Addint(key, num));
+		return execute(new Addint(keyTranscoder, valueTranscoder, key, num));
 	}
 
 	/**
@@ -390,7 +376,7 @@ public class RDB {
 	 * @return If successful, the return value is the summation value, else, it is {@link Double#NaN}.
 	 */
 	public double adddouble(Object key, double num) throws IOException {
-		return execute(new Adddouble(key, num));
+		return execute(new Adddouble(keyTranscoder, valueTranscoder, key, num));
 	}
 
 	/**
@@ -403,11 +389,11 @@ public class RDB {
 	 * @return If successful, the return value is the value of the response or {@code null} on failure.
 	 */
 	public Object ext(String name, Object key, Object value, int opts) throws IOException {
-		return execute(new Ext(name, key, value, opts));
+		return execute(new Ext(keyTranscoder, valueTranscoder, name, key, value, opts));
 	}
 
 	public Object ext(String name, Object key, Object value, int opts, Transcoder valueTranscoder) throws IOException {
-		return execute(new Ext(name, key, value, opts), valueTranscoder);
+		return execute(new Ext(keyTranscoder, valueTranscoder, name, key, value, opts));
 	}
 
 	/**

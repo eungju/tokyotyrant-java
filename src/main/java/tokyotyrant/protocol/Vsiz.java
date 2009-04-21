@@ -1,14 +1,16 @@
 package tokyotyrant.protocol;
 
+import tokyotyrant.transcoder.Transcoder;
+
 public class Vsiz extends CommandSupport<Integer> {
 	private static final PacketFormat REQUEST = magic().int32("ksiz").bytes("kbuf", "ksiz").end();
 	private static final PacketFormat RESPONSE = code(true).int32("vsiz").end();
-	private Object key;
+	private final byte[] key;
 	private int vsiz;
 
-	public Vsiz(Object key) {
-		super((byte) 0x38, REQUEST, RESPONSE);
-		this.key = key;
+	public Vsiz(Transcoder keyTranscoder, Transcoder valueTranscoder, Object key) {
+		super((byte) 0x38, REQUEST, RESPONSE, keyTranscoder, valueTranscoder);
+		this.key = keyTranscoder.encode(key);
 	}
 	
 	public Integer getReturnValue() {
@@ -16,9 +18,8 @@ public class Vsiz extends CommandSupport<Integer> {
 	}
 
 	protected void pack(PacketContext context) {
-		byte[] kbuf = keyTranscoder.encode(key);
-		context.put("ksiz", kbuf.length);
-		context.put("kbuf", kbuf);
+		context.put("ksiz", key.length);
+		context.put("kbuf", key);
 	}
 
 	protected void unpack(PacketContext context) {

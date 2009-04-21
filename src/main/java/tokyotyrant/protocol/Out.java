@@ -2,12 +2,14 @@ package tokyotyrant.protocol;
 
 import org.jboss.netty.buffer.ChannelBuffer;
 
-public class Out extends Command<Boolean> {
-	private Object key;
+import tokyotyrant.transcoder.Transcoder;
 
-	public Out(Object key) {
-		super((byte)0x20);
-		this.key = key;
+public class Out extends Command<Boolean> {
+	private final byte[] key;
+
+	public Out(Transcoder keyTranscoder, Transcoder valueTranscoder, Object key) {
+		super((byte) 0x20, keyTranscoder, valueTranscoder);
+		this.key = keyTranscoder.encode(key);
 	}
 	
 	public Boolean getReturnValue() {
@@ -15,10 +17,9 @@ public class Out extends Command<Boolean> {
 	}
 	
 	public void encode(ChannelBuffer out) {
-		byte[] kbuf = keyTranscoder.encode(key);
 		out.writeBytes(magic);
-		out.writeInt(kbuf.length);
-		out.writeBytes(kbuf);
+		out.writeInt(key.length);
+		out.writeBytes(key);
 	}
 
 	public boolean decode(ChannelBuffer in) {

@@ -5,7 +5,7 @@ public class Iterinit extends CommandSupport<Boolean> {
 	private static final PacketFormat RESPONSE = code(false).end();
 	             
 	public Iterinit() {
-		super((byte) 0x50, REQUEST, RESPONSE);
+		super((byte) 0x50, REQUEST, RESPONSE, null, null);
 	}
 	
 	public Boolean getReturnValue() {

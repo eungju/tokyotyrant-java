@@ -5,7 +5,7 @@ public class PingCommand extends CommandSupport<Boolean> {
 	int pong;
 	
 	public PingCommand(int ping) {
-		super((byte) 0xff, magic().int32("ping").end(), code(true).int32("pong").end());
+		super((byte) 0xff, magic().int32("ping").end(), code(true).int32("pong").end(), null, null);
 		this.ping = ping;
 	}
 	
