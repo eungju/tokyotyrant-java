@@ -24,7 +24,7 @@ public class Fwmkeys extends Command<List<Object>> {
 		}
 		List<Object> result = new ArrayList<Object>(keys.size());
 		for (byte[] kbuf : keys) {
-			result.add(valueTranscoder.decode(kbuf));
+			result.add(keyTranscoder.decode(kbuf));
 		}
 		return result;
 	}
