@@ -1,16 +1,13 @@
 package tokyotyrant.protocol;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import org.jboss.netty.buffer.ChannelBuffer;
 
 import tokyotyrant.transcoder.Transcoder;
 
-public class Fwmkeys extends Command<List<Object>> {
+public class Fwmkeys extends Command<Object[]> {
 	private final byte[] prefix;
 	private final int max;
-	private List<byte[]> keys;
+	private byte[][] keys;
 
 	public Fwmkeys(Transcoder keyTranscoder, Transcoder valueTranscoder, Object prefix, int max) {
 		super((byte) 0x58, keyTranscoder, valueTranscoder);
@@ -18,13 +15,13 @@ public class Fwmkeys extends Command<List<Object>> {
 		this.max = max;
 	}
 	
-	public List<Object> getReturnValue() {
+	public Object[] getReturnValue() {
 		if (!isSuccess()) {
 			return null;
 		}
-		List<Object> result = new ArrayList<Object>(keys.size());
-		for (byte[] kbuf : keys) {
-			result.add(keyTranscoder.decode(kbuf));
+		Object[] result = new Object[keys.length];
+		for (int i = 0; i < keys.length; i++) {
+			result[i] = keyTranscoder.decode(keys[i]);
 		}
 		return result;
 	}
@@ -47,7 +44,7 @@ public class Fwmkeys extends Command<List<Object>> {
 		}
 		int knum = in.readInt();
 
-		keys = new ArrayList<byte[]>(knum);
+		keys = new byte[knum][];
 		for (int i = 0; i < knum; i++) {
 			if (in.readableBytes() < 4) {
 				return false;
@@ -58,7 +55,7 @@ public class Fwmkeys extends Command<List<Object>> {
 			}
 			byte[] kbuf = new byte[ksiz];
 			in.readBytes(kbuf);
-			keys.add(kbuf);
+			keys[i] = kbuf;
 		}
 		return true;
 	}

@@ -5,7 +5,6 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.Socket;
 import java.net.SocketAddress;
-import java.util.List;
 import java.util.Map;
 
 import org.jboss.netty.buffer.ChannelBuffer;
@@ -351,7 +350,7 @@ public class RDB {
 	 * @param max specifies the maximum number of keys to be fetched. If it is not defined or negative, no limit is specified.
 	 * @return The return value is an array of the keys of the corresponding records. This method does never fail and return an empty list even if no record corresponds.
 	 */
-	public List<Object> fwmkeys(Object prefix, int max) throws IOException {
+	public Object[] fwmkeys(Object prefix, int max) throws IOException {
 		return execute(new Fwmkeys(keyTranscoder, valueTranscoder, prefix, max));
 	}
 

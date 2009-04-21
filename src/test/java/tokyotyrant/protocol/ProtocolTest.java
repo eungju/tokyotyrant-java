@@ -306,8 +306,8 @@ public class ProtocolTest {
 		
 		response.writeBytes(key);
 		assertTrue(dut.decode(response));
-		assertEquals(1, dut.getReturnValue().size());
-		assertArrayEquals(key, (byte[]) dut.getReturnValue().get(0));
+		assertEquals(1, dut.getReturnValue().length);
+		assertArrayEquals(key, (byte[]) dut.getReturnValue()[0]);
 		
 		//error
 		response.clear();

@@ -1,7 +1,6 @@
 package tokyotyrant;
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
@@ -198,7 +197,7 @@ public class MRDB {
 		return execute(new Vsiz(keyTranscoder, valueTranscoder, key));
 	}
 
-	public Future<List<Object>> fwmkeys(Object prefix, int max) {
+	public Future<Object[]> fwmkeys(Object prefix, int max) {
 		return execute(new Fwmkeys(keyTranscoder, valueTranscoder, prefix, max));
 	}
 
