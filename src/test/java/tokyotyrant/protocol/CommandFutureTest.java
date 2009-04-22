@@ -7,64 +7,47 @@ import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
-import org.jboss.netty.buffer.ChannelBuffer;
+import org.junit.Before;
 import org.junit.Test;
 
 public class CommandFutureTest {
-	static class DummyCommand extends Command<Object> {
-		public DummyCommand() {
-			super((byte) 0xff, null, null);
-		}
-		
-		public boolean decode(ChannelBuffer in) {
-			return true;
-		}
+	private PingCommand command;
+	private Future<Boolean> dut;
 
-		public void encode(ChannelBuffer out) {
-		}
-		
-		public Object getReturnValue() {
-			return 42;
-		}
-	};
+	@Before public void beforeEach() {
+		command = new PingCommand(42);
+		dut = new CommandFuture<Boolean>(command, Long.MAX_VALUE);
+	}
 	
 	@Test public void whenComplete() throws InterruptedException, ExecutionException {
-		DummyCommand command = new DummyCommand();
-		Future<Object> future = new CommandFuture<Object>(command);
 		assertFalse(command.isReading());
 		command.reading();
 		assertTrue(command.isReading());
-		assertFalse(future.isDone());
+		assertFalse(dut.isDone());
 		command.complete();
-		assertTrue(future.isDone());
-		assertEquals(42, future.get());
+		assertTrue(dut.isDone());
+		assertTrue(dut.get());
 	}
 
 	@Test(expected=ExecutionException.class) public void whenError() throws InterruptedException, ExecutionException {
-		DummyCommand command = new DummyCommand();
-		Future<Object> future = new CommandFuture<Object>(command);
 		Exception exception = new Exception();
 		command.error(exception);
 		assertTrue(command.hasError());
 		assertSame(exception, command.getErrorException());
-		assertTrue(future.isDone());
-		future.get();
+		assertTrue(dut.isDone());
+		dut.get();
 	}
 	
 	@Test(expected=ExecutionException.class)
 	public void whenCancel() throws InterruptedException, ExecutionException {
-		DummyCommand command = new DummyCommand();
-		Future<Object> future = new CommandFuture<Object>(command);
-		future.cancel(true);
+		dut.cancel(true);
 		assertTrue(command.isCancelled());
-		assertTrue(future.isDone());
-		future.get();
+		assertTrue(dut.isDone());
+		dut.get();
 	}
 	
 	@Test(expected=TimeoutException.class)
 	public void getThrowsTimeoutExceptionWhenTimeoutExpired() throws InterruptedException, ExecutionException, TimeoutException {
-		DummyCommand command = new DummyCommand();
-		Future<Object> future = new CommandFuture<Object>(command);
-		future.get(10, TimeUnit.MILLISECONDS);
+		dut.get(10, TimeUnit.MILLISECONDS);
 	}
 }

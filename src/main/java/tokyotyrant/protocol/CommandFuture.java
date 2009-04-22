@@ -12,10 +12,6 @@ public class CommandFuture<T> implements Future<T> {
 	private final CountDownLatch latch;
 	private long globalTimeout;
 
-	public CommandFuture(Command<T> command) {
-		this(command, Long.MAX_VALUE);
-	}
-
 	public CommandFuture(Command<T> command, long globalTimeout) {
 		this.command = command;
 		this.latch = command.getLatch();
