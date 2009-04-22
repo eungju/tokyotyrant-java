@@ -9,8 +9,6 @@ import java.util.Map;
 
 import org.jboss.netty.buffer.ChannelBuffer;
 import org.jboss.netty.buffer.ChannelBuffers;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import tokyotyrant.networking.NodeAddress;
 import tokyotyrant.protocol.Adddouble;
@@ -53,7 +51,6 @@ public class RDB {
 	 */
 	public static final int XOLCKGLB = 1 << 1;
 	
-	private final Logger logger = LoggerFactory.getLogger(getClass());
 	private Transcoder keyTranscoder = new StringTranscoder();
 	private Transcoder valueTranscoder = new StringTranscoder();
 	private Socket socket;
@@ -105,7 +102,6 @@ public class RDB {
 		try {
 			socket.close();
 		} catch (IOException e) {
-			logger.error("Error while closing connection " + socket, e);
 		}
 	}
 	
@@ -163,7 +159,6 @@ public class RDB {
 		command.encode(buffer);
 		//In blocking-mode, a write operation will return only after writing all of the requested bytes.
 		buffer.readBytes(outputStream, buffer.readableBytes());
-		logger.debug("Sent request " + buffer);
 	}
 
 	/**
@@ -176,9 +171,7 @@ public class RDB {
 		while (true) {
 			//try to decode
 			buffer.markReaderIndex();
-			logger.debug("Try to decode {}", buffer);
 			if (command.decode(buffer)) {
-				logger.debug("Received response of {}", command);
 				break;
 			}
 			buffer.resetReaderIndex();
@@ -190,7 +183,6 @@ public class RDB {
 				throw new IOException("Connection closed unexpectedly");
 			}
 			buffer.writeBytes(chunk, 0, n);
-			logger.debug("Received {} bytes", n);
 		}
 	}
 
