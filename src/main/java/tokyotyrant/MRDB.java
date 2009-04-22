@@ -236,7 +236,7 @@ public class MRDB {
 	public Map<NodeAddress, Map<String, String>> stat() {
 		Map<ServerNode, Future<Map<String, String>>> futures = new HashMap<ServerNode, Future<Map<String, String>>>();
 		for (ServerNode each : networking.getNodeLocator().getAll()) {
-			futures.put(each, execute(new Stat()));
+			futures.put(each, execute(each, new Stat()));
 		}
 		Map<NodeAddress, Map<String, String>> result = new HashMap<NodeAddress, Map<String, String>>();
 		for (ServerNode each : networking.getNodeLocator().getAll()) {

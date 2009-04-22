@@ -60,7 +60,7 @@ public class RDB {
 	/**
 	 * Open a remote database connection.
 	 * 
-	 * @param uri specifies the uri of the server.
+	 * @param address specifies the uri of the server.
 	 */
 	public void open(NodeAddress address) throws IOException {
 		int timeout = address.timeout();

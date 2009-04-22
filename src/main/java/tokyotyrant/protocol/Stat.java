@@ -13,6 +13,9 @@ public class Stat extends CommandSupport<Map<String, String>> {
 	}
 	
 	public Map<String, String> getReturnValue() {
+		if (sbuf == null) {
+			return null;
+		}
 		return parseTsv(new String(sbuf));
 	}
 	
