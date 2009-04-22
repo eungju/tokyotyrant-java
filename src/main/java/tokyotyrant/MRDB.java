@@ -55,6 +55,11 @@ public class MRDB {
 		this.networking = networking;
 	}
     
+    /**
+     * Open connections.
+     * 
+     * @param addresses the addresses of the servers to connect.
+     */
     public void open(NodeAddress[] addresses) throws Exception {
 		if (addresses.length == 0) {
 			throw new IllegalArgumentException("Requires at least 1 node");
@@ -63,6 +68,9 @@ public class MRDB {
 		networking.start();
     }
 
+    /**
+     * Close all connections.
+     */
 	public void close() {
 		networking.stop();
 	}
