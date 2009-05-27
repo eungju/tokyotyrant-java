@@ -44,10 +44,13 @@
 
 	<distributionManagement>
 		<repository>
-			<id>nhncorp-2</id>
-			<name>NHN Corp. Internal Repository 2</name>
-			<url>dav:http://repo.nhncorp.com/maven2</url>
+			<id>tokyotyrant-java</id>
+			<url>dav:https://tokyotyrant-java.googlecode.com/svn/maven/repository</url>
 		</repository>
+		<snapshotRepository>
+			<id>tokyotyrant-java-snapshot</id>
+			<url>dav:https://tokyotyrant-java.googlecode.com/svn/maven/snapshot-repository</url>
+		</snapshotRepository>
 	</distributionManagement>
 
   <dependencies>
