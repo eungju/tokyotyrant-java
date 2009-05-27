@@ -42,6 +42,16 @@
 		</repository>
 	</repositories>
 
+	<pluginRepositories>
+		<pluginRepository>
+			<id>undercover-snaphost</id>
+			<url>http://undercover.googlecode.com/svn/maven/snapshot-repository</url>
+			<snapshots>
+				<enabled>true</enabled>
+			</snapshots>
+		</pluginRepository>
+	</pluginRepositories>
+
 	<distributionManagement>
 		<repository>
 			<id>tokyotyrant-java</id>
