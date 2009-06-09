@@ -190,6 +190,10 @@
 					<forceEncoding>${maven.compiler.encoding}</forceEncoding>
 				</configuration>
 			</plugin>
+			<plugin>
+				<groupId>undercover</groupId>
+				<artifactId>undercover-maven-plugin</artifactId>
+			</plugin>
 		</plugins>
 	</reporting>	
 
@@ -290,18 +294,6 @@
 					<groupId>org.sonatype.maven.plugin</groupId>
 					<artifactId>emma-maven-plugin</artifactId>
 					<version>1.0</version>
-					</plugin>
-				</plugins>
-			</reporting>
-		</profile>
-
-		<profile>
-			<id>undercover</id>
-			<reporting>
-				<plugins>
-					<plugin>
-						<groupId>undercover</groupId>
-						<artifactId>undercover-maven-plugin</artifactId>
 					</plugin>
 				</plugins>
 			</reporting>
