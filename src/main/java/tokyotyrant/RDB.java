@@ -435,7 +435,7 @@ public class RDB {
 	/**
 	 * Restore the database file from the update log.
 	 * 
-	 * @param path specifies the path of the update log directory. If it begins with `+', the trailing substring is treated as the path and consistency checking is omitted.
+	 * @param path specifies the path of the update log directory.
 	 * @param ts specifies the beginning time stamp in microseconds.
 	 * @param opts specifies options by bitwise-or: {@link RDB#ROCHKCON} for consistency checking.
 	 * @return If successful, the return value is true, else, it is false.
