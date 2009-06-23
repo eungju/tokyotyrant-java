@@ -88,7 +88,9 @@ public class Incoming {
 			i.remove();
 			count++;
 		}
-		logger.warn("{} commands are cancelled", count);
+		if (count > 0) {
+			logger.warn("{} commands are cancelled", count);
+		}
 		assert readingCommands.isEmpty();
 	}
 }
