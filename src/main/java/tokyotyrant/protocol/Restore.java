@@ -7,7 +7,7 @@ public class Restore extends CommandSupport<Boolean> {
 	private final long timestamp;
 	
 	public Restore(String path, long timestamp) {
-		super((byte) 0x73, REQUEST, RESPONSE, null, null);
+		super((byte) 0x74, REQUEST, RESPONSE, null, null);
 		this.path = path.getBytes();
 		this.timestamp = timestamp;
 	}

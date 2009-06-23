@@ -21,6 +21,7 @@ import tokyotyrant.protocol.Get;
 import tokyotyrant.protocol.Iterinit;
 import tokyotyrant.protocol.Iternext;
 import tokyotyrant.protocol.Mget;
+import tokyotyrant.protocol.Optimize;
 import tokyotyrant.protocol.Out;
 import tokyotyrant.protocol.Put;
 import tokyotyrant.protocol.Putcat;
@@ -394,6 +395,16 @@ public class RDB {
 	 */
 	public boolean sync() throws IOException {
 		return execute(new Sync());
+	}
+
+	/**
+	 * Optimize the storage.
+	 * 
+	 * @param specifies the string of the tuning parameters.  If it is not defined, it is not used.
+	 * @return If successful, the return value is true, else, it is false.
+	 */
+	public boolean optimize(String params) throws IOException {
+		return execute(new Optimize(params));
 	}
 
 	/**

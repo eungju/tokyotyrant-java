@@ -8,17 +8,15 @@ import org.jboss.netty.buffer.ChannelBuffer;
 import org.jboss.netty.buffer.ChannelBuffers;
 import org.junit.Test;
 
-public class RestoreTest extends AbstractCommandTest {
+public class OptimizeTest extends AbstractCommandTest {
 	@Test public void protocol() {
-		String path = "path";
-		long timestamp = System.currentTimeMillis();
-		Restore dut = new Restore(path, timestamp);
+		String parameters = "#bnum=1024";
+		Optimize dut = new Optimize(parameters);
 		
-		ChannelBuffer request = ChannelBuffers.buffer(2 + 4 + 8 + path.getBytes().length);
-		request.writeBytes(new byte[] { (byte) 0xC8, (byte) 0x74 });
-		request.writeInt(path.getBytes().length);
-		request.writeLong(timestamp);
-		request.writeBytes(path.getBytes());
+		ChannelBuffer request = ChannelBuffers.buffer(2 + 4 + parameters.getBytes().length);
+		request.writeBytes(new byte[] { (byte) 0xC8, (byte) 0x71 });
+		request.writeInt(parameters.getBytes().length);
+		request.writeBytes(parameters.getBytes());
 		ChannelBuffer actual = ChannelBuffers.buffer(request.capacity());
 		dut.encode(actual);
 		assertEquals(request, actual);
@@ -38,6 +36,6 @@ public class RestoreTest extends AbstractCommandTest {
 	}
 
 	@Test public void rdb() throws IOException {
-		rdb.restore("path", 123L);
+		rdb.optimize("#bnum=2048");
 	}
 }

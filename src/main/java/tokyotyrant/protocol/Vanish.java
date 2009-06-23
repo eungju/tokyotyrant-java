@@ -5,7 +5,7 @@ public class Vanish extends CommandSupport<Boolean> {
 	private static final PacketFormat RESPONSE = code(true).end();
 	             
 	public Vanish() {
-		super((byte) 0x71, REQUEST, RESPONSE, null, null);
+		super((byte) 0x72, REQUEST, RESPONSE, null, null);
 	}
 	
 	public Boolean getReturnValue() {

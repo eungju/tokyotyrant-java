@@ -14,7 +14,7 @@ public class VanishTest extends AbstractCommandTest {
 		Vanish dut = new Vanish();
 		
 		ChannelBuffer request = ChannelBuffers.buffer(2);
-		request.writeBytes(new byte[] { (byte) 0xC8, (byte) 0x71 });
+		request.writeBytes(new byte[] { (byte) 0xC8, (byte) 0x72 });
 		ChannelBuffer actual = ChannelBuffers.buffer(request.capacity());
 		dut.encode(actual);
 		assertEquals(request, actual);

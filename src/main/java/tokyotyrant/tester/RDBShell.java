@@ -78,6 +78,8 @@ public class RDBShell extends Shell {
 			result = db.ext(args[0], args[2], args[3], Integer.parseInt(args[1]));
 		} else if ("sync".equals(command)) {
 			result = db.sync();
+		} else if ("optimize".equals(command)) {
+			result = db.optimize(args[0]);
 		} else if ("vanish".equals(command)) {
 			result = db.vanish();
 		} else if ("copy".equals(command)) {

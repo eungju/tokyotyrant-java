@@ -14,7 +14,7 @@ public class CopyTest extends AbstractCommandTest {
 		Copy dut = new Copy(path);
 		
 		ChannelBuffer request = ChannelBuffers.buffer(2 + 4 + path.getBytes().length);
-		request.writeBytes(new byte[] { (byte) 0xC8, (byte) 0x72 });
+		request.writeBytes(new byte[] { (byte) 0xC8, (byte) 0x73 });
 		request.writeInt(path.getBytes().length);
 		request.writeBytes(path.getBytes());
 		ChannelBuffer actual = ChannelBuffers.buffer(request.capacity());

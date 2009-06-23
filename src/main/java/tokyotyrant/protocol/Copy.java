@@ -6,7 +6,7 @@ public class Copy extends CommandSupport<Boolean> {
 	private final byte[] path;
 	
 	public Copy(String path) {
-		super((byte) 0x72, REQUEST, RESPONSE, null, null);
+		super((byte) 0x73, REQUEST, RESPONSE, null, null);
 		this.path = path.getBytes();
 	}
 
