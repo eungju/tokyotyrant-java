@@ -52,6 +52,11 @@ public class RDB {
 	 */
 	public static final int XOLCKGLB = 1 << 1;
 	
+	/**
+	 * Restore options: consistency checking 
+	 */
+	public static final int ROCHKCON = 1 << 0;
+	
 	private Transcoder keyTranscoder = new StringTranscoder();
 	private Transcoder valueTranscoder = new StringTranscoder();
 	private Socket socket;
@@ -432,10 +437,11 @@ public class RDB {
 	 * 
 	 * @param path specifies the path of the update log directory. If it begins with `+', the trailing substring is treated as the path and consistency checking is omitted.
 	 * @param ts specifies the beginning time stamp in microseconds.
+	 * @param opts specifies options by bitwise-or: {@link RDB#ROCHKCON} for consistency checking.
 	 * @return If successful, the return value is true, else, it is false.
 	 */
-	public boolean restore(String path, long ts) throws IOException {
-		return execute(new Restore(path, ts));
+	public boolean restore(String path, long ts, int opts) throws IOException {
+		return execute(new Restore(path, ts, opts));
 	}
 	
 	/**
@@ -443,10 +449,12 @@ public class RDB {
 	 * 
 	 * @param host specifies the name or the address of the server. If it is {@code null}, replication of the database is disabled.
 	 * @param port specifies the port number.
+	 * @param ts specifies the beginning timestamp in microseconds.
+	 * @param opts specifies options by bitwise-or: {@link RDB#ROCHKCON} for consistency checking.
 	 * @return If successful, the return value is true, else, it is false.
 	 */
-	public boolean setmst(String host, int port) throws IOException {
-		return execute(new Setmst(host, port));
+	public boolean setmst(String host, int port, long ts, int opts) throws IOException {
+		return execute(new Setmst(host, port, ts, 0));
 	}
 
 	/**

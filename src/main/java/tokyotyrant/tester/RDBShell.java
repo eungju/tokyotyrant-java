@@ -85,9 +85,9 @@ public class RDBShell extends Shell {
 		} else if ("copy".equals(command)) {
 			result = db.copy(args[0]);
 		} else if ("restore".equals(command)) {
-			result = db.restore(args[0], Long.parseLong(args[1]));
+			result = db.restore(args[0], Long.parseLong(args[1]), Integer.parseInt(args[2]));
 		} else if ("setmst".equals(command)) {
-			result = db.setmst(args[0], Integer.parseInt(args[1]));
+			result = db.setmst(args[0], Integer.parseInt(args[1]), Long.parseLong(args[2]), Integer.parseInt(args[3]));
 		} else if ("rnum".equals(command)) {
 			result = db.rnum();
 		} else if ("size".equals(command)) {

@@ -8,16 +8,22 @@ import org.jboss.netty.buffer.ChannelBuffer;
 import org.jboss.netty.buffer.ChannelBuffers;
 import org.junit.Test;
 
+import tokyotyrant.RDB;
+
 public class SetmstTest extends AbstractCommandTest {
 	@Test public void setmst() {
 		String host = "host";
 		int port = 1978;
-		Setmst dut = new Setmst(host, port);
+		long timestamp = System.currentTimeMillis();
+		int opts = RDB.ROCHKCON;
+		Setmst dut = new Setmst(host, port, timestamp, opts);
 		
-		ChannelBuffer request = ChannelBuffers.buffer(2 + 4 + 4 + host.getBytes().length);
+		ChannelBuffer request = ChannelBuffers.buffer(2 + 4 + 4 + 8 + 4 + host.getBytes().length);
 		request.writeBytes(new byte[] { (byte) 0xC8, (byte) 0x78 });
 		request.writeInt(host.getBytes().length);
 		request.writeInt(port);
+		request.writeLong(timestamp);
+		request.writeInt(opts);
 		request.writeBytes(host.getBytes());
 		ChannelBuffer actual = ChannelBuffers.buffer(request.capacity());
 		dut.encode(actual);
@@ -38,6 +44,6 @@ public class SetmstTest extends AbstractCommandTest {
 	}
 
 	@Test public void rdb() throws IOException {
-		rdb.setmst("host", 1978);
+		rdb.setmst("host", 1978, 123L, RDB.ROCHKCON);
 	}
 }

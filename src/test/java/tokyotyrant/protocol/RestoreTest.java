@@ -8,16 +8,20 @@ import org.jboss.netty.buffer.ChannelBuffer;
 import org.jboss.netty.buffer.ChannelBuffers;
 import org.junit.Test;
 
+import tokyotyrant.RDB;
+
 public class RestoreTest extends AbstractCommandTest {
 	@Test public void protocol() {
 		String path = "path";
 		long timestamp = System.currentTimeMillis();
-		Restore dut = new Restore(path, timestamp);
+		int opts = RDB.ROCHKCON;
+		Restore dut = new Restore(path, timestamp, opts);
 		
-		ChannelBuffer request = ChannelBuffers.buffer(2 + 4 + 8 + path.getBytes().length);
+		ChannelBuffer request = ChannelBuffers.buffer(2 + 4 + 8 + 4 + path.getBytes().length);
 		request.writeBytes(new byte[] { (byte) 0xC8, (byte) 0x74 });
 		request.writeInt(path.getBytes().length);
 		request.writeLong(timestamp);
+		request.writeInt(opts);
 		request.writeBytes(path.getBytes());
 		ChannelBuffer actual = ChannelBuffers.buffer(request.capacity());
 		dut.encode(actual);
@@ -38,6 +42,6 @@ public class RestoreTest extends AbstractCommandTest {
 	}
 
 	@Test public void rdb() throws IOException {
-		rdb.restore("path", 123L);
+		rdb.restore("path", 123L, RDB.ROCHKCON);
 	}
 }
