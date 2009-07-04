@@ -162,6 +162,12 @@
 			<plugin>
 				<groupId>undercover</groupId>
 				<artifactId>undercover-maven-plugin</artifactId>
+                                <configuration>
+                                        <formats>
+                                                <format>html</format>
+                                                <format>coberturaxml</format>
+                                        </formats>
+                                </configuration>
 			</plugin>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
