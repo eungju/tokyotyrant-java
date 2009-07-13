@@ -27,6 +27,7 @@ public class ReconnectionMonitor implements Runnable {
 				}
 				reconnections.reconnectDelayed();
 			} catch (Exception e) {
+				//ignore
 			}
 		}
 	}

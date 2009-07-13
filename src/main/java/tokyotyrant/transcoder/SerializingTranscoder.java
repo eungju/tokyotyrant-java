@@ -11,6 +11,8 @@ import java.util.Date;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
 
+import tokyotyrant.helper.IOUtils;
+
 /**
  * [flag:1][body:*]
  * flag: A 8-bit integer standing for the flag. MSB is compression mark. 6-0 bit is the type of the object.
@@ -167,8 +169,8 @@ public class SerializingTranscoder implements Transcoder {
 		} catch (IOException e) {
 			throw new RuntimeException("Unable to compress data", e);
 		} finally {
-			closeQuietly(gzip);
-			closeQuietly(buffer);
+			IOUtils.closeQuietly(gzip);
+			IOUtils.closeQuietly(buffer);
 		}
 		return buffer.toByteArray();
 	}
@@ -183,8 +185,8 @@ public class SerializingTranscoder implements Transcoder {
 		} catch (IOException e) {
 			throw new RuntimeException("Unable to decompress data", e);
 		} finally {
-			closeQuietly(gzip);
-			closeQuietly(buffer);
+			IOUtils.closeQuietly(gzip);
+			IOUtils.closeQuietly(buffer);
 		}
 		return buffer.toByteArray();
 	}
@@ -196,24 +198,4 @@ public class SerializingTranscoder implements Transcoder {
             output.write(buffer, 0, n);
         }
 	}
-
-	private static void closeQuietly(InputStream input) {
-        try {
-            if (input != null) {
-                input.close();
-            }
-        } catch (IOException ioe) {
-            // ignore
-        }
-    }
-
-	private static void closeQuietly(OutputStream output) {
-        try {
-            if (output != null) {
-                output.close();
-            }
-        } catch (IOException ioe) {
-            // ignore
-        }
-    }
 }
