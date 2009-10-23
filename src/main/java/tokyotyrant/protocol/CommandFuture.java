@@ -6,7 +6,6 @@ import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
-
 public class CommandFuture<T> implements Future<T> {
 	private final Command<T> command;
 	private final CountDownLatch latch;
@@ -51,6 +50,6 @@ public class CommandFuture<T> implements Future<T> {
 	}
 
 	public boolean isDone() {
-		return command.isCompleted() || command.hasError() ||command.isCancelled();
+		return command.isCompleted() || command.hasError() || command.isCancelled();
 	}
 }

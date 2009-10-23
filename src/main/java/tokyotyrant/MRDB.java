@@ -89,10 +89,24 @@ public class MRDB {
 	
 	/**
 	 * Set the {@link Transcoder} to be used to transcode values.
-	 * Not required: @{link StringTranscoder} is the default.
+	 * Not required: @{link SerializingTranscoder} is the default.
 	 */
 	public void setValueTranscoder(Transcoder transcoder) {
 		this.valueTranscoder = transcoder;
+	}
+	
+	/**
+	 * Get the {@link Transcoder} to be used to transcode keys.
+	 */
+	public Transcoder getKeyTranscoder() {
+		return keyTranscoder;
+	}
+	
+	/**
+	 * Get the {@link Transcoder} to be used to transcode values.
+	 */
+	public Transcoder getValueTranscoder() {
+		return valueTranscoder;
 	}
 
 	protected <T> CommandFuture<T> execute(Command<T> command) {

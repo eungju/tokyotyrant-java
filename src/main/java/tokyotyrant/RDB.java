@@ -130,14 +130,14 @@ public class RDB {
 	/**
 	 * Get the {@link Transcoder} to be used to transcode keys.
 	 */
-	protected Transcoder getKeyTranscoder() {
+	public Transcoder getKeyTranscoder() {
 		return keyTranscoder;
 	}
 	
 	/**
 	 * Get the {@link Transcoder} to be used to transcode values.
 	 */
-	protected Transcoder getValueTranscoder() {
+	public Transcoder getValueTranscoder() {
 		return valueTranscoder;
 	}
 	

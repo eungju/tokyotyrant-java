@@ -1,5 +1,6 @@
 package tokyotyrant.networking.nio;
 
+import java.nio.channels.Selector;
 import java.nio.channels.SocketChannel;
 
 import org.jmock.Expectations;
@@ -16,26 +17,29 @@ import tokyotyrant.networking.NodeAddress;
 @RunWith(JMock.class)
 public class NioNodeTest {
 	private Mockery mockery = new JUnit4Mockery() {{
-		this.setImposteriser(ClassImposteriser.INSTANCE);
+		setImposteriser(ClassImposteriser.INSTANCE);
 	}};
 	private NioNode dut;
-	private SocketChannel channel;
+	private Selector selector;
+	private SocketChannel mockChannel;
 	private NodeAddress address;
 	
 	@Before public void beforeEach() {
-		channel = mockery.mock(SocketChannel.class);
-		dut = new NioNode(null) {
+		selector = mockery.mock(Selector.class);
+		mockChannel = mockery.mock(SocketChannel.class);
+		dut = new NioNode(selector) {
+			@Override
 			public void fixupInterests() {}
 		};
 		address = new NodeAddress("tcp://localhost:1978");
 		dut.initialize(address);
-		dut.channel = channel;
 	}
 	
 	@Test public void handleConnect() throws Exception {
 		mockery.checking(new Expectations() {{
-			one(channel).finishConnect(); will(returnValue(true));
+			one(mockChannel).finishConnect(); will(returnValue(true));
 		}});
+		dut.channel = mockChannel;
 		dut.handleConnect();
 	}
 	

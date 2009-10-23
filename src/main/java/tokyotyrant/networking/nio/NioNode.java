@@ -19,13 +19,12 @@ public class NioNode implements ServerNode {
 	private NodeAddress address;
 
 	//Status
-	int reconnecting = 0;
+	private int reconnecting = 0;
 
 	//Network
 	Selector selector;
 	SocketChannel channel;
 	SelectionKey selectionKey;
-
 	Incoming incoming;
 	Outgoing outgoing;
 	
@@ -59,10 +58,7 @@ public class NioNode implements ServerNode {
 	public boolean connect() {
 		logger.info("Connect " + address);
 		try {
-			channel = SocketChannel.open();
-			channel.configureBlocking(false);
-			channel.socket().setTcpNoDelay(true);
-			channel.socket().setKeepAlive(true);
+			channel = openChannel();
 			channel.connect(address.socketAddress());
 			outgoing.attach(channel);
 			incoming.attach(channel);
@@ -72,6 +68,14 @@ public class NioNode implements ServerNode {
 			logger.error("Error while opening connection to " + address, e);
 			return false;
 		}
+	}
+
+	SocketChannel openChannel() throws IOException {
+		SocketChannel channel = SocketChannel.open();
+		channel.configureBlocking(false);
+		channel.socket().setTcpNoDelay(true);
+		channel.socket().setKeepAlive(true);
+		return channel;
 	}
 
 	public void disconnect() {
