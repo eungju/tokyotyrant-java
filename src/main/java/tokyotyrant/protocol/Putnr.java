@@ -14,7 +14,7 @@ public class Putnr extends PutCommandSupport {
 	}
 	
 	public Boolean getReturnValue() {
-		return null;
+		return Boolean.TRUE;
 	}
 
 	public boolean decode(ChannelBuffer in) {

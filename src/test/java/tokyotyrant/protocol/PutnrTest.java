@@ -25,7 +25,7 @@ public class PutnrTest extends AbstractCommandTest {
 		
 		ChannelBuffer response = ChannelBuffers.buffer(1);
 		assertTrue(dut.decode(response));
-		assertNull(dut.getReturnValue());
+		assertTrue(dut.getReturnValue());
 	}
 
 	@Test public void rdb() throws IOException {

@@ -32,7 +32,7 @@ public class OutgoingTest {
 		channel = mockery.mock(SocketChannel.class);
 		buffer = ChannelBuffers.dynamicBuffer();
 		incoming = new Incoming(1024);
-		dut = new Outgoing(incoming, 1024, buffer);
+		dut = new Outgoing(incoming, buffer);
 		dut.attach(channel);
 	}
 
@@ -52,14 +52,6 @@ public class OutgoingTest {
 		ChannelBuffer expected = ChannelBuffers.dynamicBuffer();
 		command.encode(expected);
 		assertEquals(expected, buffer);
-	}
-
-	@Test public void fillOutgoingBufferShouldNotExceedHighwatermark() throws Exception {
-		buffer.writeBytes(new byte[1024]);
-		PingCommand command = new PingCommand(1);
-		dut.put(command);
-		dut.fillBuffer();
-		assertEquals(1024, buffer.readableBytes());
 	}
 
 	@Test public void forgetBuffered() throws Exception {

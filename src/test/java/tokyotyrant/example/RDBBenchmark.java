@@ -1,25 +1,38 @@
 package tokyotyrant.example;
 
-import static org.junit.Assert.*;
-
 import java.io.IOException;
 
 import tokyotyrant.RDB;
 import tokyotyrant.networking.NodeAddress;
-import tokyotyrant.transcoder.SerializingTranscoder;
+import tokyotyrant.transcoder.ByteArrayTranscoder;
+import tokyotyrant.transcoder.StringTranscoder;
 
 public class RDBBenchmark {
-	public static void main(String[] args) throws IOException {
-		RDB rdb = new RDB();
-		rdb.open(new NodeAddress(args[0]));
-		rdb.setValueTranscoder(new SerializingTranscoder());
-		byte[] value = new byte[128];
-		rdb.put("key", value);
-		StopWatch watch = new StopWatch().start();
-		for (int i = 0; i < 1000; i++) {
-			assertArrayEquals(value, (byte[]) rdb.get("key"));
+	public static void main(String[] args) throws Exception {
+		final RDB db = new RDB();
+		db.open(new NodeAddress(args[0]));
+		db.setKeyTranscoder(new StringTranscoder());
+		db.setValueTranscoder(new ByteArrayTranscoder());
+		final String key = "key";
+		final byte[] value = new byte[128];
+		value[0] = 1;
+		value[1] = 2;
+		value[2] = 3;
+		db.put(key, value);
+		Runnable task = new Runnable() {
+			public void run() {
+				try {
+					synchronized (db) {
+						db.get(key);
+					}
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+			}
+		};
+		for (int c : new int[] {1, 10, 100}) {
+			System.out.println(c + ":" + (new Benchmark(c, 10000).run(task)) + "ms");
 		}
-		System.out.println(watch.stop().taken() + "ms");
-		rdb.close();
+		db.close();
 	}
 }

@@ -43,9 +43,4 @@ public class NodeAddressTest {
 		assertEquals(NodeAddress.DEFAULT_BUFFER_CAPACITY, new NodeAddress("tcp://localhost:1978").bufferCapacity());
 		assertEquals(1024, new NodeAddress("tcp://localhost:1978?bufferCapacity=1024").bufferCapacity());
 	}
-
-	@Test public void bufferHighwatermarkOption() {
-		assertEquals(NodeAddress.DEFAULT_BUFFER_CAPACITY * 4, new NodeAddress("tcp://localhost:1978").bufferHighwatermark());
-		assertEquals(1024, new NodeAddress("tcp://localhost:1978?bufferHighwatermark=1024").bufferHighwatermark());
-	}
 }

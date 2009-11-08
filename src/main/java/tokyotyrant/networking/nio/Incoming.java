@@ -18,7 +18,7 @@ public class Incoming {
 	private final Logger logger = LoggerFactory.getLogger(getClass());  
 	private final int bufferCapacity;
 	private final ChannelBuffer buffer;
-	private final BlockingQueue<Command<?>> readingCommands;
+	private final BlockingQueue<Command<?>> readQueue;
 	private SocketChannel channel;
 	
 	public Incoming(int bufferCapacity) {
@@ -28,7 +28,7 @@ public class Incoming {
 	public Incoming(int bufferCapacity, ChannelBuffer buffer) {
 		this.bufferCapacity = bufferCapacity;
 		this.buffer = buffer;
-		readingCommands = new LinkedBlockingQueue<Command<?>>();
+		readQueue = new LinkedBlockingQueue<Command<?>>();
 	}
 
 	public void attach(SocketChannel channel) {
@@ -37,11 +37,11 @@ public class Incoming {
 	
 	public void put(Command<?> command) {
 		command.reading();
-		readingCommands.add(command);
+		readQueue.add(command);
 	}
 	
 	public boolean hasReadable() {
-		return !readingCommands.isEmpty();
+		return !readQueue.isEmpty();
 	}
 	
 	public void read() throws Exception {
@@ -60,8 +60,8 @@ public class Incoming {
 	}
 	
 	void consumeBuffer() throws Exception {
-		while (!readingCommands.isEmpty()) {
-			Command<?> command = readingCommands.peek();
+		while (!readQueue.isEmpty()) {
+			Command<?> command = readQueue.peek();
 			try {
 				buffer.markReaderIndex();
 				if (!command.decode(buffer)) {
@@ -69,7 +69,7 @@ public class Incoming {
 					break;
 				}
 				command.complete();
-				Command<?> _removed = readingCommands.remove();
+				Command<?> _removed = readQueue.remove();
 				assert _removed == command;
 			} catch (Exception exception) {
 				command.error(exception);
@@ -82,7 +82,7 @@ public class Incoming {
 	public void cancelAll() {
 		buffer.clear();
 		int count = 0;
-		for (Iterator<Command<?>> i = readingCommands.iterator(); i.hasNext(); ) {
+		for (Iterator<Command<?>> i = readQueue.iterator(); i.hasNext(); ) {
 			Command<?> each = i.next();
 			each.cancel();
 			i.remove();
@@ -91,6 +91,6 @@ public class Incoming {
 		if (count > 0) {
 			logger.warn("{} commands are cancelled", count);
 		}
-		assert readingCommands.isEmpty();
+		assert readQueue.isEmpty();
 	}
 }

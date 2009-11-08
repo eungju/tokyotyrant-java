@@ -1,27 +1,21 @@
 package tokyotyrant.example;
 
-import tokyotyrant.MRDB;
-import tokyotyrant.networking.NodeAddress;
-import tokyotyrant.transcoder.ByteArrayTranscoder;
-import tokyotyrant.transcoder.StringTranscoder;
+import net.spy.memcached.AddrUtil;
+import net.spy.memcached.MemcachedClient;
 
-public class MRDBBenchmark {
+public class MemcachedBenchmark {
 	public static void main(String[] args) throws Exception {
-		final MRDB db = new MRDB();
-		db.open(NodeAddress.addresses(args[0]));
-		db.setGlobalTimeout(Long.MAX_VALUE);
-		db.setKeyTranscoder(new StringTranscoder());
-		db.setValueTranscoder(new ByteArrayTranscoder());
+		final MemcachedClient db = new MemcachedClient(AddrUtil.getAddresses(args[0]));
 		final String key = "key";
 		final byte[] value = new byte[128];
 		value[0] = 1;
 		value[1] = 2;
 		value[2] = 3;
-		db.put(key, value);
+		db.set(key, 0, value);
 		Runnable task = new Runnable() {
 			public void run() {
 				try {
-					db.get(key).get();
+					db.asyncGet(key).get();
 				} catch (Exception e) {
 					e.printStackTrace();
 				}
@@ -30,6 +24,6 @@ public class MRDBBenchmark {
 		for (int c : new int[] {1, 10, 100}) {
 			System.out.println(c + ":" + (new Benchmark(c, 10000).run(task)) + "ms");
 		}
-		db.close();
+		db.shutdown();
 	}
 }

@@ -87,10 +87,6 @@ public class NodeAddress {
 		return parameterAsInt("bufferCapacity", DEFAULT_BUFFER_CAPACITY);
 	}
 
-	public int bufferHighwatermark() {
-		return parameterAsInt("bufferHighwatermark", bufferCapacity() * 4);
-	}
-
 	public static NodeAddress[] addresses(String addresses) {
 		List<NodeAddress> result = new ArrayList<NodeAddress>();
 		for (String each : addresses.split("\\s")) {

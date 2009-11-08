@@ -4,6 +4,8 @@ import java.io.IOException;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
 import java.nio.channels.SocketChannel;
+import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.BlockingQueue;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -25,8 +27,9 @@ public class NioNode implements ServerNode {
 	Selector selector;
 	SocketChannel channel;
 	SelectionKey selectionKey;
-	Incoming incoming;
+	BlockingQueue<Command<?>> inputQueue;
 	Outgoing outgoing;
+	Incoming incoming;
 	
 	public NioNode(Selector selector) {
 		this.selector = selector;
@@ -34,16 +37,17 @@ public class NioNode implements ServerNode {
 	
 	public void initialize(NodeAddress address) {
 		this.address = address;
+		inputQueue = new ArrayBlockingQueue<Command<?>>(16 * 1024);
 		incoming = new Incoming(address.bufferCapacity());
-		outgoing = new Outgoing(incoming, address.bufferCapacity(), address.bufferHighwatermark());
+		outgoing = new Outgoing(incoming, address.bufferCapacity());
 	}
 	
 	public NodeAddress getAddress() {
 		return address;
 	}
-		
+	
 	public void send(Command<?> command) {
-		outgoing.put(command);
+		inputQueue.add(command);
 		selector.wakeup();
 	}
 
@@ -94,6 +98,10 @@ public class NioNode implements ServerNode {
 	public void reconnecting() {
 		logger.info("Reconnecting " + address);
 		reconnecting++;
+	}
+
+	public void fillWriteQueue() {
+		outgoing.putAll(inputQueue);
 	}
 
 	public void fixupInterests() {

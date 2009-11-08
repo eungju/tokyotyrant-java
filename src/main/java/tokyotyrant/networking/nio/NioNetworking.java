@@ -89,12 +89,13 @@ public class NioNetworking extends AbstractNetworking implements Runnable {
 				continue;
 			}
 			NioNode node = (NioNode) each;
+			node.fillWriteQueue();
 			node.fixupInterests();
 		}
 	}
 	
 	void handleChannelIO(SelectionKey key) {
-		NioNode node = (NioNode)key.attachment();
+		NioNode node = (NioNode) key.attachment();
 		try {
 			if (key.isConnectable()) {
 				logger.debug("Ready to connect {}", node);
