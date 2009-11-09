@@ -1,7 +1,7 @@
 package tokyotyrant.example;
 
-import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
 public class Benchmark {
@@ -14,7 +14,7 @@ public class Benchmark {
 	}
 	
 	public long run(Runnable task) {
-		ThreadPoolExecutor executor = new ThreadPoolExecutor(concurrency, concurrency, Long.MAX_VALUE, TimeUnit.MILLISECONDS, new LinkedBlockingQueue<Runnable>());
+		ExecutorService executor = Executors.newFixedThreadPool(concurrency);
 		StopWatch watch = new StopWatch().start();
 		for (int i = 0; i < number; i++) {
 			executor.execute(task);
