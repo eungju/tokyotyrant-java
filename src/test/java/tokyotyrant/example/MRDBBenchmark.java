@@ -1,5 +1,6 @@
 package tokyotyrant.example;
 
+import static org.junit.Assert.*;
 import tokyotyrant.MRDB;
 import tokyotyrant.networking.NodeAddress;
 import tokyotyrant.transcoder.ByteArrayTranscoder;
@@ -9,7 +10,6 @@ public class MRDBBenchmark {
 	public static void main(String[] args) throws Exception {
 		final MRDB db = new MRDB();
 		db.open(NodeAddress.addresses(args[0]));
-		db.setGlobalTimeout(Long.MAX_VALUE);
 		db.setKeyTranscoder(new StringTranscoder());
 		db.setValueTranscoder(new ByteArrayTranscoder());
 		final String key = "key";
@@ -21,7 +21,7 @@ public class MRDBBenchmark {
 		Runnable task = new Runnable() {
 			public void run() {
 				try {
-					db.get(key).get();
+					assertArrayEquals(value, (byte[]) db.get(key).get());
 				} catch (Exception e) {
 					e.printStackTrace();
 				}

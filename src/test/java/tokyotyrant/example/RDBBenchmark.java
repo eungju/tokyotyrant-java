@@ -1,5 +1,7 @@
 package tokyotyrant.example;
 
+import static org.junit.Assert.*;
+
 import java.io.IOException;
 
 import tokyotyrant.RDB;
@@ -23,7 +25,7 @@ public class RDBBenchmark {
 			public void run() {
 				try {
 					synchronized (db) {
-						db.get(key);
+						assertArrayEquals(value, (byte[]) db.get(key));
 					}
 				} catch (IOException e) {
 					e.printStackTrace();
