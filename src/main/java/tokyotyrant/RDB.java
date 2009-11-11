@@ -9,6 +9,8 @@ import java.util.Map;
 
 import org.jboss.netty.buffer.ChannelBuffer;
 import org.jboss.netty.buffer.ChannelBuffers;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import tokyotyrant.networking.NodeAddress;
 import tokyotyrant.protocol.Adddouble;
@@ -43,6 +45,8 @@ import tokyotyrant.transcoder.Transcoder;
  * Official Tokyo Tyrant API(C/Perl/Ruby) like interface.
  */
 public class RDB {
+	private final Logger logger = LoggerFactory.getLogger(getClass());
+	
 	/**
 	 * scripting extension option: record locking
 	 */
@@ -59,18 +63,18 @@ public class RDB {
 	
 	private Transcoder keyTranscoder = new StringTranscoder();
 	private Transcoder valueTranscoder = new StringTranscoder();
-	private Socket socket;
-	InputStream inputStream;
-	OutputStream outputStream;
+
+	private SocketAddress address;
+	private int timeout;
+	Connection connection;
 
 	/**
 	 * Open a remote database connection.
 	 * 
 	 * @param address specifies the uri of the server.
 	 */
-	public void open(NodeAddress address) throws IOException {
-		int timeout = address.timeout();
-		open(address.socketAddress(), timeout);
+	public void open(NodeAddress address) {
+		open(address.socketAddress(), address.timeout());
 	}
 
 	/**
@@ -78,7 +82,7 @@ public class RDB {
 	 * 
 	 * @param address specifies the address of the server.
 	 */
-	public void open(SocketAddress address) throws IOException {
+	public void open(SocketAddress address) {
 		open(address, 0);
 	}
 
@@ -88,27 +92,16 @@ public class RDB {
 	 * @param address specifies the address of the server.
 	 * @param timeout specified the socket timeout.
 	 */
-	public void open(SocketAddress address, int timeout) throws IOException {
-		socket = new Socket();
-		socket.setTcpNoDelay(true);
-		socket.setKeepAlive(true);
-		socket.setSoTimeout(timeout);
-		socket.connect(address, timeout);
-		inputStream = socket.getInputStream();
-		outputStream = socket.getOutputStream();
+	public void open(SocketAddress address, int timeout) {
+		this.address = address;
+		this.timeout = timeout;
 	}
 
 	/**
 	 * Close the database connection.
 	 */
 	public void close() {
-		if (socket == null) {
-			return;
-		}
-		try {
-			socket.close();
-		} catch (IOException e) {
-		}
+		disconnect();
 	}
 	
 	/**
@@ -141,6 +134,29 @@ public class RDB {
 		return valueTranscoder;
 	}
 	
+	void connect() {
+		try {
+			connection = new Connection(address, timeout);
+		} catch (IOException e) {
+			logger.error("Error while opening connection", e);
+		}
+	}
+	
+	void disconnect() {
+		try {
+			connection.close();
+		} catch (IOException e) {
+			logger.warn("Error while closing connection", e);
+		}
+		connection = null;
+	}
+	
+	void ensureConnected() {
+		if (connection == null) {
+			connect();
+		}
+	}
+	
 	/**
 	 * Execute the command.
 	 * Use the default value transcoder.
@@ -150,9 +166,15 @@ public class RDB {
 	 * @return the return value of the command.
 	 */
 	protected <T> T execute(Command<T> command) throws IOException {
-		sendRequest(command);
-		receiveResponse(command);
-		return command.getReturnValue();
+		ensureConnected();
+		try {
+			sendRequest(command);
+			receiveResponse(command);
+			return command.getReturnValue();
+		} catch (IOException e) {
+			disconnect();
+			throw e;
+		}
 	}
 
 	/**
@@ -163,8 +185,10 @@ public class RDB {
 	protected void sendRequest(Command<?> command) throws IOException {
 		ChannelBuffer buffer = ChannelBuffers.dynamicBuffer();
 		command.encode(buffer);
+		byte[] b = new byte[buffer.readableBytes()];
+		buffer.readBytes(b);
 		//In blocking-mode, a write operation will return only after writing all of the requested bytes.
-		buffer.readBytes(outputStream, buffer.readableBytes());
+		connection.write(b);
 	}
 
 	/**
@@ -184,11 +208,39 @@ public class RDB {
 
 			//fill buffer
 			byte[] chunk = new byte[4 * 1024];
-			int n = inputStream.read(chunk);
+			int n = connection.read(chunk);
 			if (n == -1) {
 				throw new IOException("Connection closed unexpectedly");
 			}
 			buffer.writeBytes(chunk, 0, n);
+		}
+	}
+	
+	static class Connection {
+		private final Socket socket;
+		private final InputStream inputStream;
+		private final OutputStream outputStream;
+		
+		public Connection(SocketAddress address, int timeout) throws IOException {
+			socket = new Socket();
+			socket.setTcpNoDelay(true);
+			socket.setKeepAlive(true);
+			socket.setSoTimeout(timeout);
+			socket.connect(address, timeout);
+			inputStream = socket.getInputStream();
+			outputStream = socket.getOutputStream();
+		}
+		
+		void close() throws IOException {
+			socket.close();
+		}
+
+		public void write(byte b[]) throws IOException {
+			outputStream.write(b);
+		}
+
+	    public int read(byte b[]) throws IOException {
+			return inputStream.read(b, 0, b.length);
 		}
 	}
 
