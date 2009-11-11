@@ -165,7 +165,7 @@ public class RDB {
 	 * @param command the command to execute.
 	 * @return the return value of the command.
 	 */
-	protected <T> T execute(Command<T> command) throws IOException {
+	protected <T> T execute(Command<T> command) {
 		ensureConnected();
 		try {
 			sendRequest(command);
@@ -173,7 +173,7 @@ public class RDB {
 			return command.getReturnValue();
 		} catch (IOException e) {
 			disconnect();
-			throw e;
+			throw new RuntimeException("Error while executing the command " + command, e);
 		}
 	}
 
@@ -252,11 +252,11 @@ public class RDB {
 	 * @param value specifies the value.
 	 * @return If successful, the return value is true, else, it is false.
 	 */
-	public boolean put(Object key, Object value) throws IOException {
+	public boolean put(Object key, Object value) {
 		return execute(new Put(keyTranscoder, valueTranscoder, key, value));
 	}
 
-	public boolean put(Object key, Object value, Transcoder valueTranscoder) throws IOException {
+	public boolean put(Object key, Object value, Transcoder valueTranscoder) {
 		return execute(new Put(keyTranscoder, valueTranscoder, key, value));
 	}
 
@@ -268,11 +268,11 @@ public class RDB {
 	 * @param value specifies the value.
 	 * @return If successful, the return value is true, else, it is false.
 	 */
-	public boolean putkeep(Object key, Object value) throws IOException {
+	public boolean putkeep(Object key, Object value) {
 		return execute(new Putkeep(keyTranscoder, valueTranscoder, key, value));
 	}
 
-	public boolean putkeep(Object key, Object value, Transcoder valueTranscoder) throws IOException {
+	public boolean putkeep(Object key, Object value, Transcoder valueTranscoder) {
 		return execute(new Putkeep(keyTranscoder, valueTranscoder, key, value));
 	}
 
@@ -284,11 +284,11 @@ public class RDB {
 	 * @param value specifies the value.
 	 * @return If successful, the return value is true, else, it is false.
 	 */
-	public boolean putcat(Object key, Object value) throws IOException {
+	public boolean putcat(Object key, Object value) {
 		return execute(new Putcat(keyTranscoder, valueTranscoder, key, value));
 	}
 
-	public boolean putcat(Object key, Object value, Transcoder valueTranscoder) throws IOException {
+	public boolean putcat(Object key, Object value, Transcoder valueTranscoder) {
 		return execute(new Putcat(keyTranscoder, valueTranscoder, key, value));
 	}
 
@@ -301,11 +301,11 @@ public class RDB {
 	 * @param width specifies the width of the record.
 	 * @return If successful, the return value is true, else, it is false.
 	 */
-	public boolean putshl(Object key, Object value, int width) throws IOException {
+	public boolean putshl(Object key, Object value, int width) {
 		return execute(new Putshl(keyTranscoder, valueTranscoder, key, value, width));
 	}
 
-	public boolean putshl(Object key, Object value, int width, Transcoder valueTranscoder) throws IOException {
+	public boolean putshl(Object key, Object value, int width, Transcoder valueTranscoder) {
 		return execute(new Putshl(keyTranscoder, valueTranscoder, key, value, width));
 	}
 
@@ -316,11 +316,11 @@ public class RDB {
 	 * @param key specifies the key.
 	 * @param value specifies the value.
 	 */
-	public void putnr(Object key, Object value) throws IOException {
+	public void putnr(Object key, Object value) {
 		execute(new Putnr(keyTranscoder, valueTranscoder, key, value));
 	}
 
-	public void putnr(Object key, Object value, Transcoder valueTranscoder) throws IOException {
+	public void putnr(Object key, Object value, Transcoder valueTranscoder) {
 		execute(new Putnr(keyTranscoder, valueTranscoder, key, value));
 	}
 
@@ -330,7 +330,7 @@ public class RDB {
 	 * @param key specifies the key.
 	 * @return If successful, the return value is true, else, it is false.
 	 */
-	public boolean out(Object key) throws IOException {
+	public boolean out(Object key) {
 		return execute(new Out(keyTranscoder, valueTranscoder, key));
 	}
 	
@@ -340,11 +340,11 @@ public class RDB {
 	 * @param key specifies the key.
 	 * @return If successful, the return value is the value of the corresponding record. {@code null} is returned if no record corresponds.
 	 */
-	public Object get(Object key) throws IOException {
+	public Object get(Object key) {
 		return execute(new Get(keyTranscoder, valueTranscoder, key));
 	}
 
-	public Object get(Object key, Transcoder valueTranscoder) throws IOException {
+	public Object get(Object key, Transcoder valueTranscoder) {
 		return execute(new Get(keyTranscoder, valueTranscoder, key));
 	}
 
@@ -354,11 +354,11 @@ public class RDB {
 	 * @param keys specifies an array containing the retrieval keys.
 	 * @return If successful, the return value is the map contains corresponding values, else, it is {@code null}. As a result of this method, keys existing in the database have the corresponding values and keys not existing in the database are removed.
 	 */
-	public Map<Object, Object> mget(Object[] keys) throws IOException {
+	public Map<Object, Object> mget(Object[] keys) {
 		return execute(new Mget(keyTranscoder, valueTranscoder, keys));
 	}
 	
-	public Map<Object, Object> mget(Object[] keys, Transcoder valueTranscoder) throws IOException {
+	public Map<Object, Object> mget(Object[] keys, Transcoder valueTranscoder) {
 		return execute(new Mget(keyTranscoder, valueTranscoder, keys));
 	}
 
@@ -368,7 +368,7 @@ public class RDB {
 	 * @param key specifies the key.
 	 * @return If successful, the return value is the size of the value of the corresponding record, else, it is -1.
 	 */
-	public int vsiz(Object key) throws IOException {
+	public int vsiz(Object key) {
 		return execute(new Vsiz(keyTranscoder, valueTranscoder, key));
 	}
 
@@ -378,7 +378,7 @@ public class RDB {
 	 *  
 	 * @return If successful, the return value is true, else, it is false.
 	 */
-	public boolean iterinit() throws IOException {
+	public boolean iterinit() {
 		return execute(new Iterinit());
 	}
 	
@@ -388,7 +388,7 @@ public class RDB {
 	 * 
 	 * @return If successful, the return value is the next key, else, it is {@code null}. {@code null} is returned when no record is to be get out of the iterator.
 	 */
-	public Object iternext() throws IOException {
+	public Object iternext() {
 		return execute(new Iternext(keyTranscoder, valueTranscoder));
 	}
 
@@ -400,7 +400,7 @@ public class RDB {
 	 * @param max specifies the maximum number of keys to be fetched. If it is not defined or negative, no limit is specified.
 	 * @return The return value is an array of the keys of the corresponding records. This method does never fail and return an empty list even if no record corresponds.
 	 */
-	public Object[] fwmkeys(Object prefix, int max) throws IOException {
+	public Object[] fwmkeys(Object prefix, int max) {
 		return execute(new Fwmkeys(keyTranscoder, valueTranscoder, prefix, max));
 	}
 
@@ -412,7 +412,7 @@ public class RDB {
 	 * @param num specifies the additional value. If it is not defined, 0 is specified.
 	 * @return If successful, the return value is the summation value, else, it is {@link Integer#MIN_VALUE}.
 	 */
-	public int addint(Object key, int num) throws IOException {
+	public int addint(Object key, int num) {
 		return execute(new Addint(keyTranscoder, valueTranscoder, key, num));
 	}
 
@@ -424,7 +424,7 @@ public class RDB {
 	 * @param num specifies the additional value. If it is not defined, 0 is specified.
 	 * @return If successful, the return value is the summation value, else, it is {@link Double#NaN}.
 	 */
-	public double adddouble(Object key, double num) throws IOException {
+	public double adddouble(Object key, double num) {
 		return execute(new Adddouble(keyTranscoder, valueTranscoder, key, num));
 	}
 
@@ -437,11 +437,11 @@ public class RDB {
 	 * @param opts specifies options by bitwise or: {@link RDB#XOLCKREC} for record locking, {@link RDB#XOLCKGLB} for global locking. If it is {@code 0}, no option is specified.
 	 * @return If successful, the return value is the value of the response or {@code null} on failure.
 	 */
-	public Object ext(String name, Object key, Object value, int opts) throws IOException {
+	public Object ext(String name, Object key, Object value, int opts) {
 		return execute(new Ext(keyTranscoder, valueTranscoder, name, key, value, opts));
 	}
 
-	public Object ext(String name, Object key, Object value, int opts, Transcoder valueTranscoder) throws IOException {
+	public Object ext(String name, Object key, Object value, int opts, Transcoder valueTranscoder) {
 		return execute(new Ext(keyTranscoder, valueTranscoder, name, key, value, opts));
 	}
 
@@ -450,7 +450,7 @@ public class RDB {
 	 * 
 	 * @return If successful, the return value is true, else, it is false.
 	 */
-	public boolean sync() throws IOException {
+	public boolean sync() {
 		return execute(new Sync());
 	}
 
@@ -460,7 +460,7 @@ public class RDB {
 	 * @param specifies the string of the tuning parameters.  If it is not defined, it is not used.
 	 * @return If successful, the return value is true, else, it is false.
 	 */
-	public boolean optimize(String params) throws IOException {
+	public boolean optimize(String params) {
 		return execute(new Optimize(params));
 	}
 
@@ -469,7 +469,7 @@ public class RDB {
 	 * 
 	 * @return If successful, the return value is true, else, it is false.
 	 */
-	public boolean vanish() throws IOException {
+	public boolean vanish() {
 		return execute(new Vanish());
 	}
 
@@ -480,7 +480,7 @@ public class RDB {
 	 * @param path specifies the path of the destination file. If it begins with {@code @}, the trailing substring is executed as a command line.
 	 * @return If successful, the return value is true, else, it is false. False is returned if the executed command returns non-zero code.
 	 */
-	public boolean copy(String path) throws IOException {
+	public boolean copy(String path) {
 		return execute(new Copy(path));
 	}
 
@@ -492,7 +492,7 @@ public class RDB {
 	 * @param opts specifies options by bitwise-or: {@link RDB#ROCHKCON} for consistency checking.
 	 * @return If successful, the return value is true, else, it is false.
 	 */
-	public boolean restore(String path, long ts, int opts) throws IOException {
+	public boolean restore(String path, long ts, int opts) {
 		return execute(new Restore(path, ts, opts));
 	}
 	
@@ -505,7 +505,7 @@ public class RDB {
 	 * @param opts specifies options by bitwise-or: {@link RDB#ROCHKCON} for consistency checking.
 	 * @return If successful, the return value is true, else, it is false.
 	 */
-	public boolean setmst(String host, int port, long ts, int opts) throws IOException {
+	public boolean setmst(String host, int port, long ts, int opts) {
 		return execute(new Setmst(host, port, ts, 0));
 	}
 
@@ -514,7 +514,7 @@ public class RDB {
 	 * 
 	 * @return The return value is the number of records or 0 if the object does not connect to any database server.
 	 */
-	public long rnum() throws IOException {
+	public long rnum() {
 		return execute(new Rnum());
 	}
 
@@ -523,7 +523,7 @@ public class RDB {
 	 *
 	 * @return The return value is the size of the database or 0 if the object does not connect to any database server.
 	 */
-	public long size() throws IOException {
+	public long size() {
 		return execute(new Size());
 	}
 
@@ -532,7 +532,7 @@ public class RDB {
 	 *  
 	 * @return The return value is the status items of the database.
 	 */
-	public Map<String, String> stat() throws IOException {
+	public Map<String, String> stat() {
 		return execute(new Stat());
 	}
 }

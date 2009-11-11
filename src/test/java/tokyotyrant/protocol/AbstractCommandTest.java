@@ -30,7 +30,8 @@ public abstract class AbstractCommandTest {
 
 	@Before public void beforeEach() throws Exception {
 		rdb = new RDB() {
-			protected <T> T execute(Command<T> command) throws IOException {
+			@Override
+			protected <T> T execute(Command<T> command) {
 				return command.getReturnValue();
 			}
 		};

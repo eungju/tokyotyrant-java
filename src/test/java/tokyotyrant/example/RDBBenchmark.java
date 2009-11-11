@@ -1,9 +1,6 @@
 package tokyotyrant.example;
 
 import static org.junit.Assert.*;
-
-import java.io.IOException;
-
 import tokyotyrant.RDB;
 import tokyotyrant.networking.NodeAddress;
 import tokyotyrant.transcoder.ByteArrayTranscoder;
@@ -23,12 +20,8 @@ public class RDBBenchmark {
 		db.put(key, value);
 		Runnable task = new Runnable() {
 			public void run() {
-				try {
-					synchronized (db) {
-						assertArrayEquals(value, (byte[]) db.get(key));
-					}
-				} catch (IOException e) {
-					e.printStackTrace();
+				synchronized (db) {
+					assertArrayEquals(value, (byte[]) db.get(key));
 				}
 			}
 		};
