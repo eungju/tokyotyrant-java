@@ -457,7 +457,7 @@ public class RDB {
 	/**
 	 * Optimize the storage.
 	 * 
-	 * @param specifies the string of the tuning parameters.  If it is not defined, it is not used.
+	 * @param params specifies the string of the tuning parameters. If it is not defined, it is not used.
 	 * @return If successful, the return value is true, else, it is false.
 	 */
 	public boolean optimize(String params) {
