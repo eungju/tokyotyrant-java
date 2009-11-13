@@ -9,14 +9,20 @@ import net.spy.memcached.transcoders.Transcoder;
 public class MemcachedBenchmark {
 	public static void main(String[] args) throws Exception {
 		final MemcachedClient db = new MemcachedClient(AddrUtil.getAddresses(args[0]));
-		db.setTranscoder(new Transcoder<Object>() {
+		final Transcoder<Object> transcoder = new Transcoder<Object>() {
 			public CachedData encode(Object data) {
-				return new CachedData(0, (byte[]) data);
+				return new CachedData(0, (byte[]) data, getMaxSize());
 			}
 			public Object decode(CachedData cachedData) {
 				return cachedData.getData();
 			}
-		});
+			public boolean asyncDecode(CachedData arg0) {
+				return false;
+			}
+			public int getMaxSize() {
+				return CachedData.MAX_SIZE;
+			}
+		};
 		final String key = "key";
 		final byte[] value = new byte[128];
 		value[0] = 1;
@@ -26,13 +32,13 @@ public class MemcachedBenchmark {
 		Runnable task = new Runnable() {
 			public void run() {
 				try {
-					assertArrayEquals(value, (byte[]) db.asyncGet(key).get());
+					assertArrayEquals(value, (byte[]) db.asyncGet(key, transcoder).get());
 				} catch (Exception e) {
 					e.printStackTrace();
 				}
 			}
 		};
-		for (int c : new int[] {1, 10, 100}) {
+		for (int c : new int[] {1, 10, 100, 200, 300}) {
 			System.out.println(c + ":" + (new Benchmark(c, 10000).run(task)) + "ms");
 		}
 		db.shutdown();

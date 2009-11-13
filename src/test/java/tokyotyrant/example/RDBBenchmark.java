@@ -25,7 +25,7 @@ public class RDBBenchmark {
 				}
 			}
 		};
-		for (int c : new int[] {1, 10, 100}) {
+		for (int c : new int[] {1, 10, 100, 200, 300}) {
 			System.out.println(c + ":" + (new Benchmark(c, 10000).run(task)) + "ms");
 		}
 		db.close();
