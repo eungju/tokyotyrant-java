@@ -4,7 +4,7 @@
 	<groupId>tokyotyrant</groupId>
 	<artifactId>tokyotyrant</artifactId>
 	<packaging>jar</packaging>
-	<version>0.9.2-SNAPSHOT</version>
+	<version>0.10</version>
 
 	<name>Tokyo Tyrant Java Client</name>
 	<description>This module implements the pure Java client which connects to the server of Tokyo Tyrant and speaks its original binary protocol.</description>
