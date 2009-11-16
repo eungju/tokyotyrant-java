@@ -15,14 +15,15 @@ public abstract class Command<T> {
 	
 	protected final byte[] magic;
 	
-	protected byte code = EUNKNOWN;
+	protected byte code;
 
-	private CountDownLatch latch = new CountDownLatch(1);
-	private CommandState state = CommandState.WRITING;
-	private Exception errorException = null; 
+	private CountDownLatch latch;
+	private CommandState state;
+	private Exception errorException; 
 	
 	public Command(byte commandId, Transcoder keyTranscoder, Transcoder valueTranscoder) {
 		magic = new byte[] {(byte) 0xC8, commandId};
+		code = EUNKNOWN;
 		this.keyTranscoder = keyTranscoder;
 		this.valueTranscoder = valueTranscoder;
 	}
@@ -35,8 +36,17 @@ public abstract class Command<T> {
 		return code == ESUCCESS;
 	}
 	
-	public CountDownLatch getLatch() {
-		return latch;
+	public abstract T getReturnValue();
+
+	public abstract void encode(ChannelBuffer out);
+
+	public abstract boolean decode(ChannelBuffer in);
+
+	public CommandFuture<T> writing(long timeout) {
+		latch = new CountDownLatch(1);
+		state = CommandState.WRITING;
+		errorException = null; 
+		return new CommandFuture<T>(this, latch, timeout);
 	}
 	
 	public boolean isWriting() {
@@ -93,10 +103,4 @@ public abstract class Command<T> {
 	public Exception getErrorException() {
 		return errorException;
 	}
-	
-	public abstract T getReturnValue();
-
-	public abstract void encode(ChannelBuffer out);
-
-	public abstract boolean decode(ChannelBuffer in);
 }

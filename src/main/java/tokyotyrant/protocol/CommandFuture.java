@@ -11,9 +11,9 @@ public class CommandFuture<T> implements Future<T> {
 	private final CountDownLatch latch;
 	private long globalTimeout;
 
-	public CommandFuture(Command<T> command, long globalTimeout) {
+	public CommandFuture(Command<T> command, CountDownLatch latch, long globalTimeout) {
 		this.command = command;
-		this.latch = command.getLatch();
+		this.latch = latch;
 		this.globalTimeout = globalTimeout;
 	}
 
@@ -21,7 +21,7 @@ public class CommandFuture<T> implements Future<T> {
 		try {
 			return get(globalTimeout , TimeUnit.MILLISECONDS);
 		} catch (TimeoutException e) {
-			throw new RuntimeException("Timed out waiting for operation", e);
+			throw new RuntimeException("Timed out waiting for operation " + command.toString(), e);
 		}
 	}
 

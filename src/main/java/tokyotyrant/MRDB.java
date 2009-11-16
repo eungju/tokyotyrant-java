@@ -110,13 +110,13 @@ public class MRDB {
 	}
 
 	protected <T> CommandFuture<T> execute(Command<T> command) {
-		CommandFuture<T> future = new CommandFuture<T>(command, globalTimeout);
+		CommandFuture<T> future = command.writing(globalTimeout);
 		networking.send(command);
 		return future;
 	}
 
 	protected <T> CommandFuture<T> execute(ServerNode node, Command<T> command) {
-		CommandFuture<T> future = new CommandFuture<T>(command, globalTimeout);
+		CommandFuture<T> future = command.writing(globalTimeout);
 		networking.send(node, command);
 		return future;
 	}

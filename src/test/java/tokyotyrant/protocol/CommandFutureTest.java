@@ -16,7 +16,7 @@ public class CommandFutureTest {
 
 	@Before public void beforeEach() {
 		command = new PingCommand(42);
-		dut = new CommandFuture<Boolean>(command, Long.MAX_VALUE);
+		dut = command.writing(Long.MAX_VALUE);
 	}
 	
 	@Test public void whenComplete() throws InterruptedException, ExecutionException {
