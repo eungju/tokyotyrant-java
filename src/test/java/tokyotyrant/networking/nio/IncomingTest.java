@@ -44,6 +44,7 @@ public class IncomingTest {
 
 	@Test public void consumeBuffer() throws Exception {
 		PingCommand command = new PingCommand(1);
+		command.writing(0);
 		dut.put(command);
 		buffer.writeByte(Command.EUNKNOWN);
 		dut.consumeBuffer();
@@ -52,6 +53,7 @@ public class IncomingTest {
 
 	@Test public void consumeBufferIncompleted() throws Exception {
 		PingCommand command = new PingCommand(1);
+		command.writing(0);
 		dut.put(command);
 		int mark = buffer.readerIndex();
 		dut.consumeBuffer();
@@ -61,6 +63,7 @@ public class IncomingTest {
 
 	@Test public void cancelAll() throws Exception {
 		PingCommand command = new PingCommand(1);
+		command.writing(0);
 		dut.put(command);
 		dut.cancelAll();
 		assertFalse(dut.hasReadable());
