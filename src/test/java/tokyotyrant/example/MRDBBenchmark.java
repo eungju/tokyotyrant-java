@@ -3,12 +3,15 @@ package tokyotyrant.example;
 import static org.junit.Assert.*;
 import tokyotyrant.MRDB;
 import tokyotyrant.networking.NodeAddress;
+import tokyotyrant.networking.NodeSelector;
+import tokyotyrant.networking.RoundRobinNodeLocator;
+import tokyotyrant.networking.netty.NettyNetworking;
 import tokyotyrant.transcoder.ByteArrayTranscoder;
 import tokyotyrant.transcoder.StringTranscoder;
 
 public class MRDBBenchmark {
 	public static void main(String[] args) throws Exception {
-		final MRDB db = new MRDB();
+		final MRDB db = new MRDB(new NettyNetworking(new RoundRobinNodeLocator(), new NodeSelector()));
 		db.open(NodeAddress.addresses(args[0]));
 		db.setKeyTranscoder(new StringTranscoder());
 		db.setValueTranscoder(new ByteArrayTranscoder());

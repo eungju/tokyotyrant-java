@@ -12,9 +12,10 @@ import org.jboss.netty.channel.Channel;
 import org.jboss.netty.channel.ChannelHandlerContext;
 import org.jboss.netty.channel.ChannelPipelineCoverage;
 import org.jboss.netty.channel.ChannelStateEvent;
+import org.jboss.netty.channel.Channels;
 import org.jboss.netty.channel.ExceptionEvent;
 import org.jboss.netty.channel.MessageEvent;
-import org.jboss.netty.handler.codec.frame.FrameDecoder;
+import org.jboss.netty.channel.SimpleChannelHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -23,7 +24,7 @@ import tokyotyrant.networking.ServerNode;
 import tokyotyrant.protocol.Command;
 
 @ChannelPipelineCoverage("one")
-public class NettyNode extends FrameDecoder implements ServerNode {
+public class NettyNode extends SimpleChannelHandler implements ServerNode {
 	private final Logger logger = LoggerFactory.getLogger(getClass());
 	private NodeAddress address;
 
@@ -31,7 +32,8 @@ public class NettyNode extends FrameDecoder implements ServerNode {
 	private ClientBootstrap bootstrap;
 	private Channel channel;
 	private int reconnecting;
-	private BlockingQueue<Command<?>> readingCommands = new LinkedBlockingQueue<Command<?>>();
+	private ChannelBuffer buffer = ChannelBuffers.dynamicBuffer(8 * 1024);
+	private BlockingQueue<Command<?>> readQueue = new LinkedBlockingQueue<Command<?>>();
 
 	public NettyNode(NettyNetworking networking) {
 		this.networking = networking;
@@ -53,7 +55,7 @@ public class NettyNode extends FrameDecoder implements ServerNode {
 
 	public void disconnect() {
 		channel.close();
-		readingCommands.clear();
+		readQueue.clear();
 	}
 
 	public int getReconnectAttempt() {
@@ -73,15 +75,18 @@ public class NettyNode extends FrameDecoder implements ServerNode {
 		channel.write(command);
 	}
 
+	@Override
     public void channelConnected(ChannelHandlerContext ctx, ChannelStateEvent e) {
     	reconnecting = 0;
     }
     
+	@Override
 	public void exceptionCaught(ChannelHandlerContext ctx, ExceptionEvent e) {
 		logger.warn("Unexpected exception from downstream.", e.getCause());
 		networking.getReconnectionMonitor().reconnect(this);
 	}
 
+	@Override
 	public void writeRequested(ChannelHandlerContext ctx, MessageEvent e) throws Exception {
 		Command<?> command = (Command<?>) e.getMessage();
 
@@ -91,7 +96,7 @@ public class NettyNode extends FrameDecoder implements ServerNode {
 			write(ctx, e.getFuture(), buffer, e.getRemoteAddress());
 			command.reading();
 			if (command.responseRequired()) {
-				readingCommands.add(command);
+				readQueue.add(command);
 			} else {
 				command.complete();
 			}
@@ -100,26 +105,26 @@ public class NettyNode extends FrameDecoder implements ServerNode {
 			throw new Exception("Error while sending " + command, exception);
 		}
 	}
-
-	protected Object decode(ChannelHandlerContext ctx, Channel channel, ChannelBuffer buffer) throws Exception {
-		Command<?> command = readingCommands.peek();
-		if (command == null) {
-			return null;
-		} 
-
-		try {
-			buffer.markReaderIndex();
-			if (!command.decode(buffer)) {
-				buffer.resetReaderIndex();
-				return null;
+	
+    public void messageReceived(ChannelHandlerContext ctx, MessageEvent e) throws Exception {
+    	buffer.writeBytes((ChannelBuffer) e.getMessage()); 
+		while (!readQueue.isEmpty()) {
+			Command<?> command = readQueue.peek();
+			try {
+				buffer.markReaderIndex();
+				if (!command.decode(buffer)) {
+					buffer.resetReaderIndex();
+					break;
+				}
+				command.complete();
+				Command<?> _removed = readQueue.remove();
+				assert _removed == command;
+		    	Channels.fireMessageReceived(ctx, command, e.getRemoteAddress());
+			} catch (Exception exception) {
+				command.error(exception);
+				throw new Exception("Error while receiving " + command, exception);
 			}
-			command.complete();
-			Command<?> _removed = readingCommands.remove();
-			assert _removed == command;
-			return command;
-		} catch (Exception exception) {
-			command.error(exception);
-			throw new Exception("Error while receiving " + command, exception);
 		}
-	}
+		buffer.discardReadBytes();
+    }
 }
