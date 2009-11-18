@@ -3,7 +3,9 @@ package tokyotyrant.tester;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import tokyotyrant.RDB;
 
@@ -94,6 +96,14 @@ public class RDBShell extends Shell {
 			result = db.size();
 		} else if ("stat".equals(command)) {
 			result = db.stat();
+		} else if ("tablePut".equals(command)) {
+			Map<String, String> cols = new HashMap<String, String>();
+			for (int i = 1; i < args.length; i += 2) {
+				cols.put(args[i], args[i + 1]);
+			}
+			result = db.tablePut(args[0], cols);
+		} else if ("tableGet".equals(command)) {
+			result = db.tableGet(args[0]);
 		}
 		return result;
 	}

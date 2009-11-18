@@ -5,6 +5,10 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.Socket;
 import java.net.SocketAddress;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 
 import org.jboss.netty.buffer.ChannelBuffer;
@@ -21,6 +25,7 @@ import tokyotyrant.protocol.Get;
 import tokyotyrant.protocol.Iterinit;
 import tokyotyrant.protocol.Iternext;
 import tokyotyrant.protocol.Mget;
+import tokyotyrant.protocol.Misc;
 import tokyotyrant.protocol.Optimize;
 import tokyotyrant.protocol.Out;
 import tokyotyrant.protocol.Put;
@@ -56,6 +61,11 @@ public class RDB {
 	 * Restore options: consistency checking 
 	 */
 	public static final int ROCHKCON = 1 << 0;
+	
+	/**
+	 * Versatile function option: omission of the update log
+	 */
+	public static final int MONOULOG = 1 << 0;
 	
 	private Transcoder keyTranscoder = new StringTranscoder();
 	private Transcoder valueTranscoder = new StringTranscoder();
@@ -424,6 +434,38 @@ public class RDB {
 		return execute(new Stat());
 	}
 	
+	List<byte[]> misc(String name, List<byte[]> args, int opts) {
+		return execute(new Misc(name, args, opts));
+	}
+	
+	public boolean tablePut(Object pkey, Map<String, String> cols) {
+		List<byte[]> args = new ArrayList<byte[]>();
+		args.add(keyTranscoder.encode(pkey));
+		for (Map.Entry<String, String> each : cols.entrySet()) {
+			args.add(StringTranscoder.INSTANCE.encode(each.getKey()));
+			args.add(StringTranscoder.INSTANCE.encode(each.getValue()));
+		}
+		List<byte[]> elements = misc("put", args, 0);
+		return elements != null;
+	}
+	
+	public Map<String, String> tableGet(Object pkey) {
+		List<byte[]> args = new ArrayList<byte[]>();
+		args.add(keyTranscoder.encode(pkey));
+		List<byte[]> elements = misc("get", args, MONOULOG);
+		if (elements == null) {
+			return null;
+		}
+		Map<String, String> result = new HashMap<String, String>();
+		Iterator<byte[]> i = elements.iterator();
+		while (i.hasNext()) {
+			String ckey = (String) StringTranscoder.INSTANCE.decode(i.next());
+			String cvalue = (String) StringTranscoder.INSTANCE.decode(i.next());
+			result.put(ckey, cvalue);
+		}
+		return result;
+	}
+
 	/**
 	 * Execute the command.
 	 * Use the default value transcoder.

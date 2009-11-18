@@ -7,6 +7,7 @@ import java.util.Arrays;
  * Always treat values as character string.
  */
 public class StringTranscoder implements Transcoder {
+	public static final StringTranscoder INSTANCE = new StringTranscoder();
 	private final String characterEncoding;
 	
 	public StringTranscoder() {
