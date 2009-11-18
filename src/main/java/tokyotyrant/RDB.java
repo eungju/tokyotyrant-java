@@ -467,7 +467,7 @@ public class RDB {
 	 * @param cols specifies a hash containing columns.
 	 * @return If successful, the return value is {@code true}, else, it is {@code false}.
 	 */
-	public boolean tablePut(Object pkey, Map<String, String> cols) {
+	public boolean tablePut(String pkey, Map<String, String> cols) {
 		List<byte[]> args = new ArrayList<byte[]>();
 		args.add(keyTranscoder.encode(pkey));
 		for (Map.Entry<String, String> each : cols.entrySet()) {
@@ -479,11 +479,23 @@ public class RDB {
 	}
 
 	/**
+	 * Remove a record.
+	 * @param pkey specifies the primary key.
+	 * @return If successful, the return value is {@code true}, else, it is {@code false}.
+	 */
+	public boolean tableOut(String pkey) {
+		List<byte[]> args = new ArrayList<byte[]>();
+		args.add(keyTranscoder.encode(pkey));
+		List<byte[]> rv = misc("out", args, 0);
+		return rv != null;
+	}
+
+	/**
 	 * Retrieve a record.
 	 * @param pkey specifies the primary key.
 	 * @return If successful, the return value is a hash of the columns of the corresponding record. {@code null} is returned if no record corresponds.
 	 */
-	public Map<String, String> tableGet(Object pkey) {
+	public Map<String, String> tableGet(String pkey) {
 		List<byte[]> args = new ArrayList<byte[]>();
 		args.add(keyTranscoder.encode(pkey));
 		List<byte[]> rv = misc("get", args, MONOULOG);
@@ -499,7 +511,7 @@ public class RDB {
 		}
 		return result;
 	}
-
+	
     /**
      * Generate a unique ID number.
      * @return The return value is the new unique ID number or -1 on failure.
