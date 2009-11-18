@@ -6,6 +6,7 @@ import java.io.OutputStream;
 import java.net.Socket;
 import java.net.SocketAddress;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -433,11 +434,39 @@ public class RDB {
 	public Map<String, String> stat() {
 		return execute(new Stat());
 	}
-	
-	List<byte[]> misc(String name, List<byte[]> args, int opts) {
+
+	/**
+	 * Call a versatile function for miscellaneous operations.
+	 * 
+	 * @param name
+	 *            specifies the name of the function. All databases support
+	 *            "putlist", "outlist", and "getlist". "putlist" is to store
+	 *            records. It receives keys and values one after the other, and
+	 *            returns an empty list. "outlist" is to remove records. It
+	 *            receives keys, and returns an empty array. "getlist" is to
+	 *            retrieve records. It receives keys, and returns keys and
+	 *            values of corresponding records one after the other. Table
+	 *            database supports "setindex", "search", and "genuid".
+	 * @param args
+	 *            specifies an array containing arguments. If it is not defined,
+	 *            no argument is specified.
+	 * @param opts
+	 *            specifies options by bitwise-or: {@link MONOULOG} for omission
+	 *            of the update log. If it is not defined, no option is
+	 *            specified.
+	 * @return If successful, the return value is an array of the result.
+	 *         {@code null} is returned on failure.
+	 */
+	public List<byte[]> misc(String name, List<byte[]> args, int opts) {
 		return execute(new Misc(name, args, opts));
 	}
-	
+
+	/**
+	 * Store a record. If a record with the same key exists in the database, it is overwritten.
+	 * @param pkey specifies the primary key.
+	 * @param cols specifies a hash containing columns.
+	 * @return If successful, the return value is {@code true}, else, it is {@code false}.
+	 */
 	public boolean tablePut(Object pkey, Map<String, String> cols) {
 		List<byte[]> args = new ArrayList<byte[]>();
 		args.add(keyTranscoder.encode(pkey));
@@ -445,19 +474,24 @@ public class RDB {
 			args.add(StringTranscoder.INSTANCE.encode(each.getKey()));
 			args.add(StringTranscoder.INSTANCE.encode(each.getValue()));
 		}
-		List<byte[]> elements = misc("put", args, 0);
-		return elements != null;
+		List<byte[]> rv = misc("put", args, 0);
+		return rv != null;
 	}
-	
+
+	/**
+	 * Retrieve a record.
+	 * @param pkey specifies the primary key.
+	 * @return If successful, the return value is a hash of the columns of the corresponding record. {@code null} is returned if no record corresponds.
+	 */
 	public Map<String, String> tableGet(Object pkey) {
 		List<byte[]> args = new ArrayList<byte[]>();
 		args.add(keyTranscoder.encode(pkey));
-		List<byte[]> elements = misc("get", args, MONOULOG);
-		if (elements == null) {
+		List<byte[]> rv = misc("get", args, MONOULOG);
+		if (rv == null) {
 			return null;
 		}
 		Map<String, String> result = new HashMap<String, String>();
-		Iterator<byte[]> i = elements.iterator();
+		Iterator<byte[]> i = rv.iterator();
 		while (i.hasNext()) {
 			String ckey = (String) StringTranscoder.INSTANCE.decode(i.next());
 			String cvalue = (String) StringTranscoder.INSTANCE.decode(i.next());
@@ -466,7 +500,19 @@ public class RDB {
 		return result;
 	}
 
-	/**
+    /**
+     * Generate a unique ID number.
+     * @return The return value is the new unique ID number or -1 on failure.
+     */
+    public long tableGenuid() {
+      List<byte[]> rv = misc("genuid", Collections.<byte[]>emptyList(), 0);
+      if (rv == null) {
+    	  return -1;
+      }
+      return Long.parseLong((String) StringTranscoder.INSTANCE.decode(rv.get(0)));
+    }
+
+    /**
 	 * Execute the command.
 	 * Use the default value transcoder.
 	 * 

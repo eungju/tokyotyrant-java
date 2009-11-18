@@ -104,6 +104,8 @@ public class RDBShell extends Shell {
 			result = db.tablePut(args[0], cols);
 		} else if ("tableGet".equals(command)) {
 			result = db.tableGet(args[0]);
+		} else if ("tableGenuid".equals(command)) {
+			result = db.tableGenuid();
 		}
 		return result;
 	}
