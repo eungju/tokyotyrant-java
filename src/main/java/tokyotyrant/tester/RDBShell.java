@@ -8,9 +8,11 @@ import java.util.List;
 import java.util.Map;
 
 import tokyotyrant.RDB;
+import tokyotyrant.RDBTable;
 
 public class RDBShell extends Shell {
 	private RDB db;
+	private RDBTable table;
 	private String host;
 	private int port;
 
@@ -24,6 +26,7 @@ public class RDBShell extends Shell {
 	protected void openConnection() throws IOException {
 		db = new RDB();
 		db.open(new InetSocketAddress(host, port));
+		table = new RDBTable(db);
 	}
 	
 	protected void closeConnection() {
@@ -101,13 +104,17 @@ public class RDBShell extends Shell {
 			for (int i = 1; i < args.length; i += 2) {
 				cols.put(args[i], args[i + 1]);
 			}
-			result = db.tablePut(args[0], cols);
+			result = table.put(args[0], cols);
 		} else if ("tableOut".equals(command)) {
-			result = db.tableOut(args[0]);
+			result = table.out(args[0]);
 		} else if ("tableGet".equals(command)) {
-			result = db.tableGet(args[0]);
+			result = table.get(args[0]);
+		} else if ("tableSetindex".equals(command)) {
+			result = table.setindex(args[0], Integer.parseInt(args[1]));
 		} else if ("tableGenuid".equals(command)) {
-			result = db.tableGenuid();
+			result = table.genuid();
+		} else if ("tableSearch".equals(command)) {
+			result = table.search(null);
 		}
 		return result;
 	}

@@ -5,10 +5,6 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.Socket;
 import java.net.SocketAddress;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -451,7 +447,7 @@ public class RDB {
 	 *            specifies an array containing arguments. If it is not defined,
 	 *            no argument is specified.
 	 * @param opts
-	 *            specifies options by bitwise-or: {@link MONOULOG} for omission
+	 *            specifies options by bitwise-or: {@link RDB#MONOULOG} for omission
 	 *            of the update log. If it is not defined, no option is
 	 *            specified.
 	 * @return If successful, the return value is an array of the result.
@@ -462,69 +458,6 @@ public class RDB {
 	}
 
 	/**
-	 * Store a record. If a record with the same key exists in the database, it is overwritten.
-	 * @param pkey specifies the primary key.
-	 * @param cols specifies a hash containing columns.
-	 * @return If successful, the return value is {@code true}, else, it is {@code false}.
-	 */
-	public boolean tablePut(String pkey, Map<String, String> cols) {
-		List<byte[]> args = new ArrayList<byte[]>();
-		args.add(keyTranscoder.encode(pkey));
-		for (Map.Entry<String, String> each : cols.entrySet()) {
-			args.add(StringTranscoder.INSTANCE.encode(each.getKey()));
-			args.add(StringTranscoder.INSTANCE.encode(each.getValue()));
-		}
-		List<byte[]> rv = misc("put", args, 0);
-		return rv != null;
-	}
-
-	/**
-	 * Remove a record.
-	 * @param pkey specifies the primary key.
-	 * @return If successful, the return value is {@code true}, else, it is {@code false}.
-	 */
-	public boolean tableOut(String pkey) {
-		List<byte[]> args = new ArrayList<byte[]>();
-		args.add(keyTranscoder.encode(pkey));
-		List<byte[]> rv = misc("out", args, 0);
-		return rv != null;
-	}
-
-	/**
-	 * Retrieve a record.
-	 * @param pkey specifies the primary key.
-	 * @return If successful, the return value is a hash of the columns of the corresponding record. {@code null} is returned if no record corresponds.
-	 */
-	public Map<String, String> tableGet(String pkey) {
-		List<byte[]> args = new ArrayList<byte[]>();
-		args.add(keyTranscoder.encode(pkey));
-		List<byte[]> rv = misc("get", args, MONOULOG);
-		if (rv == null) {
-			return null;
-		}
-		Map<String, String> result = new HashMap<String, String>();
-		Iterator<byte[]> i = rv.iterator();
-		while (i.hasNext()) {
-			String ckey = (String) StringTranscoder.INSTANCE.decode(i.next());
-			String cvalue = (String) StringTranscoder.INSTANCE.decode(i.next());
-			result.put(ckey, cvalue);
-		}
-		return result;
-	}
-	
-    /**
-     * Generate a unique ID number.
-     * @return The return value is the new unique ID number or -1 on failure.
-     */
-    public long tableGenuid() {
-      List<byte[]> rv = misc("genuid", Collections.<byte[]>emptyList(), 0);
-      if (rv == null) {
-    	  return -1;
-      }
-      return Long.parseLong((String) StringTranscoder.INSTANCE.decode(rv.get(0)));
-    }
-
-    /**
 	 * Execute the command.
 	 * Use the default value transcoder.
 	 * 

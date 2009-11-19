@@ -5,6 +5,8 @@ import java.nio.ByteOrder;
 import java.util.Arrays;
 
 public class IntegerTranscoder implements Transcoder {
+	public static final IntegerTranscoder INSTANCE = new IntegerTranscoder();
+	
 	private final ByteOrder byteOrder;
 
 	public IntegerTranscoder() {
