@@ -59,6 +59,7 @@ public class TableQuery {
 	public List<Condition> conditions = new ArrayList<Condition>();
 	public Limit limit;
 	public Order order;
+	public String hint;
 	
 	public TableQuery condition(String name, int op, String expr) {
 		conditions.add(new Condition(name, op, expr));

@@ -111,4 +111,14 @@ public class RDBTableTest {
 		}});
 		assertEquals(-1, dut.genuid());
 	}
+	
+	@Test public void searchSuccess() {
+		mockery.checking(new Expectations() {{
+			one(db).misc(with(equal("search")), with(new MiscListMatcher(Collections.<byte[]>emptyList())), with(equal(RDB.MONOULOG)));
+				will(returnValue(Arrays.asList("ckey".getBytes(), "\0\0[[HINT]]\nhint".getBytes())));
+		}});
+		TableQuery query = new TableQuery();
+		assertEquals(Arrays.asList("ckey"), dut.search(query));
+		assertEquals("hint", query.hint);
+	}
 }

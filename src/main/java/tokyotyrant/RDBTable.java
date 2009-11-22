@@ -144,41 +144,63 @@ public class RDBTable {
     public List<String> search(TableQuery query) {
     	List<byte[]> args = new ArrayList<byte[]>();
     	for (TableQuery.Condition each : query.conditions) {
-			byte[] addcond = "addcond".getBytes();
-			byte[] name = stringTranscoder.encode(each.name);
-			byte[] op = stringTranscoder.encode(each.op);
-			byte[] expr = stringTranscoder.encode(each.expr);
-			ByteBuffer buf = ByteBuffer.allocate(addcond.length + 1 + name.length + 1 + op.length + 1 + expr.length);
-			buf.put(addcond);
-			buf.put((byte) 0).put(name);
-			buf.put((byte) 0).put(op);
-			buf.put((byte) 0).put(expr);
-			args.add(buf.array());
+			args.add(encodeCondition(each));
     	}
     	if (query.order != null) {
-			byte[] setorder = "setorder".getBytes();
-			byte[] name = stringTranscoder.encode(query.order.name);
-			byte[] type = stringTranscoder.encode(query.order.type);
-			ByteBuffer buf = ByteBuffer.allocate(setorder.length + 1 + name.length + 1 + type.length);
-			buf.put(setorder);
-			buf.put((byte) 0).put(name);
-			buf.put((byte) 0).put(type);
-			args.add(buf.array());
+			args.add(encodeSetorder(query.order));
     	}
     	if (query.limit != null) {
-			byte[] setlimit = "setlimit".getBytes();
-			byte[] max = stringTranscoder.encode(query.limit.max);
-			byte[] skip = stringTranscoder.encode(query.limit.skip);
-			ByteBuffer buf = ByteBuffer.allocate(setlimit.length + 1 + max.length + 1 + skip.length);
-			buf.put(setlimit);
-			buf.put((byte) 0).put(max);
-			buf.put((byte) 0).put(skip);
-			args.add(buf.array());
+			args.add(encodeSetlimit(query.limit));
     	}
+    	query.hint = "";
     	List<byte[]> rv = db.misc("search", args, RDB.MONOULOG);
-    	for (byte[] each : rv) {
-    		System.out.println(stringTranscoder.decode(each));
+    	if (rv == null) {
+    		Collections.emptyList();
     	}
-    	return null;
+    	List<String> result = new ArrayList<String>();
+    	for (byte[] each : rv) {
+    		String pkey = (String) stringTranscoder.decode(each);
+    		if (pkey.startsWith("\0\0[[HINT]]\n")) {
+    			query.hint = pkey.substring("\0\0[[HINT]]\n".length());
+    		} else {
+    			result.add(pkey);
+    		}
+    	}
+    	return result;
     }
+    
+    byte[] encodeCondition(TableQuery.Condition condition) {
+		byte[] addcond = "addcond".getBytes();
+		byte[] name = stringTranscoder.encode(condition.name);
+		byte[] op = stringTranscoder.encode(condition.op);
+		byte[] expr = stringTranscoder.encode(condition.expr);
+		ByteBuffer buf = ByteBuffer.allocate(addcond.length + 1 + name.length + 1 + op.length + 1 + expr.length);
+		buf.put(addcond);
+		buf.put((byte) 0).put(name);
+		buf.put((byte) 0).put(op);
+		buf.put((byte) 0).put(expr);
+		return buf.array();
+    }
+    
+    byte[] encodeSetorder(TableQuery.Order order) {
+		byte[] setorder = "setorder".getBytes();
+		byte[] name = stringTranscoder.encode(order.name);
+		byte[] type = stringTranscoder.encode(order.type);
+		ByteBuffer buf = ByteBuffer.allocate(setorder.length + 1 + name.length + 1 + type.length);
+		buf.put(setorder);
+		buf.put((byte) 0).put(name);
+		buf.put((byte) 0).put(type);
+		return buf.array();
+    }
+    
+    byte[] encodeSetlimit(TableQuery.Limit limit) {
+		byte[] setlimit = "setlimit".getBytes();
+		byte[] max = stringTranscoder.encode(limit.max);
+		byte[] skip = stringTranscoder.encode(limit.skip);
+		ByteBuffer buf = ByteBuffer.allocate(setlimit.length + 1 + max.length + 1 + skip.length);
+		buf.put(setlimit);
+		buf.put((byte) 0).put(max);
+		buf.put((byte) 0).put(skip);
+		return buf.array();
+    }    
 }
