@@ -121,4 +121,14 @@ public class RDBTableTest {
 		assertEquals(Arrays.asList("ckey"), dut.search(query));
 		assertEquals("hint", query.hint);
 	}
+	
+	@Test public void searchCountSuccess() {
+		mockery.checking(new Expectations() {{
+			one(db).misc(with(equal("search")), with(new MiscListMatcher(Arrays.asList("count".getBytes()))), with(equal(RDB.MONOULOG)));
+				will(returnValue(Arrays.asList("42".getBytes(), "\0\0[[HINT]]\nhint".getBytes())));
+		}});
+		TableQuery query = new TableQuery();
+		assertEquals(42, dut.searchCount(query));
+		assertEquals("hint", query.hint);
+	}
 }

@@ -142,20 +142,11 @@ public class RDBTable {
     }
     
     public List<String> search(TableQuery query) {
-    	List<byte[]> args = new ArrayList<byte[]>();
-    	for (TableQuery.Condition each : query.conditions) {
-			args.add(encodeCondition(each));
-    	}
-    	if (query.order != null) {
-			args.add(encodeSetorder(query.order));
-    	}
-    	if (query.limit != null) {
-			args.add(encodeSetlimit(query.limit));
-    	}
     	query.hint = "";
+    	List<byte[]> args = encodeQuery(query);
     	List<byte[]> rv = db.misc("search", args, RDB.MONOULOG);
     	if (rv == null) {
-    		Collections.emptyList();
+    		return Collections.emptyList();
     	}
     	List<String> result = new ArrayList<String>();
     	for (byte[] each : rv) {
@@ -167,6 +158,40 @@ public class RDBTable {
     		}
     	}
     	return result;
+    }
+    
+    public int searchCount(TableQuery query) {
+    	query.hint = "";
+    	List<byte[]> args = encodeQuery(query);
+    	args.add("count".getBytes());
+    	List<byte[]> rv = db.misc("search", args, RDB.MONOULOG);
+    	if (rv == null) {
+    		return 0;
+    	}
+    	int result = 0;
+    	for (byte[] each : rv) {
+    		String pkey = (String) stringTranscoder.decode(each);
+    		if (pkey.startsWith("\0\0[[HINT]]\n")) {
+    			query.hint = pkey.substring("\0\0[[HINT]]\n".length());
+    		} else {
+    			result = Integer.parseInt(pkey);
+    		}
+    	}
+    	return result;
+    }
+
+    List<byte[]> encodeQuery(TableQuery query) {
+    	List<byte[]> args = new ArrayList<byte[]>();
+    	for (TableQuery.Condition each : query.conditions) {
+			args.add(encodeCondition(each));
+    	}
+    	if (query.order != null) {
+			args.add(encodeSetorder(query.order));
+    	}
+    	if (query.limit != null) {
+			args.add(encodeSetlimit(query.limit));
+    	}
+    	return args;
     }
     
     byte[] encodeCondition(TableQuery.Condition condition) {

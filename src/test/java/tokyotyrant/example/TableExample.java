@@ -13,6 +13,7 @@ public class TableExample {
 	public static void main(String[] args) {
 		RDB db = new RDB();
 		db.open(new InetSocketAddress("localhost", 1978));
+		db.vanish();
 		RDBTable table = new RDBTable(db);
 		
 		// Store a record
@@ -33,8 +34,8 @@ public class TableExample {
 		for (String each : result) {
 			System.out.println(each + ":" + table.get(each));
 		}
+		System.out.println(table.searchCount(query) + " records");
 		
-		db.vanish();
 		db.close();
 	}
 }
