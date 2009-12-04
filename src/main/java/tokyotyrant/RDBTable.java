@@ -142,8 +142,8 @@ public class RDBTable {
     }
     
     public List<String> search(TableQuery query) {
-    	query.hint = "";
     	List<byte[]> args = encodeQuery(query);
+    	query.hint = "";
     	List<byte[]> rv = db.misc("search", args, RDB.MONOULOG);
     	if (rv == null) {
     		return Collections.emptyList();
@@ -152,9 +152,9 @@ public class RDBTable {
     }
 
 	public boolean searchOut(TableQuery query) {
-    	query.hint = "";
     	List<byte[]> args = encodeQuery(query);
     	args.add("out".getBytes());
+    	query.hint = "";
     	List<byte[]> rv = db.misc("search", args, RDB.MONOULOG);
     	if (rv == null) {
     		return false;
@@ -164,9 +164,9 @@ public class RDBTable {
 	}    
 
 	public int searchCount(TableQuery query) {
-    	query.hint = "";
     	List<byte[]> args = encodeQuery(query);
     	args.add("count".getBytes());
+    	query.hint = "";
     	List<byte[]> rv = db.misc("search", args, RDB.MONOULOG);
     	if (rv == null) {
     		return 0;
