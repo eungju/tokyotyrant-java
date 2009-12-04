@@ -122,6 +122,16 @@ public class RDBTableTest {
 		assertEquals("hint", query.hint);
 	}
 	
+	@Test public void searchOutSuccess() {
+		mockery.checking(new Expectations() {{
+			one(db).misc(with(equal("search")), with(new MiscListMatcher(Arrays.asList("out".getBytes()))), with(equal(RDB.MONOULOG)));
+				will(returnValue(Arrays.asList("\0\0[[HINT]]\nhint".getBytes())));
+		}});
+		TableQuery query = new TableQuery();
+		assertTrue(dut.searchOut(query));
+		assertEquals("hint", query.hint);
+	}
+
 	@Test public void searchCountSuccess() {
 		mockery.checking(new Expectations() {{
 			one(db).misc(with(equal("search")), with(new MiscListMatcher(Arrays.asList("count".getBytes()))), with(equal(RDB.MONOULOG)));

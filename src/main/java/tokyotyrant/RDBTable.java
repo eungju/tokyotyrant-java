@@ -148,8 +148,36 @@ public class RDBTable {
     	if (rv == null) {
     		return Collections.emptyList();
     	}
-    	List<String> result = new ArrayList<String>();
-    	for (byte[] each : rv) {
+    	return decodeQueryResult(query, rv);
+    }
+
+	public boolean searchOut(TableQuery query) {
+    	query.hint = "";
+    	List<byte[]> args = encodeQuery(query);
+    	args.add("out".getBytes());
+    	List<byte[]> rv = db.misc("search", args, RDB.MONOULOG);
+    	if (rv == null) {
+    		return false;
+    	}
+    	decodeQueryResult(query, rv);
+    	return true;
+	}    
+
+	public int searchCount(TableQuery query) {
+    	query.hint = "";
+    	List<byte[]> args = encodeQuery(query);
+    	args.add("count".getBytes());
+    	List<byte[]> rv = db.misc("search", args, RDB.MONOULOG);
+    	if (rv == null) {
+    		return 0;
+    	}
+    	List<String> result = decodeQueryResult(query, rv);
+    	return result.size() == 0 ? 0 : Integer.parseInt(result.get(0));
+    }
+
+	List<String> decodeQueryResult(TableQuery query, List<byte[]> elements) {
+		List<String> result = new ArrayList<String>();
+    	for (byte[] each : elements) {
     		String pkey = (String) stringTranscoder.decode(each);
     		if (pkey.startsWith("\0\0[[HINT]]\n")) {
     			query.hint = pkey.substring("\0\0[[HINT]]\n".length());
@@ -158,28 +186,8 @@ public class RDBTable {
     		}
     	}
     	return result;
-    }
-    
-    public int searchCount(TableQuery query) {
-    	query.hint = "";
-    	List<byte[]> args = encodeQuery(query);
-    	args.add("count".getBytes());
-    	List<byte[]> rv = db.misc("search", args, RDB.MONOULOG);
-    	if (rv == null) {
-    		return 0;
-    	}
-    	int result = 0;
-    	for (byte[] each : rv) {
-    		String pkey = (String) stringTranscoder.decode(each);
-    		if (pkey.startsWith("\0\0[[HINT]]\n")) {
-    			query.hint = pkey.substring("\0\0[[HINT]]\n".length());
-    		} else {
-    			result = Integer.parseInt(pkey);
-    		}
-    	}
-    	return result;
-    }
-
+	}
+	
     List<byte[]> encodeQuery(TableQuery query) {
     	List<byte[]> args = new ArrayList<byte[]>();
     	for (TableQuery.Condition each : query.conditions) {
@@ -227,5 +235,5 @@ public class RDBTable {
 		buf.put((byte) 0).put(max);
 		buf.put((byte) 0).put(skip);
 		return buf.array();
-    }    
+    }
 }
