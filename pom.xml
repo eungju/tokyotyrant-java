@@ -210,13 +210,6 @@
 				<groupId>org.codehaus.mojo</groupId>
 				<artifactId>findbugs-maven-plugin</artifactId>
 			</plugin>
-			<plugin>
-				<groupId>org.codehaus.mojo</groupId>
-				<artifactId>javancss-maven-plugin</artifactId>
-				<configuration>
-					<forceEncoding>${maven.compiler.encoding}</forceEncoding>
-				</configuration>
-			</plugin>
 		</plugins>
 	</reporting>
 
