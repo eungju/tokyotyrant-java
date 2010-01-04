@@ -1,7 +1,5 @@
 package tokyotyrant.protocol;
 
-import java.io.IOException;
-
 import org.jmock.Expectations;
 import org.junit.Test;
 
@@ -10,7 +8,7 @@ public class PutcatTest extends AbstractCommandTest {
 		putFamily(new Putcat(transcoder, transcoder, key, value), 0x12);
 	}
 
-	@Test public void rdb() throws IOException {
+	@Test public void rdb() {
 		rdb.putcat(key, value);
 		rdb.putcat(key, value, transcoder);
 	}

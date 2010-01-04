@@ -2,8 +2,6 @@ package tokyotyrant.protocol;
 
 import static org.junit.Assert.*;
 
-import java.io.IOException;
-
 import org.jboss.netty.buffer.ChannelBuffer;
 import org.jboss.netty.buffer.ChannelBuffers;
 import org.jmock.Expectations;
@@ -41,7 +39,7 @@ public class AddintTest extends AbstractCommandTest {
 		assertEquals(Integer.MIN_VALUE, (int)dut.getReturnValue());
 	}
 
-	@Test public void rdb() throws IOException {
+	@Test public void rdb() {
 		rdb.addint(key, 3);
 	}
 	

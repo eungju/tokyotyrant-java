@@ -2,8 +2,6 @@ package tokyotyrant.protocol;
 
 import static org.junit.Assert.*;
 
-import java.io.IOException;
-
 import org.jboss.netty.buffer.ChannelBuffer;
 import org.jboss.netty.buffer.ChannelBuffers;
 import org.jmock.Expectations;
@@ -46,7 +44,7 @@ public class AdddoubleTest extends AbstractCommandTest {
 		assertEquals(Double.NaN, (double)dut.getReturnValue(), 0.0);
 	}
 	
-	@Test public void rdb() throws IOException {
+	@Test public void rdb() {
 		rdb.adddouble(key, 3);
 	}
 	

@@ -2,8 +2,6 @@ package tokyotyrant.protocol;
 
 import static org.junit.Assert.*;
 
-import java.io.IOException;
-
 import org.jboss.netty.buffer.ChannelBuffer;
 import org.jboss.netty.buffer.ChannelBuffers;
 import org.junit.Test;
@@ -32,7 +30,7 @@ public class IterinitTest extends AbstractCommandTest {
 		assertFalse(dut.getReturnValue());
 	}
 
-	@Test public void rdb() throws IOException {
+	@Test public void rdb() {
 		rdb.iterinit();
 	}
 }

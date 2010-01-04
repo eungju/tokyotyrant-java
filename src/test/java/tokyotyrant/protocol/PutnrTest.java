@@ -2,8 +2,6 @@ package tokyotyrant.protocol;
 
 import static org.junit.Assert.*;
 
-import java.io.IOException;
-
 import org.jboss.netty.buffer.ChannelBuffer;
 import org.jboss.netty.buffer.ChannelBuffers;
 import org.jmock.Expectations;
@@ -28,7 +26,7 @@ public class PutnrTest extends AbstractCommandTest {
 		assertTrue(dut.getReturnValue());
 	}
 
-	@Test public void rdb() throws IOException {
+	@Test public void rdb() {
 		rdb.putnr(key, value);
 		rdb.putnr(key, value, transcoder);
 	}

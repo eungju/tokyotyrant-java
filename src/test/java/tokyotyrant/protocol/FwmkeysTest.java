@@ -2,8 +2,6 @@ package tokyotyrant.protocol;
 
 import static org.junit.Assert.*;
 
-import java.io.IOException;
-
 import org.jboss.netty.buffer.ChannelBuffer;
 import org.jboss.netty.buffer.ChannelBuffers;
 import org.jmock.Expectations;
@@ -50,7 +48,7 @@ public class FwmkeysTest extends AbstractCommandTest {
 		assertNull(dut.getReturnValue());
 	}
 
-	@Test public void rdb() throws IOException {
+	@Test public void rdb() {
 		rdb.fwmkeys(key, 10);
 	}
 	

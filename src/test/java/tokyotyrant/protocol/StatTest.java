@@ -2,7 +2,6 @@ package tokyotyrant.protocol;
 
 import static org.junit.Assert.*;
 
-import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -45,7 +44,7 @@ public class StatTest extends AbstractCommandTest {
 		assertEquals(expected, dut.getReturnValue());
 	}
 
-	@Test public void rdb() throws IOException {
+	@Test public void rdb() {
 		rdb.stat();
 	}
 	
