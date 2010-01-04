@@ -9,6 +9,7 @@ import java.util.Map;
 
 import tokyotyrant.RDB;
 import tokyotyrant.RDBTable;
+import tokyotyrant.TableQuery;
 
 public class RDBShell extends Shell {
 	private RDB db;
@@ -114,7 +115,13 @@ public class RDBShell extends Shell {
 		} else if ("tableGenuid".equals(command)) {
 			result = table.genuid();
 		} else if ("tableSearch".equals(command)) {
-			result = table.search(null);
+			result = table.search(new TableQuery());
+		} else if ("tableSearchOut".equals(command)) {
+			result = table.searchOut(new TableQuery());
+		} else if ("tableSearchCount".equals(command)) {
+			result = table.searchCount(new TableQuery());
+		} else if ("tableSearchGet".equals(command)) {
+			result = table.searchGet(new TableQuery(), null);
 		}
 		return result;
 	}

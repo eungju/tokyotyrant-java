@@ -8,6 +8,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+import tokyotyrant.helper.ByteArrayUtils;
 import tokyotyrant.transcoder.StringTranscoder;
 
 /**
@@ -175,17 +176,62 @@ public class RDBTable {
     	return result.size() == 0 ? 0 : Integer.parseInt(result.get(0));
     }
 
-	List<String> decodeQueryResult(TableQuery query, List<byte[]> elements) {
-		List<String> result = new ArrayList<String>();
-    	for (byte[] each : elements) {
-    		String pkey = (String) stringTranscoder.decode(each);
-    		if (pkey.startsWith("\0\0[[HINT]]\n")) {
-    			query.hint = pkey.substring("\0\0[[HINT]]\n".length());
+	public List<Map<String, String>> searchGet(TableQuery query, List<String> names) {
+    	List<byte[]> args = encodeQuery(query);
+    	if (names == null) {
+    		args.add("get".getBytes());
+    	} else {
+    	}
+    	query.hint = "";
+    	List<byte[]> rv = db.misc("search", args, RDB.MONOULOG);
+    	if (rv == null) {
+    		return Collections.emptyList();
+    	}
+		List<Map<String, String>> result = new ArrayList<Map<String, String>>();
+    	for (byte[] each : rv) {
+    		if (isHint(each)) {
+    			query.hint = getHint(each);
     		} else {
-    			result.add(pkey);
+    			Map<String, String> columns = new HashMap<String, String>();
+    			Iterator<byte[]> i = ByteArrayUtils.split(each, 0).iterator();
+    			while (i.hasNext()) {
+    				String ckey = (String) stringTranscoder.decode(i.next());
+    				String cvalue = (String) stringTranscoder.decode(i.next());
+    				columns.put(ckey, cvalue);
+    			}
+    			result.add(columns);
     		}
     	}
     	return result;
+	}
+	
+	List<String> decodeQueryResult(TableQuery query, List<byte[]> elements) {
+		List<String> result = new ArrayList<String>();
+    	for (byte[] each : elements) {
+    		if (isHint(each)) {
+    			query.hint = getHint(each);
+    		} else {
+    			result.add((String) stringTranscoder.decode(each));
+    		}
+    	}
+    	return result;
+	}
+	
+	static final byte[] HINT_MARK = "\0\0[[HINT]]\n".getBytes();
+	boolean isHint(byte[] element) {
+		if (element.length < HINT_MARK.length) {
+			return false;
+		}
+		for (int i = 0; i < HINT_MARK.length; i++) {
+			if (element[i] != HINT_MARK[i]) {
+				return false;
+			}
+		}
+		return true;
+	}
+	
+	String getHint(byte[] element) {
+		return new String(element, HINT_MARK.length, (element.length - HINT_MARK.length));
 	}
 	
     List<byte[]> encodeQuery(TableQuery query) {

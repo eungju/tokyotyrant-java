@@ -141,4 +141,16 @@ public class RDBTableTest {
 		assertEquals(42, dut.searchCount(query));
 		assertEquals("hint", query.hint);
 	}
+	
+	@Test public void searchGetSuccess() {
+		mockery.checking(new Expectations() {{
+			one(db).misc(with(equal("search")), with(new MiscListMatcher(Arrays.asList("get".getBytes()))), with(equal(RDB.MONOULOG)));
+				will(returnValue(Arrays.asList("ckey\0cvalue".getBytes(), "\0\0[[HINT]]\nhint".getBytes())));
+		}});
+		Map<String, String> columns = new HashMap<String, String>();
+		columns.put("ckey", "cvalue");
+		TableQuery query = new TableQuery();
+		assertEquals(Arrays.asList(columns), dut.searchGet(query, null));
+		assertEquals("hint", query.hint);
+	}
 }
