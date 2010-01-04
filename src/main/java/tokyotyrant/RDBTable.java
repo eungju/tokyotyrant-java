@@ -59,16 +59,30 @@ public class RDBTable {
 	 * @return If successful, the return value is {@code true}, else, it is {@code false}.
 	 */
 	public boolean put(String pkey, Map<String, String> cols) {
+		List<byte[]> rv = db.misc("put", createPutArgs(pkey, cols), 0);
+		return rv != null;
+	}
+
+	public boolean putkeep(String pkey, Map<String, String> cols) {
+		List<byte[]> rv = db.misc("putkeep", createPutArgs(pkey, cols), 0);
+		return rv != null;
+	}
+
+	public boolean putcat(String pkey, Map<String, String> cols) {
+		List<byte[]> rv = db.misc("putcat", createPutArgs(pkey, cols), 0);
+		return rv != null;
+	}
+
+	List<byte[]> createPutArgs(String pkey, Map<String, String> cols) {
 		List<byte[]> args = new ArrayList<byte[]>();
 		args.add(stringTranscoder.encode(pkey));
 		for (Map.Entry<String, String> each : cols.entrySet()) {
 			args.add(stringTranscoder.encode(each.getKey()));
 			args.add(stringTranscoder.encode(each.getValue()));
 		}
-		List<byte[]> rv = db.misc("put", args, 0);
-		return rv != null;
+		return args;
 	}
-
+	
 	/**
 	 * Remove a record.
 	 * @param pkey specifies the primary key.

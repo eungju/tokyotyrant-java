@@ -106,6 +106,18 @@ public class RDBShell extends Shell {
 				cols.put(args[i], args[i + 1]);
 			}
 			result = table.put(args[0], cols);
+		} else if ("tablePutkeep".equals(command)) {
+			Map<String, String> cols = new HashMap<String, String>();
+			for (int i = 1; i < args.length; i += 2) {
+				cols.put(args[i], args[i + 1]);
+			}
+			result = table.putkeep(args[0], cols);
+		} else if ("tablePutcat".equals(command)) {
+			Map<String, String> cols = new HashMap<String, String>();
+			for (int i = 1; i < args.length; i += 2) {
+				cols.put(args[i], args[i + 1]);
+			}
+			result = table.putcat(args[0], cols);
 		} else if ("tableOut".equals(command)) {
 			result = table.out(args[0]);
 		} else if ("tableGet".equals(command)) {

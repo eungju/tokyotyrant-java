@@ -46,6 +46,26 @@ public class RDBTableTest {
 		assertFalse(dut.put("pkey", columns));
 	}
 
+	@Test public void putkeepSuccess() {
+		mockery.checking(new Expectations() {{
+			one(db).misc(with(equal("putkeep")), with(new MiscListMatcher(Arrays.asList("pkey".getBytes(), "ckey".getBytes(), "cvalue".getBytes()))), with(equal(0)));
+				will(returnValue(Collections.emptyList()));
+		}});
+		Map<String, String> columns = new HashMap<String, String>();
+		columns.put("ckey", "cvalue");
+		assertTrue(dut.putkeep("pkey", columns));
+	}
+
+	@Test public void putcatSuccess() {
+		mockery.checking(new Expectations() {{
+			one(db).misc(with(equal("putcat")), with(new MiscListMatcher(Arrays.asList("pkey".getBytes(), "ckey".getBytes(), "cvalue".getBytes()))), with(equal(0)));
+				will(returnValue(Collections.emptyList()));
+		}});
+		Map<String, String> columns = new HashMap<String, String>();
+		columns.put("ckey", "cvalue");
+		assertTrue(dut.putcat("pkey", columns));
+	}
+
 	@Test public void outSuccess() {
 		mockery.checking(new Expectations() {{
 			one(db).misc(with(equal("out")), with(new MiscListMatcher(Arrays.asList("pkey".getBytes()))), with(equal(0)));
