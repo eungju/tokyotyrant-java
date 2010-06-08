@@ -1,10 +1,18 @@
 syntax: glob
 
-.DS_Store
+target
+
 .classpath
 .project
 .settings
-target
+
+*.iml
+*.ipr
+*.iws
+
+infinitest.log*
+
+.DS_Store
 *~
 .#*
-infinitest.log*
+
