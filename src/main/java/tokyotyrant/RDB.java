@@ -466,10 +466,10 @@ public class RDB {
 	 * @return the return value of the command.
 	 */
 	protected <T> T execute(Command<T> command) {
+		if (connection == null) {
+			connection = new Connection(address, timeout);
+		}
 		try {
-			if (connection == null) {
-				connection = new Connection(address, timeout);
-			}
 			sendRequest(command);
 			receiveResponse(command);
 			return command.getReturnValue();
@@ -524,14 +524,18 @@ public class RDB {
 		private final InputStream inputStream;
 		private final OutputStream outputStream;
 
-		public Connection(SocketAddress address, int timeout) throws IOException {
-			socket = new Socket();
-			socket.setTcpNoDelay(true);
-			socket.setKeepAlive(true);
-			socket.setSoTimeout(timeout);
-			socket.connect(address, timeout);
-			inputStream = socket.getInputStream();
-			outputStream = socket.getOutputStream();
+		public Connection(SocketAddress address, int timeout) {
+			try {
+				socket = new Socket();
+				socket.setTcpNoDelay(true);
+				socket.setKeepAlive(true);
+				socket.setSoTimeout(timeout);
+				socket.connect(address, timeout);
+				inputStream = socket.getInputStream();
+				outputStream = socket.getOutputStream();
+			} catch (IOException e) {
+				throw new RuntimeException("Cannot connect to the server " + address, e);
+			}
 		}
 
 		public void close() {
