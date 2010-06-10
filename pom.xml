@@ -132,7 +132,7 @@
 				<configuration>
 					<debug>true</debug>
 					<optimize>true</optimize>
-					<showDeprecations>true</showDeprecations>
+					<showDeprecation>true</showDeprecation>
 					<source>${maven.compiler.source}</source>
 					<target>${maven.compiler.target}</target>
 					<encoding>${maven.compiler.encoding}</encoding>
