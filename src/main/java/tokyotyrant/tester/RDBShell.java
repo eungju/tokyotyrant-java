@@ -3,6 +3,7 @@ package tokyotyrant.tester;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -75,7 +76,7 @@ public class RDBShell extends Shell {
 			}
 			result = keys;
 		} else if ("fwmkeys".equals(command)) {
-			result = db.fwmkeys(args[0], Integer.parseInt(args[1]));
+			result = Arrays.asList(db.fwmkeys(args[0], Integer.parseInt(args[1])));
 		} else if ("addint".equals(command)) {
 			result = db.addint(args[0], Integer.parseInt(args[1]));
 		} else if ("adddouble".equals(command)) {

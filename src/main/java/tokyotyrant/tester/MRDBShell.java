@@ -3,6 +3,8 @@ package tokyotyrant.tester;
 import tokyotyrant.MRDB;
 import tokyotyrant.networking.NodeAddress;
 
+import java.util.Arrays;
+
 public class MRDBShell extends Shell {
 	private MRDB db;
 	private NodeAddress[] addresses;
@@ -48,9 +50,9 @@ public class MRDBShell extends Shell {
 		} else if ("vsiz".equals(command)) {
 			result = db.vsiz(args[0]).get();
 		} else if ("list".equals(command)) {
-			result = db.fwmkeys("", Integer.MAX_VALUE).get();
+			result = Arrays.asList(db.fwmkeys("", Integer.MAX_VALUE).get());
 		} else if ("fwmkeys".equals(command)) {
-			result = db.fwmkeys(args[0], Integer.parseInt(args[1])).get();
+			result = Arrays.asList(db.fwmkeys(args[0], Integer.parseInt(args[1])).get());
 		} else if ("addint".equals(command)) {
 			result = db.addint(args[0], Integer.parseInt(args[1])).get();
 		} else if ("adddouble".equals(command)) {
