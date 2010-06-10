@@ -3,10 +3,6 @@ package tokyotyrant.example;
 import static org.junit.Assert.*;
 import tokyotyrant.MRDB;
 import tokyotyrant.networking.NodeAddress;
-import tokyotyrant.networking.NodeSelector;
-import tokyotyrant.networking.RoundRobinNodeLocator;
-import tokyotyrant.networking.netty.NettyNetworking;
-import tokyotyrant.networking.nio.NioNetworking;
 import tokyotyrant.transcoder.ByteArrayTranscoder;
 import tokyotyrant.transcoder.StringTranscoder;
 
