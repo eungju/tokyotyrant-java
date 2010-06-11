@@ -488,10 +488,7 @@ public class RDB {
 	protected void sendRequest(Command<?> command) throws IOException {
 		ChannelBuffer buffer = ChannelBuffers.dynamicBuffer();
 		command.encode(buffer);
-		byte[] b = new byte[buffer.readableBytes()];
-		buffer.readBytes(b);
-		//In blocking-mode, a write operation will return only after writing all of the requested bytes.
-		connection.write(b);
+		connection.write(buffer);
 	}
 
 	/**
@@ -502,20 +499,15 @@ public class RDB {
 	protected void receiveResponse(Command<?> command) throws IOException {
 		ChannelBuffer buffer = ChannelBuffers.dynamicBuffer();
 		while (true) {
-			//try to decode
-			buffer.markReaderIndex();
-			if (command.decode(buffer)) {
-				break;
-			}
-			buffer.resetReaderIndex();
+            //try to decode before read for commands like putnr.
+            buffer.markReaderIndex();
+            if (command.decode(buffer)) {
+                break;
+            }
+            buffer.resetReaderIndex();
 
-			//fill buffer
-			byte[] chunk = new byte[4 * 1024];
-			int n = connection.read(chunk);
-			if (n == -1) {
-				throw new IOException("Connection closed unexpectedly");
-			}
-			buffer.writeBytes(chunk, 0, n);
+            //fill buffer
+            connection.read(buffer);
 		}
 	}
 	
@@ -545,12 +537,28 @@ public class RDB {
 			}
 		}
 
-		public void write(byte b[]) throws IOException {
+		public void write(ChannelBuffer buffer) throws IOException {
+            byte[] b = new byte[buffer.readableBytes()];
+            buffer.readBytes(b);
+            //In blocking-mode, a write operation will return only after writing all of the requested bytes.
 			outputStream.write(b);
 		}
 
-		public int read(byte b[]) throws IOException {
-			return inputStream.read(b, 0, b.length);
-		}
+		/**
+		 * Read as much as possible to reduce decoding of incomplete responses.
+		 */
+		public void read(ChannelBuffer buffer) throws IOException {
+            byte[] chunk = new byte[4 * 1024];
+            do {
+                int n = inputStream.read(chunk);
+                if (n == 0) {
+                    break;
+                }
+                if (n == -1) {
+                    throw new IOException("Connection closed unexpectedly");
+                }
+                buffer.writeBytes(chunk, 0, n);
+            } while (inputStream.available() > 0);
+        }
 	}
 }

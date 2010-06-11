@@ -4,10 +4,13 @@ import static org.junit.Assert.*;
 
 import java.io.IOException;
 
+import org.hamcrest.Description;
 import org.jboss.netty.buffer.ChannelBuffer;
 import org.jboss.netty.buffer.ChannelBuffers;
 import org.jmock.Expectations;
 import org.jmock.Mockery;
+import org.jmock.api.Action;
+import org.jmock.api.Invocation;
 import org.jmock.integration.junit4.JMock;
 import org.jmock.integration.junit4.JUnit4Mockery;
 import org.jmock.lib.legacy.ClassImposteriser;
@@ -39,9 +42,17 @@ public class RDBTest {
 		command.encode(buffer);
 
 		mockery.checking(new Expectations() {{
-			one(connection).write(with(any(byte[].class)));
-			one(connection).read(with(any(byte[].class))); will(returnValue(0));
-			one(connection).read(with(any(byte[].class))); will(returnValue(1));
+            one(connection).write(with(any(ChannelBuffer.class)));
+            one(connection).read(with(any(ChannelBuffer.class))); will(new Action() {
+                public void describeTo(Description description) {
+                }
+
+                public Object invoke(Invocation invocation) throws Throwable {
+                    ChannelBuffer buffer = (ChannelBuffer) invocation.getParameter(0);
+                    buffer.writeBytes(new byte[] { 0 });
+                    return null;
+                }
+            });
 		}});
 		
 		assertTrue(dut.execute(command));

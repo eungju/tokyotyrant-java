@@ -49,14 +49,22 @@ public class Incoming {
 		consumeBuffer();
 	}
 
+	/**
+	 * Read as much as possible to reduce decoding of incomplete responses.
+	 */
 	void fillBuffer() throws IOException {
 		ByteBuffer chunk = ByteBuffer.allocate(bufferCapacity);
-		int n = channel.read(chunk);
-		if (n == -1) {
-			throw new IOException("Channel " + channel + " is closed");
-		}
-		chunk.flip();
-		buffer.writeBytes(chunk);
+        while (true) {
+            int n = channel.read(chunk);
+            if (n == 0) {
+                break;
+            }
+            if (n == -1) {
+                throw new IOException("Channel " + channel + " closed unexpectedly");
+            }
+            chunk.flip();
+            buffer.writeBytes(chunk);
+        }
 	}
 	
 	void consumeBuffer() throws Exception {
