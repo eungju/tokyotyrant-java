@@ -4,17 +4,12 @@ import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import tokyotyrant.RDB;
-import tokyotyrant.RDBTable;
-import tokyotyrant.TableQuery;
 
 public class RDBShell extends Shell {
 	private RDB db;
-	private RDBTable table;
 	private String host;
 	private int port;
 
@@ -28,7 +23,6 @@ public class RDBShell extends Shell {
 	protected void openConnection() throws IOException {
 		db = new RDB();
 		db.open(new InetSocketAddress(host, port));
-		table = new RDBTable(db);
 	}
 	
 	protected void closeConnection() {
@@ -101,42 +95,8 @@ public class RDBShell extends Shell {
 			result = db.size();
 		} else if ("stat".equals(command)) {
 			result = db.stat();
-		} else if ("tablePut".equals(command)) {
-			Map<String, String> cols = new HashMap<String, String>();
-			for (int i = 1; i < args.length; i += 2) {
-				cols.put(args[i], args[i + 1]);
-			}
-			result = table.put(args[0], cols);
-		} else if ("tablePutkeep".equals(command)) {
-			Map<String, String> cols = new HashMap<String, String>();
-			for (int i = 1; i < args.length; i += 2) {
-				cols.put(args[i], args[i + 1]);
-			}
-			result = table.putkeep(args[0], cols);
-		} else if ("tablePutcat".equals(command)) {
-			Map<String, String> cols = new HashMap<String, String>();
-			for (int i = 1; i < args.length; i += 2) {
-				cols.put(args[i], args[i + 1]);
-			}
-			result = table.putcat(args[0], cols);
-		} else if ("tableOut".equals(command)) {
-			result = table.out(args[0]);
-		} else if ("tableGet".equals(command)) {
-			result = table.get(args[0]);
-		} else if ("tableSetindex".equals(command)) {
-			result = table.setindex(args[0], Integer.parseInt(args[1]));
-		} else if ("tableGenuid".equals(command)) {
-			result = table.genuid();
-		} else if ("tableSearch".equals(command)) {
-			result = table.search(new TableQuery());
-		} else if ("tableSearchOut".equals(command)) {
-			result = table.searchOut(new TableQuery());
-		} else if ("tableSearchCount".equals(command)) {
-			result = table.searchCount(new TableQuery());
-		} else if ("tableSearchGet".equals(command)) {
-			result = table.searchGet(new TableQuery(), null);
 		}
-		return result;
+        return result;
 	}
 	
 	public static void main(String[] args) throws Exception {
