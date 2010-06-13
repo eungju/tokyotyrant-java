@@ -1,19 +1,17 @@
 package tokyotyrant;
 
+import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.*;
 
 import java.io.IOException;
 
-import org.hamcrest.Description;
 import org.jboss.netty.buffer.ChannelBuffer;
-import org.jboss.netty.buffer.ChannelBuffers;
 import org.jmock.Expectations;
 import org.jmock.Mockery;
-import org.jmock.api.Action;
 import org.jmock.api.Invocation;
 import org.jmock.integration.junit4.JMock;
 import org.jmock.integration.junit4.JUnit4Mockery;
-import org.jmock.lib.legacy.ClassImposteriser;
+import org.jmock.lib.action.CustomAction;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -25,28 +23,20 @@ import tokyotyrant.transcoder.Transcoder;
 
 @RunWith(JMock.class)
 public class RDBTest {
-	private Mockery mockery = new JUnit4Mockery() {{
-		setImposteriser(ClassImposteriser.INSTANCE);
-	}};
+	private Mockery mockery = new JUnit4Mockery();
 	private RDB dut;
 
 	@Before public void beforeEach() {
 		dut = new RDB();
 	}
 	
-	@Test public void execute() throws IOException {
+	@Test public void executesCommands() throws IOException {
 		final RDB.Connection connection = mockery.mock(RDB.Connection.class);
 		dut.connection = connection;
 		Vanish command = new Vanish();
-		final ChannelBuffer buffer = ChannelBuffers.dynamicBuffer();
-		command.encode(buffer);
-
 		mockery.checking(new Expectations() {{
             one(connection).write(with(any(ChannelBuffer.class)));
-            one(connection).read(with(any(ChannelBuffer.class))); will(new Action() {
-                public void describeTo(Description description) {
-                }
-
+            one(connection).read(with(any(ChannelBuffer.class))); will(new CustomAction("Fill the buffer") {
                 public Object invoke(Invocation invocation) throws Throwable {
                     ChannelBuffer buffer = (ChannelBuffer) invocation.getParameter(0);
                     buffer.writeBytes(new byte[] { 0 });
@@ -54,27 +44,26 @@ public class RDBTest {
                 }
             });
 		}});
-		
-		assertTrue(dut.execute(command));
+		assertThat(dut.execute(command), is(true));
 	}
 	
-	@Test public void defaultKeyTranscoderIsStringTranscoder() {
-		assertEquals(StringTranscoder.class, dut.getKeyTranscoder().getClass());
+	@Test public void hasKeyTranscoderAndTheDefaultIsStringTranscoder() {
+		assertThat(dut.getKeyTranscoder(), is(StringTranscoder.class));
 	}
 
-	@Test public void keyTranscoderCanBeChanged() {
+	@Test public void hasKeyTranscoderWhichIsChangeable() {
 		Transcoder newTranscoder = new ByteArrayTranscoder();
 		dut.setKeyTranscoder(newTranscoder);
-		assertEquals(newTranscoder.getClass(), dut.getKeyTranscoder().getClass());
+		assertThat(dut.getKeyTranscoder(), is(newTranscoder));
 	}
 	
-	@Test public void defaultValueTranscoderIsStringTranscoder() {
-		assertEquals(StringTranscoder.class, dut.getValueTranscoder().getClass());
+	@Test public void hasValueTranscoderAndTheDefaultIsStringTranscoder() {
+		assertThat(dut.getValueTranscoder(), is(StringTranscoder.class));
 	}
 
-	@Test public void valueTranscoderCanBeChanged() {
+	@Test public void hasValueTranscoderWhichIsChangeable() {
 		Transcoder newTranscoder = new ByteArrayTranscoder();
 		dut.setValueTranscoder(newTranscoder);
-		assertEquals(newTranscoder.getClass(), dut.getValueTranscoder().getClass());
+		assertThat(dut.getValueTranscoder(), is(newTranscoder));
 	}
 }

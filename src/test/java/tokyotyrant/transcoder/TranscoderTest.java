@@ -4,7 +4,7 @@ import java.util.Arrays;
 
 import org.junit.Test;
 
-public class TranscoderTest {
+public abstract class TranscoderTest {
 	protected Transcoder dut;
 	
 	@Test(expected=NullPointerException.class)

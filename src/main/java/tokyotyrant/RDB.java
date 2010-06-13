@@ -467,7 +467,7 @@ public class RDB {
 	 */
 	protected <T> T execute(Command<T> command) {
 		if (connection == null) {
-			connection = new Connection(address, timeout);
+			connection = new SocketConnection(address, timeout);
 		}
 		try {
 			sendRequest(command);
@@ -511,12 +511,18 @@ public class RDB {
 		}
 	}
 	
-	static class Connection {
+	static interface Connection {
+		void close();
+		void write(ChannelBuffer buffer) throws IOException;
+		void read(ChannelBuffer buffer) throws IOException;
+	}
+	
+	static class SocketConnection implements Connection {
 		private final Socket socket;
 		private final InputStream inputStream;
 		private final OutputStream outputStream;
 
-		public Connection(SocketAddress address, int timeout) {
+		public SocketConnection(SocketAddress address, int timeout) {
 			try {
 				socket = new Socket();
 				socket.setTcpNoDelay(true);
