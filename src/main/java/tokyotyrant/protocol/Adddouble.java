@@ -45,7 +45,7 @@ public class Adddouble extends CommandSupport<Double> {
 	
 	protected void unpack(PacketContext context) {
 		code = (Byte)context.get("code");
-		if (code == 0) {
+		if (code == ESUCCESS) {
 			sumInteg = (Long) context.get("integ");
 			sumFract = (Long) context.get("fract");
 		}

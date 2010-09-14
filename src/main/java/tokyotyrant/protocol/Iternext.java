@@ -20,7 +20,7 @@ public class Iternext extends CommandSupport<Object> {
 	
 	protected void unpack(PacketContext context) {
 		code = (Byte) context.get("code");
-		if (code == 0) {
+		if (code == ESUCCESS) {
 			key = (byte[]) context.get("kbuf");
 		}
 	}

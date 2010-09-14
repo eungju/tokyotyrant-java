@@ -24,7 +24,7 @@ public class Vsiz extends CommandSupport<Integer> {
 
 	protected void unpack(PacketContext context) {
 		code = (Byte)context.get("code");
-		if (code == 0) {
+		if (code == ESUCCESS) {
 			vsiz = (Integer)context.get("vsiz");
 		}
 	}

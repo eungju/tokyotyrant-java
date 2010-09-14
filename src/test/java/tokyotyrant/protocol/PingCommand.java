@@ -19,7 +19,7 @@ public class PingCommand extends CommandSupport<Boolean> {
 	
 	protected void unpack(PacketContext context) {
 		code = (Byte) context.get("code");
-		if (isSuccess()) {
+		if (code == ESUCCESS) {
 			pong = (Integer) context.get("pong");
 		}
 	}

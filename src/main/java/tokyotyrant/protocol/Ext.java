@@ -35,7 +35,7 @@ public class Ext extends CommandSupport<Object> {
 	
 	protected void unpack(PacketContext context) {
 		code = (Byte)context.get("code");
-		if (code == 0) {
+		if (code == ESUCCESS) {
 			result = (byte[])context.get("rbuf");
 		}
 	}

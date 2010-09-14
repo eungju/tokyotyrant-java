@@ -29,7 +29,7 @@ public class Get extends Command<Object> {
 			return false;
 		}
 		code = in.readByte();
-		if (!isSuccess()) {
+		if (code != ESUCCESS) {
 			return true;
 		}
 		if (!BufferHelper.prefixedDataAvailable(in, 4)) {
