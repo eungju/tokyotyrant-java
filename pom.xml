@@ -11,9 +11,9 @@
 	<url>http://code.google.com/p/tokyotyrant-java</url>
 
 	<scm>
-		<connection>scm:hg:http://bitbucket.org/EP/tokyotyrant-java/</connection>
-		<developerConnection>scm:hg:https://bitbucket.org/EP/tokyotyrant-java/</developerConnection>
-		<url>http://www.bitbucket.org/EP/tokyotyrant-java/</url>
+		<connection>scm:hg:https://bitbucket.org/EP/tokyotyrant-java</connection>
+		<developerConnection>scm:hg:ssh://hg@bitbucket.org/EP/tokyotyrant-java</developerConnection>
+		<url>https://bitbucket.org/EP/tokyotyrant-java</url>
 	</scm>
 
 	<issueManagement>
@@ -23,7 +23,7 @@
 	<developers>
 		<developer>
 			<id>eungju</id>
-			<name>Eung-ju PARK</name>
+			<name>Eungju PARK</name>
 		</developer>
 	</developers>
 
@@ -37,7 +37,7 @@
     <repositories>
         <repository>
             <id>repository.jboss.org</id>
-            <url>http://repository.jboss.org/nexus/content/groups/public/</url>
+            <url>http://repository.jboss.org/nexus/content/groups/public</url>
             <snapshots>
                 <enabled>false</enabled>
             </snapshots>
@@ -46,7 +46,7 @@
             <id>spy</id>
             <name>Spy Repository</name>
             <layout>default</layout>
-            <url>http://bleu.west.spy.net/~dustin/m2repo/</url>
+            <url>http://bleu.west.spy.net/~dustin/m2repo</url>
             <snapshots>
                 <enabled>false</enabled>
             </snapshots>
@@ -76,9 +76,9 @@
 
 	<dependencies>
 		<dependency>
-			<groupId>org.jboss.netty</groupId>
+			<groupId>io.netty</groupId>
 			<artifactId>netty</artifactId>
-			<version>3.1.5.GA</version>
+			<version>3.3.1.Final</version>
 		</dependency>
 		<dependency>
 			<groupId>org.slf4j</groupId>
