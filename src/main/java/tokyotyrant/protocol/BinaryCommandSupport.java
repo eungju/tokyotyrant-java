@@ -4,7 +4,7 @@ import org.jboss.netty.buffer.ChannelBuffer;
 
 import tokyotyrant.transcoder.Transcoder;
 
-public abstract class CommandSupport<T> extends Command<T> {
+public abstract class BinaryCommandSupport<T> extends BinaryCommand<T> {
 	/**
 	 * Requests are start with magic number.
 	 */
@@ -29,7 +29,7 @@ public abstract class CommandSupport<T> extends Command<T> {
 	 */
 	private final PacketFormat responseFormat;
 
-	public CommandSupport(byte commandId, PacketFormat requestFormat, PacketFormat responseFormat, Transcoder keyTranscoder, Transcoder valueTranscoder) {
+	public BinaryCommandSupport(byte commandId, PacketFormat requestFormat, PacketFormat responseFormat, Transcoder keyTranscoder, Transcoder valueTranscoder) {
 		super(commandId, keyTranscoder, valueTranscoder);
 		this.requestFormat = requestFormat;
 		this.responseFormat = responseFormat;

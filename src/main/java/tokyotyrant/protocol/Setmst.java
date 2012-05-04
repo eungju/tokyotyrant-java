@@ -1,6 +1,6 @@
 package tokyotyrant.protocol;
 
-public class Setmst extends CommandSupport<Boolean> {
+public class Setmst extends BinaryCommandSupport<Boolean> {
 	private static final PacketFormat REQUEST = magic().int32("hsiz").int32("port").int64("ts").int32("opts").bytes("host", "hsiz").end();
 	private static final PacketFormat RESPONSE = code(false).end();
 	private final byte[] host;

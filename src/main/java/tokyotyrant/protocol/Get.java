@@ -5,7 +5,7 @@ import org.jboss.netty.buffer.ChannelBuffer;
 import tokyotyrant.helper.BufferHelper;
 import tokyotyrant.transcoder.Transcoder;
 
-public class Get extends Command<Object> {
+public class Get extends BinaryCommand<Object> {
 	private final byte[] key;
 	private byte[] value;
 

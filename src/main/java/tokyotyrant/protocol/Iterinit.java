@@ -1,6 +1,6 @@
 package tokyotyrant.protocol;
 
-public class Iterinit extends CommandSupport<Boolean> {
+public class Iterinit extends BinaryCommandSupport<Boolean> {
 	private static final PacketFormat REQUEST = magic().end();
 	private static final PacketFormat RESPONSE = code(false).end();
 	             

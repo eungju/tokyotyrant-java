@@ -3,7 +3,7 @@ package tokyotyrant.protocol;
 import java.util.HashMap;
 import java.util.Map;
 
-public class Stat extends CommandSupport<Map<String, String>> {
+public class Stat extends BinaryCommandSupport<Map<String, String>> {
 	private static final PacketFormat REQUEST = magic().end();
 	private static final PacketFormat RESPONSE = code(false).int32("ssiz").bytes("sbuf", "ssiz").end();
 	private byte[] sbuf;

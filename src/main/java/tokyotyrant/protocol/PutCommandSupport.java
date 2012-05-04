@@ -4,7 +4,7 @@ import org.jboss.netty.buffer.ChannelBuffer;
 
 import tokyotyrant.transcoder.Transcoder;
 
-public abstract class PutCommandSupport extends Command<Boolean> {
+public abstract class PutCommandSupport extends BinaryCommand<Boolean> {
 	private final byte[] key;
 	private final byte[] value;
 

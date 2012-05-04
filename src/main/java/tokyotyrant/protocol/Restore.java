@@ -1,6 +1,6 @@
 package tokyotyrant.protocol;
 
-public class Restore extends CommandSupport<Boolean> {
+public class Restore extends BinaryCommandSupport<Boolean> {
 	private static final PacketFormat REQUEST = magic().int32("psiz").int64("ts").int32("opts").bytes("path", "psiz").end();
 	private static final PacketFormat RESPONSE = code(false).end();
 	private final byte[] path;

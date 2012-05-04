@@ -5,7 +5,7 @@ import java.util.List;
 
 import org.jboss.netty.buffer.ChannelBuffer;
 
-public class Misc extends Command<List<byte[]>> {
+public class Misc extends BinaryCommand<List<byte[]>> {
 	private final byte[] name;
 	private final List<byte[]> args;
 	private final int opts;

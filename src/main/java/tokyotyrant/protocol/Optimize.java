@@ -1,6 +1,6 @@
 package tokyotyrant.protocol;
 
-public class Optimize extends CommandSupport<Boolean> {
+public class Optimize extends BinaryCommandSupport<Boolean> {
 	private static final PacketFormat REQUEST = magic().int32("psiz").bytes("pbuf", "psiz").end();
 	private static final PacketFormat RESPONSE = code(false).end();
 	private final byte[] parameters;

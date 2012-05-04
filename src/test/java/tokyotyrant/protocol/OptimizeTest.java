@@ -22,13 +22,13 @@ public class OptimizeTest extends AbstractCommandTest {
 		ChannelBuffer response = ChannelBuffers.buffer(1);
 		assertFalse(dut.decode(response));
 		
-		response.writeByte(Command.ESUCCESS);
+		response.writeByte(BinaryCommand.ESUCCESS);
 		assertTrue(dut.decode(response));
 		assertTrue(dut.getReturnValue());
 		
 		//error
 		response.clear();
-		response.writeByte(Command.EUNKNOWN);
+		response.writeByte(BinaryCommand.EUNKNOWN);
 		assertTrue(dut.decode(response));
 		assertFalse(dut.getReturnValue());
 	}

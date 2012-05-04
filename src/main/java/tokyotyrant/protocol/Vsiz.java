@@ -2,7 +2,7 @@ package tokyotyrant.protocol;
 
 import tokyotyrant.transcoder.Transcoder;
 
-public class Vsiz extends CommandSupport<Integer> {
+public class Vsiz extends BinaryCommandSupport<Integer> {
 	private static final PacketFormat REQUEST = magic().int32("ksiz").bytes("kbuf", "ksiz").end();
 	private static final PacketFormat RESPONSE = code(true).int32("vsiz").end();
 	private final byte[] key;

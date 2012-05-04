@@ -2,7 +2,7 @@ package tokyotyrant.protocol;
 
 import tokyotyrant.transcoder.Transcoder;
 
-public class Putshl extends CommandSupport<Boolean> {
+public class Putshl extends BinaryCommandSupport<Boolean> {
 	private static final PacketFormat REQUEST = magic().int32("ksiz").int32("vsiz").int32("width").bytes("kbuf", "ksiz").bytes("vbuf", "vsiz").end();
 	private static final PacketFormat RESPONSE = code(false).end();
 	private final byte[] key;

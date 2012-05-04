@@ -2,7 +2,7 @@ package tokyotyrant.protocol;
 
 import tokyotyrant.transcoder.Transcoder;
 
-public class Addint extends CommandSupport<Integer> {
+public class Addint extends BinaryCommandSupport<Integer> {
 	private static final PacketFormat REQUEST = magic().int32("ksiz").int32("num").bytes("kbuf", "ksiz").end();
 	private static final PacketFormat RESPONSE = code(true).int32("sum").end();
 	private final byte[] key;

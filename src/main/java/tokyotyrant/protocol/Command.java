@@ -7,40 +7,17 @@ import org.jboss.netty.buffer.ChannelBuffer;
 import tokyotyrant.transcoder.Transcoder;
 
 public abstract class Command<T> {
-	public static final byte ESUCCESS = 0x00;
-	public static final byte EUNKNOWN = (byte) 0xff;
-
-	protected final Transcoder keyTranscoder;
-	protected final Transcoder valueTranscoder;
-	
-	protected final byte[] magic;
-	
-	protected byte code;
-
 	private CountDownLatch latch;
 	private CommandState state;
 	private Exception errorException; 
-	
-	public Command(byte commandId, Transcoder keyTranscoder, Transcoder valueTranscoder) {
-		magic = new byte[] {(byte) 0xC8, commandId};
-		code = EUNKNOWN;
-		this.keyTranscoder = keyTranscoder;
-		this.valueTranscoder = valueTranscoder;
-	}
-	
-	public boolean responseRequired() {
-		return true;
-	}
-	
-	public boolean isSuccess() {
-		return code == ESUCCESS;
-	}
-	
+
 	public abstract T getReturnValue();
 
 	public abstract void encode(ChannelBuffer out);
 
-	public abstract boolean decode(ChannelBuffer in);
+    public abstract boolean responseRequired();
+
+    public abstract boolean decode(ChannelBuffer in);
 
 	public CommandFuture<T> writing(long timeout) {
 		latch = new CountDownLatch(1);

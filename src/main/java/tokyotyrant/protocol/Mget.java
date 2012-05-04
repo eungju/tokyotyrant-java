@@ -7,7 +7,7 @@ import org.jboss.netty.buffer.ChannelBuffer;
 
 import tokyotyrant.transcoder.Transcoder;
 
-public class Mget extends Command<Map<Object, Object>> {
+public class Mget extends BinaryCommand<Map<Object, Object>> {
 	private final byte[][] keys;
 	private Map<byte[], byte[]> values;
 

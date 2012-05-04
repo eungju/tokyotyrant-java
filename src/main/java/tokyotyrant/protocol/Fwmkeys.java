@@ -4,7 +4,7 @@ import org.jboss.netty.buffer.ChannelBuffer;
 
 import tokyotyrant.transcoder.Transcoder;
 
-public class Fwmkeys extends Command<Object[]> {
+public class Fwmkeys extends BinaryCommand<Object[]> {
 	private final byte[] prefix;
 	private final int max;
 	private byte[][] keys;

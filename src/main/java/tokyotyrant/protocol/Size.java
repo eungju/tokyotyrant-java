@@ -1,6 +1,6 @@
 package tokyotyrant.protocol;
 
-public class Size extends CommandSupport<Long> {
+public class Size extends BinaryCommandSupport<Long> {
 	private static final PacketFormat REQUEST = magic().end();
 	private static final PacketFormat RESPONSE = code(false).int64("size").end();
 	private long size;

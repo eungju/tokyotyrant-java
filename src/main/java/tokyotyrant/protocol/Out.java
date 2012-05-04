@@ -4,7 +4,7 @@ import org.jboss.netty.buffer.ChannelBuffer;
 
 import tokyotyrant.transcoder.Transcoder;
 
-public class Out extends Command<Boolean> {
+public class Out extends BinaryCommand<Boolean> {
 	private final byte[] key;
 
 	public Out(Transcoder keyTranscoder, Transcoder valueTranscoder, Object key) {

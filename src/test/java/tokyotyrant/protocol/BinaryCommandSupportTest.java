@@ -10,7 +10,7 @@ import org.jboss.netty.buffer.ChannelBuffers;
 import org.junit.Before;
 import org.junit.Test;
 
-public class CommandSupportTest {
+public class BinaryCommandSupportTest {
 	private PingCommand dut;
 	
 	@Before public void beforeEach() {
@@ -28,7 +28,7 @@ public class CommandSupportTest {
 
 	@Test public void unpackWhenPacketDecodingIsCompleted() {
 		ChannelBuffer buffer = ChannelBuffers.buffer(1024);
-		buffer.writeByte(Command.ESUCCESS);
+		buffer.writeByte(BinaryCommand.ESUCCESS);
 		buffer.writeInt(43);
 		assertTrue(dut.decode(buffer));
 		assertEquals(43, dut.pong);

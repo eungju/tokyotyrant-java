@@ -1,6 +1,6 @@
 package tokyotyrant.protocol;
 
-public class Rnum extends CommandSupport<Long> {
+public class Rnum extends BinaryCommandSupport<Long> {
 	private static final PacketFormat REQUEST = magic().end();
 	private static final PacketFormat RESPONSE = code(false).int64("rnum").end();
 	private long rnum;

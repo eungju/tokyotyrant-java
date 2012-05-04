@@ -25,7 +25,7 @@ public class AdddoubleTest extends AbstractCommandTest {
 		ChannelBuffer response = ChannelBuffers.buffer(1 + 8 + 8);
 		assertFalse(dut.decode(response));
 		
-		response.writeByte(Command.ESUCCESS);
+		response.writeByte(BinaryCommand.ESUCCESS);
 		assertFalse(dut.decode(response));
 		response.resetReaderIndex();
 		
@@ -39,7 +39,7 @@ public class AdddoubleTest extends AbstractCommandTest {
 		
 		//error
 		response.clear();
-		response.writeByte(Command.EUNKNOWN);
+		response.writeByte(BinaryCommand.EUNKNOWN);
 		assertTrue(dut.decode(response));
 		assertEquals(Double.NaN, (double)dut.getReturnValue(), 0.0);
 	}

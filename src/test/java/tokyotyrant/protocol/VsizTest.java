@@ -22,7 +22,7 @@ public class VsizTest extends AbstractCommandTest {
 		ChannelBuffer response = ChannelBuffers.buffer(1 + 4 + value.length);
 		assertFalse(dut.decode(response));
 		
-		response.writeByte(Command.ESUCCESS);
+		response.writeByte(BinaryCommand.ESUCCESS);
 		assertFalse(dut.decode(response));
 		response.resetReaderIndex();
 		
@@ -32,7 +32,7 @@ public class VsizTest extends AbstractCommandTest {
 		
 		//error
 		response.clear();
-		response.writeByte(Command.EUNKNOWN);
+		response.writeByte(BinaryCommand.EUNKNOWN);
 		assertTrue(dut.decode(response));
 		assertEquals(-1, (int)dut.getReturnValue());
 	}

@@ -1,6 +1,6 @@
 package tokyotyrant.protocol;
 
-public class PingCommand extends CommandSupport<Boolean> {
+public class PingCommand extends BinaryCommandSupport<Boolean> {
 	private int ping;
 	int pong;
 	

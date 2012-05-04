@@ -1,6 +1,6 @@
 package tokyotyrant.protocol;
 
-public class Vanish extends CommandSupport<Boolean> {
+public class Vanish extends BinaryCommandSupport<Boolean> {
 	private static final PacketFormat REQUEST = magic().end();
 	private static final PacketFormat RESPONSE = code(true).end();
 	             

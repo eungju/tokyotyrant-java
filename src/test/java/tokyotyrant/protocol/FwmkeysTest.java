@@ -23,7 +23,7 @@ public class FwmkeysTest extends AbstractCommandTest {
 		ChannelBuffer response = ChannelBuffers.buffer(1 + 4 + 4 + key.length);
 		assertFalse(dut.decode(response));
 		
-		response.writeByte(Command.ESUCCESS);
+		response.writeByte(BinaryCommand.ESUCCESS);
 		assertFalse(dut.decode(response));
 		response.resetReaderIndex();
 
@@ -42,7 +42,7 @@ public class FwmkeysTest extends AbstractCommandTest {
 		
 		//error
 		response.clear();
-		response.writeByte(Command.EUNKNOWN);
+		response.writeByte(BinaryCommand.EUNKNOWN);
 		response.writeInt(0);
 		assertTrue(dut.decode(response));
 		assertNull(dut.getReturnValue());

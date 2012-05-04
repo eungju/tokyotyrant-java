@@ -16,6 +16,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
+import tokyotyrant.protocol.BinaryCommand;
 import tokyotyrant.protocol.Command;
 import tokyotyrant.protocol.PingCommand;
 
@@ -46,7 +47,7 @@ public class IncomingTest {
 		PingCommand command = new PingCommand(1);
 		command.writing(0);
 		dut.put(command);
-		buffer.writeByte(Command.EUNKNOWN);
+		buffer.writeByte(BinaryCommand.EUNKNOWN);
 		dut.consumeBuffer();
 		assertTrue(command.isCompleted());
 	}

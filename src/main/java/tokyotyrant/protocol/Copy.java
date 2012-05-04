@@ -1,6 +1,6 @@
 package tokyotyrant.protocol;
 
-public class Copy extends CommandSupport<Boolean> {
+public class Copy extends BinaryCommandSupport<Boolean> {
 	private static final PacketFormat REQUEST = magic().int32("psiz").bytes("path", "psiz").end();
 	private static final PacketFormat RESPONSE = code(false).end();
 	private final byte[] path;

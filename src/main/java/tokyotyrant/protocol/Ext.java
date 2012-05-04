@@ -2,7 +2,7 @@ package tokyotyrant.protocol;
 
 import tokyotyrant.transcoder.Transcoder;
 
-public class Ext extends CommandSupport<Object> {
+public class Ext extends BinaryCommandSupport<Object> {
 	private static final PacketFormat REQUEST = magic().int32("nsiz").int32("opts").int32("ksiz").int32("vsiz").bytes("nbuf", "nsiz").bytes("kbuf", "ksiz").bytes("vbuf", "vsiz").end();
 	private static final PacketFormat RESPONSE = code(true).int32("rsiz").bytes("rbuf", "rsiz").end();
 	private final byte[] name;

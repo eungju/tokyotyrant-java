@@ -2,7 +2,7 @@ package tokyotyrant.protocol;
 
 import tokyotyrant.transcoder.Transcoder;
 
-public class Iternext extends CommandSupport<Object> {
+public class Iternext extends BinaryCommandSupport<Object> {
 	private static final PacketFormat REQUEST = magic().end();
 	private static final PacketFormat RESPONSE = code(true).int32("ksiz").bytes("kbuf", "ksiz").end();
 	private byte[] key;

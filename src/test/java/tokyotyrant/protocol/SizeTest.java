@@ -21,7 +21,7 @@ public class SizeTest extends AbstractCommandTest {
 		ChannelBuffer response = ChannelBuffers.buffer(1 + 8);
 		assertFalse(dut.decode(response));
 		
-		response.writeByte(Command.ESUCCESS);
+		response.writeByte(BinaryCommand.ESUCCESS);
 		assertFalse(dut.decode(response));
 		response.resetReaderIndex();
 		
