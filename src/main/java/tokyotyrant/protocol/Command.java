@@ -4,8 +4,6 @@ import java.util.concurrent.CountDownLatch;
 
 import org.jboss.netty.buffer.ChannelBuffer;
 
-import tokyotyrant.transcoder.Transcoder;
-
 public abstract class Command<T> {
 	private CountDownLatch latch;
 	private CommandState state;
