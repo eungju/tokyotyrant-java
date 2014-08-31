@@ -9,6 +9,7 @@ import tokyotyrant.transcoder.StringTranscoder;
 import static org.junit.Assert.*;
 
 public class RegressionTest {
+    @Ignore
     @Test
     public void shouldNotOmitRequestsWithoutException() throws Exception {
         final MRDB db = new MRDB();
